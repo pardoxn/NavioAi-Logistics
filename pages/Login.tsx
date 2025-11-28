@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Truck, ArrowRight, Lock, Mail, ShieldCheck, Heart } from 'lucide-react';
-import { MOCK_USERS } from '../constants';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -11,19 +10,15 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(email)) {
-      navigate('/dashboard');
-    } else {
-      setError('Benutzer nicht gefunden. (Demo: admin@navio.ai)');
-    }
-  };
-
-  const fillCredentials = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('demo1234');
     setError('');
+    const ok = await login(email, password);
+    if (!ok) {
+      setError('Login fehlgeschlagen. Bitte Zugangsdaten prüfen.');
+      return;
+    }
+    navigate('/dashboard');
   };
 
   return (
@@ -149,28 +144,6 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Demo User Pills */}
-          <div className="pt-8">
-             <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                   <div className="w-full border-t border-slate-100"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                   <span className="px-2 bg-white text-slate-400 uppercase text-[10px] tracking-wider font-semibold">Demo Accounts</span>
-                </div>
-             </div>
-             <div className="mt-6 flex gap-3 justify-center">
-                {MOCK_USERS.map(u => (
-                  <button
-                    key={u.id}
-                    onClick={() => fillCredentials(u.email)}
-                    className="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 hover:text-brand-600 rounded-lg transition-colors border border-slate-100 capitalize"
-                  >
-                    {u.role.toLowerCase()}
-                  </button>
-                ))}
-             </div>
-          </div>
         </div>
 
         {/* Footer / Copyright */}

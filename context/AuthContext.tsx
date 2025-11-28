@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, UserRole } from '../types';
-import { MOCK_USERS } from '../constants';
+import { supabase } from '../lib/supabaseClient';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAdmin: boolean;
   isDispo: boolean;
@@ -16,16 +16,56 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = (email: string) => {
-    const found = MOCK_USERS.find(u => u.email === email);
-    if (found) {
-      setUser(found);
-      return true;
-    }
-    return false;
+  const mapSupabaseUser = (raw: any): User => {
+    const metaRole = (raw?.user_metadata?.role || '').toString().toUpperCase() as UserRole;
+    const role = Object.values(UserRole).includes(metaRole) ? metaRole : UserRole.DISPO;
+    return {
+      id: raw.id,
+      email: raw.email,
+      username: raw.email?.split('@')[0] || 'user',
+      role,
+      isActive: true,
+      lastLogin: raw.last_sign_in_at || undefined,
+    };
   };
 
-  const logout = () => setUser(null);
+  const login = async (email: string, password: string) => {
+    if (!supabase) return false;
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error || !data.session) {
+      console.warn('Supabase login failed', error);
+      return false;
+    }
+    setUser(mapSupabaseUser(data.session.user));
+    return true;
+  };
+
+  const logout = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+    setUser(null);
+  };
+
+  // Keep session in sync
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        setUser(mapSupabaseUser(data.session.user));
+      }
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(mapSupabaseUser(session.user));
+      } else {
+        setUser(null);
+      }
+    });
+    return () => {
+      listener?.subscription?.unsubscribe();
+    };
+  }, []);
 
   const value = {
     user,

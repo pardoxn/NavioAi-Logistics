@@ -1,28 +1,4 @@
-import { User, UserRole } from './types';
-
-export const MOCK_USERS: User[] = [
-  {
-    id: '1',
-    username: 'admin',
-    email: 'admin@navio.ai',
-    role: UserRole.ADMIN,
-    isActive: true,
-  },
-  {
-    id: '2',
-    username: 'dispo',
-    email: 'dispo@navio.ai',
-    role: UserRole.DISPO,
-    isActive: true,
-  },
-  {
-    id: '3',
-    username: 'lager',
-    email: 'lager@navio.ai',
-    role: UserRole.LAGER,
-    isActive: true,
-  },
-];
+import { UserRole } from './types';
 
 export const CSV_HEADERS_MAPPING = {
   vorgang: 'Vorgang',
