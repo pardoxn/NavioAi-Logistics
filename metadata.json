@@ -1,0 +1,5 @@
+{
+  "name": "Navio AI - Logistics Console",
+  "description": "Professional logistics and route planning application featuring CSV import, role-based access control, AI-assisted route optimization, and CMR freight document generation.",
+  "requestFramePermissions": []
+}
