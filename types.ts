@@ -134,6 +134,8 @@ export interface ChatMessage {
   timestamp: number;
   isTask: boolean;
   isDone: boolean;
+  assigneeId?: string | null;
+  assigneeName?: string | null;
 }
 
 export type NotificationCategory = 'TOUR' | 'TASK' | 'SYSTEM';

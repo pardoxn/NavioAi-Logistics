@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Order, Tour, TourStatus, ActivityLog, ActivityType, ChatMessage, Notification, FreightStatus, NotificationCategory, CmrConfig } from '../types';
 import { useAuth } from './AuthContext';
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '../lib/supabaseClient';
 
 // Fallback to LocalStorage for Demo purposes since Supabase keys might be missing
 // In a real deployment with keys, one would switch this back to Supabase logic.
@@ -37,7 +38,7 @@ interface DataContextType {
   updateCmrConfig: (config: CmrConfig) => void;
 
   // Team Features
-  sendChatMessage: (text: string, isTask: boolean) => void;
+  sendChatMessage: (text: string, isTask: boolean, assignee?: { id: string; name: string }) => Promise<void>;
   toggleTaskDone: (messageId: string) => void;
   markNotificationsRead: (ids?: string[]) => void;
 }
@@ -116,6 +117,38 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     localStorage.setItem('navio_chat', JSON.stringify(chatMessages));
   }, [chatMessages]);
+
+  // --- Supabase Chat Sync ---
+  useEffect(() => {
+    if (!supabase) return;
+
+    const load = async () => {
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .order('timestamp', { ascending: true })
+        .limit(500);
+      if (!error && data) {
+        setChatMessages(data as unknown as ChatMessage[]);
+      }
+    };
+    load();
+
+    const channel = supabase
+      .channel('chat_sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setChatMessages(prev => [...prev, payload.new as unknown as ChatMessage]);
+        } else if (payload.eventType === 'UPDATE') {
+          setChatMessages(prev => prev.map(m => m.id === payload.new.id ? payload.new as unknown as ChatMessage : m));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('navio_notifications', JSON.stringify(notifications));
@@ -413,7 +446,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // --- Team Features ---
-  const sendChatMessage = (text: string, isTask: boolean) => {
+  const sendChatMessage = async (text: string, isTask: boolean, assignee?: { id: string; name: string }) => {
     const msg: ChatMessage = {
       id: uuidv4(),
       userId: user?.id || 'sys',
@@ -421,10 +454,28 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       text,
       isTask,
       isDone: false,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      assigneeId: assignee?.id,
+      assigneeName: assignee?.name,
     };
+
+    // Optimistic update
     setChatMessages(prev => [...prev, msg]);
-    // Notify team of new task
+
+    if (supabase) {
+      await supabase.from('chat_messages').insert({
+        id: msg.id,
+        user_id: msg.userId,
+        user_name: msg.userName,
+        text: msg.text,
+        is_task: msg.isTask,
+        is_done: msg.isDone,
+        timestamp: msg.timestamp,
+        assignee_id: msg.assigneeId || null,
+        assignee_name: msg.assigneeName || null,
+      });
+    }
+
     if (isTask) {
         addNotification(`Neue Aufgabe von ${user?.username}: ${text}`, 'INFO', 'TASK');
     }
@@ -434,6 +485,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setChatMessages(prev => prev.map(m => 
       m.id === messageId ? { ...m, isDone: !m.isDone } : m
     ));
+    if (supabase) {
+      const msg = chatMessages.find(m => m.id === messageId);
+      if (msg) {
+        supabase.from('chat_messages').update({ is_done: !msg.isDone }).eq('id', messageId);
+      }
+    }
   };
 
   return (

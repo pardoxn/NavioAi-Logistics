@@ -9,6 +9,7 @@ const Team = () => {
   const { user } = useAuth();
   const [newMessage, setNewMessage] = useState('');
   const [isTask, setIsTask] = useState(false);
+  const [assignee, setAssignee] = useState<string>('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom of chat
@@ -23,12 +24,20 @@ const Team = () => {
     markNotificationsRead();
   }, []);
 
+  const participants = Array.from(
+    new Map(
+      chatMessages.map(m => [m.userId, { id: m.userId, name: m.userName }])
+    ).values()
+  );
+
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
-    sendChatMessage(newMessage, isTask);
+    const selected = assignee ? JSON.parse(assignee) as { id: string; name: string } : undefined;
+    sendChatMessage(newMessage, isTask, selected);
     setNewMessage('');
     setIsTask(false);
+    setAssignee('');
   };
 
   const formatTime = (ts: number) => {
@@ -81,6 +90,11 @@ const Team = () => {
                         {msg.isTask && (
                           <div className="flex items-center gap-2 mb-2 pb-2 border-b border-black/5">
                              <span className="text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-white/50 px-2 py-0.5 rounded">Aufgabe</span>
+                             {msg.assigneeName && (
+                               <span className="text-[10px] font-semibold text-slate-500 flex items-center gap-1">
+                                 <User size={12} className="text-brand-600" /> {msg.assigneeName}
+                               </span>
+                             )}
                           </div>
                         )}
                         <p className={msg.isTask && msg.isDone ? 'line-through opacity-50' : ''}>{msg.text}</p>
@@ -120,11 +134,33 @@ const Team = () => {
                  <input 
                    type="text"
                    value={newMessage}
-                   onChange={(e) => setNewMessage(e.target.value)}
-                   placeholder={isTask ? "Neue Aufgabe erstellen..." : "Nachricht schreiben..."}
-                   className="flex-1 bg-transparent border-none focus:ring-0 px-3 py-3 text-sm text-slate-800 placeholder-slate-400"
-                 />
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder={isTask ? "Neue Aufgabe erstellen..." : "Nachricht schreiben..."}
+                  className="flex-1 bg-transparent border-none focus:ring-0 px-3 py-3 text-sm text-slate-800 placeholder-slate-400"
+                />
               </div>
+              {isTask && (
+                <div className="bg-white border border-slate-200 rounded-xl px-3 py-2 flex items-center gap-2">
+                  <User size={16} className="text-slate-400" />
+                  <select
+                    value={assignee}
+                    onChange={(e) => setAssignee(e.target.value)}
+                    className="text-sm bg-transparent border-none focus:outline-none"
+                  >
+                    <option value="">Zuweisen (optional)</option>
+                    {participants.map(p => (
+                      <option key={p.id} value={JSON.stringify(p)}>
+                        {p.name}
+                      </option>
+                    ))}
+                    {user && !participants.find(p => p.id === user.id) && (
+                      <option value={JSON.stringify({ id: user.id, name: user.username })}>
+                        {user.username}
+                      </option>
+                    )}
+                  </select>
+                </div>
+              )}
               <button 
                 type="submit"
                 disabled={!newMessage.trim()}
