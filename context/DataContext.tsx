@@ -137,7 +137,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const load = async () => {
       const { data, error } = await supabase
         .from('chat_messages')
-        .select('id,user_id,user_name,text,timestamp,is_task,is_done,assignee_id,assignee_name')
+        .select('*')
         .order('timestamp', { ascending: true })
         .limit(500);
       if (!error && data) {
