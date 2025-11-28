@@ -10,6 +10,7 @@ const Team = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isTask, setIsTask] = useState(false);
   const [assignee, setAssignee] = useState<string>('');
+  const [userOptions, setUserOptions] = useState<{ id: string; name: string }[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom of chat
@@ -24,11 +25,37 @@ const Team = () => {
     markNotificationsRead();
   }, []);
 
+  // Load user list from API (for assignment)
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const res = await fetch('/api/users');
+        if (!res.ok) return;
+        const data = await res.json();
+        const mapped = (data.users || []).map((u: any) => ({
+          id: u.id,
+          name: u.fullName || u.email || 'User'
+        }));
+        setUserOptions(mapped);
+      } catch (e) {
+        // ignore, fallback to participants from chat
+      }
+    };
+    loadUsers();
+  }, []);
+
   const participants = Array.from(
     new Map(
       chatMessages.map(m => [m.userId, { id: m.userId, name: m.userName }])
     ).values()
   );
+  const assigneeOptions = [
+    ...participants,
+    ...userOptions
+  ].filter(Boolean).reduce((acc: { id: string; name: string }[], curr) => {
+    if (!acc.find(a => a.id === curr.id)) acc.push(curr);
+    return acc;
+  }, []);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,12 +175,12 @@ const Team = () => {
                     className="text-sm bg-transparent border-none focus:outline-none"
                   >
                     <option value="">Zuweisen (optional)</option>
-                    {participants.map(p => (
+                    {assigneeOptions.map(p => (
                       <option key={p.id} value={JSON.stringify(p)}>
                         {p.name}
                       </option>
                     ))}
-                    {user && !participants.find(p => p.id === user.id) && (
+                    {user && !assigneeOptions.find(p => p.id === user.id) && (
                       <option value={JSON.stringify({ id: user.id, name: user.username })}>
                         {user.username}
                       </option>
