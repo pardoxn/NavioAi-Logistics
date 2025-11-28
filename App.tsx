@@ -16,10 +16,7 @@ import Team from './pages/Team';
 import Settings from './pages/Settings';
 import Signup from './pages/Signup';
 import Terms from './pages/Terms';
-import Admin from './pages/Admin';
-
-// Components for other routes
-const Admin = () => <div className="p-8"><h2 className="text-2xl font-bold">Benutzerverwaltung</h2><p className="text-slate-500 mt-2">Nur für Administratoren.</p></div>;
+import AdminPage from './pages/Admin';
 
 const ProtectedLayout = () => {
   const { user } = useAuth();
@@ -52,7 +49,7 @@ const App = () => {
               <Route path="/import" element={<Import />} />
               <Route path="/planning" element={<Planning />} />
               <Route path="/warehouse" element={<Warehouse />} />
-              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin" element={<AdminPage />} />
               <Route path="/archive" element={<Archive />} />
               <Route path="/activities" element={<Activities />} />
               <Route path="/team" element={<Team />} />
