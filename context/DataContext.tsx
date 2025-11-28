@@ -137,7 +137,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const load = async () => {
       const { data, error } = await supabase
         .from('chat_messages')
-        .select('*')
+        .select('id,user_id,user_name,text,timestamp,is_task,is_done,assignee_id,assignee_name')
         .order('timestamp', { ascending: true })
         .limit(500);
       if (!error && data) {
@@ -155,6 +155,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } else if (payload.eventType === 'UPDATE') {
           const msg = mapRowToChat(payload.new);
           setChatMessages(prev => prev.map(m => m.id === msg.id ? msg : m));
+        } else if (payload.eventType === 'DELETE') {
+          const id = (payload.old as any)?.id;
+          if (id) setChatMessages(prev => prev.filter(m => m.id !== id));
         }
       })
       .subscribe();
