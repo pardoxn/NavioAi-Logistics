@@ -78,18 +78,18 @@ const Team = () => {
       <div className="flex-1 flex flex-col w-full lg:max-w-4xl border-b lg:border-b-0 lg:border-r border-slate-200/60 bg-white lg:bg-white/50 backdrop-blur-sm">
         
         {/* Header */}
-        <div className="p-4 lg:p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
-           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-             <div className="p-2 bg-brand-50 rounded-lg text-brand-600"><MessageSquare size={24} /></div>
+        <div className="p-3 lg:p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
+           <h2 className="text-xl lg:text-2xl font-bold text-slate-800 flex items-center gap-3">
+             <div className="p-2 bg-brand-50 rounded-lg text-brand-600"><MessageSquare size={22} /></div>
              Team Chat
            </h2>
-           <div className="text-xs font-medium px-3 py-1 bg-slate-100 rounded-full text-slate-500">
+           <div className="text-[11px] lg:text-xs font-medium px-3 py-1 bg-slate-100 rounded-full text-slate-500">
              {user?.username} (Online)
            </div>
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6 custom-scrollbar" ref={scrollRef}>
+        <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6 custom-scrollbar" ref={scrollRef}>
            {chatMessages.length === 0 && (
              <div className="text-center text-slate-400 py-20">
                 <MessageSquare size={48} className="mx-auto mb-4 opacity-20"/>
@@ -100,18 +100,18 @@ const Team = () => {
            {chatMessages.map(msg => {
              const isMe = msg.userId === user?.id;
              return (
-               <div key={msg.id} className={`flex gap-4 ${isMe ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm flex-shrink-0 ${isMe ? 'bg-brand-500' : 'bg-slate-400'}`}>
+               <div key={msg.id} className={`flex gap-3 lg:gap-4 ${isMe ? 'flex-row-reverse' : ''}`}>
+                  <div className={`w-9 h-9 lg:w-10 lg:h-10 rounded-full flex items-center justify-center text-xs lg:text-sm font-bold text-white shadow-sm flex-shrink-0 ${isMe ? 'bg-brand-500' : 'bg-slate-400'}`}>
                     {msg.userName.charAt(0).toUpperCase()}
                   </div>
                   
-                     <div className={`max-w-[85%] lg:max-w-[70%] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
+                  <div className={`max-w-[88%] lg:max-w-[70%] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
                      <div className="flex items-center gap-2 mb-1 px-1">
                         <span className="text-xs font-bold text-slate-600">{msg.userName}</span>
                         <span className="text-[10px] text-slate-400">{formatTime(msg.timestamp)}</span>
                      </div>
                      
-                     <div className={`p-4 rounded-2xl shadow-sm text-sm leading-relaxed relative group ${
+                     <div className={`p-3 lg:p-4 rounded-2xl shadow-sm text-sm leading-relaxed relative group ${
                        isMe ? 'bg-brand-50 text-brand-900 rounded-tr-none' : 'bg-white border border-slate-100 text-slate-700 rounded-tl-none'
                      }`}>
                         {msg.isTask && (
@@ -129,7 +129,7 @@ const Team = () => {
                         {msg.isTask && (
                           <button 
                             onClick={() => toggleTaskDone(msg.id)}
-                            className={`mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors w-full justify-center ${
+                            className={`mt-3 flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-colors w-full justify-center ${
                               msg.isDone 
                                 ? 'bg-green-100 text-green-700 hover:bg-green-200' 
                                 : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'
@@ -172,7 +172,7 @@ const Team = () => {
                   <select
                     value={assignee}
                     onChange={(e) => setAssignee(e.target.value)}
-                    className="text-sm bg-transparent border-none focus:outline-none"
+                    className="text-sm bg-transparent border-none focus:outline-none w-full"
                   >
                     <option value="">Zuweisen (optional)</option>
                     {assigneeOptions.map(p => (
