@@ -14,6 +14,8 @@ import Archive from './pages/Archive';
 import Activities from './pages/Activities';
 import Team from './pages/Team';
 import Settings from './pages/Settings';
+import Signup from './pages/Signup';
+import Terms from './pages/Terms';
 
 // Components for other routes
 const Admin = () => <div className="p-8"><h2 className="text-2xl font-bold">Benutzerverwaltung</h2><p className="text-slate-500 mt-2">Nur für Administratoren.</p></div>;
@@ -41,6 +43,8 @@ const App = () => {
         <Router>
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/agb" element={<Terms />} />
             
             <Route element={<ProtectedLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />

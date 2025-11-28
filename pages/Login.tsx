@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Truck, ArrowRight, Lock, Mail, ShieldCheck, Heart } from 'lucide-react';
 
@@ -143,6 +143,10 @@ const Login = () => {
               <ArrowRight className="ml-2 h-5 w-5" />
             </button>
           </form>
+
+          <div className="pt-6 text-center text-sm text-slate-500">
+            Kein Account? <Link to="/signup" className="text-brand-600 font-semibold">Jetzt registrieren</Link>
+          </div>
 
         </div>
 
