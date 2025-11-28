@@ -26,11 +26,19 @@ const Admin: React.FC = () => {
     setError('');
     try {
       const res = await fetch('/api/users');
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        const txt = await res.text();
+        try {
+          const parsed = JSON.parse(txt);
+          throw new Error(parsed.error || txt);
+        } catch {
+          throw new Error(txt || 'Unbekannter Fehler');
+        }
+      }
       const data = await res.json();
       setUsers(data.users || []);
     } catch (e: any) {
-      setError('Konnte Benutzer nicht laden: ' + e.message);
+      setError('Konnte Benutzer nicht laden: ' + (e.message || e.toString()));
     } finally {
       setLoading(false);
     }
@@ -49,10 +57,18 @@ const Admin: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...payload }),
       });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        const txt = await res.text();
+        try {
+          const parsed = JSON.parse(txt);
+          throw new Error(parsed.error || txt);
+        } catch {
+          throw new Error(txt || 'Unbekannter Fehler');
+        }
+      }
       await fetchUsers();
     } catch (e: any) {
-      setError('Update fehlgeschlagen: ' + e.message);
+      setError('Update fehlgeschlagen: ' + (e.message || e.toString()));
     } finally {
       setLoading(false);
     }
@@ -87,7 +103,7 @@ const Admin: React.FC = () => {
         </button>
       </div>
 
-      {error && <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg p-3">{error}</div>}
+      {error && <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg p-3 whitespace-pre-wrap">{error}</div>}
 
       <div className="overflow-x-auto bg-white border border-slate-100 rounded-2xl shadow-sm">
         <table className="min-w-full text-sm">
