@@ -18,7 +18,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const mapSupabaseUser = (raw: any): User => {
     const metaRole = (raw?.user_metadata?.role || '').toString().toUpperCase() as UserRole;
-    const role = Object.values(UserRole).includes(metaRole) ? metaRole : UserRole.DISPO;
+    let role = Object.values(UserRole).includes(metaRole) ? metaRole : UserRole.DISPO;
+
+    // Hard-assign admin for specific accounts if metadata is missing
+    const adminEmails = ['benedikt.niewels@werny.de', 'benedikt.niewels@gmail.com'];
+    if (adminEmails.includes((raw.email || '').toLowerCase())) {
+      role = UserRole.ADMIN;
+    }
+
     return {
       id: raw.id,
       email: raw.email,
