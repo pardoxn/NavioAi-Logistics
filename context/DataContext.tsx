@@ -119,6 +119,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [chatMessages]);
 
   // --- Supabase Chat Sync ---
+  const mapRowToChat = (row: any): ChatMessage => ({
+    id: row.id,
+    userId: row.user_id ?? row.userId,
+    userName: row.user_name ?? row.userName ?? 'User',
+    text: row.text,
+    timestamp: Number(row.timestamp),
+    isTask: Boolean(row.is_task ?? row.isTask),
+    isDone: Boolean(row.is_done ?? row.isDone),
+    assigneeId: row.assignee_id ?? row.assigneeId ?? null,
+    assigneeName: row.assignee_name ?? row.assigneeName ?? null,
+  });
+
   useEffect(() => {
     if (!supabase) return;
 
@@ -129,7 +141,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .order('timestamp', { ascending: true })
         .limit(500);
       if (!error && data) {
-        setChatMessages(data as unknown as ChatMessage[]);
+        setChatMessages((data as any[]).map(mapRowToChat));
       }
     };
     load();
@@ -138,9 +150,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       .channel('chat_sync')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, (payload) => {
         if (payload.eventType === 'INSERT') {
-          setChatMessages(prev => [...prev, payload.new as unknown as ChatMessage]);
+          const msg = mapRowToChat(payload.new);
+          setChatMessages(prev => prev.find(p => p.id === msg.id) ? prev : [...prev, msg]);
         } else if (payload.eventType === 'UPDATE') {
-          setChatMessages(prev => prev.map(m => m.id === payload.new.id ? payload.new as unknown as ChatMessage : m));
+          const msg = mapRowToChat(payload.new);
+          setChatMessages(prev => prev.map(m => m.id === msg.id ? msg : m));
         }
       })
       .subscribe();
