@@ -72,13 +72,13 @@ const Team = () => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 pt-4 overflow-hidden">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50 lg:pt-4 overflow-hidden">
       
       {/* LEFT: CHAT & TASKS */}
-      <div className="flex-1 flex flex-col max-w-4xl border-r border-slate-200/60 bg-white/50 backdrop-blur-sm">
+      <div className="flex-1 flex flex-col w-full lg:max-w-4xl border-b lg:border-b-0 lg:border-r border-slate-200/60 bg-white lg:bg-white/50 backdrop-blur-sm">
         
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
+        <div className="p-4 lg:p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
              <div className="p-2 bg-brand-50 rounded-lg text-brand-600"><MessageSquare size={24} /></div>
              Team Chat
@@ -89,7 +89,7 @@ const Team = () => {
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar" ref={scrollRef}>
+        <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6 custom-scrollbar" ref={scrollRef}>
            {chatMessages.length === 0 && (
              <div className="text-center text-slate-400 py-20">
                 <MessageSquare size={48} className="mx-auto mb-4 opacity-20"/>
@@ -105,7 +105,7 @@ const Team = () => {
                     {msg.userName.charAt(0).toUpperCase()}
                   </div>
                   
-                  <div className={`max-w-[70%] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
+                     <div className={`max-w-[85%] lg:max-w-[70%] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
                      <div className="flex items-center gap-2 mb-1 px-1">
                         <span className="text-xs font-bold text-slate-600">{msg.userName}</span>
                         <span className="text-[10px] text-slate-400">{formatTime(msg.timestamp)}</span>
@@ -147,8 +147,8 @@ const Team = () => {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 bg-white border-t border-slate-100">
-           <form onSubmit={handleSend} className="flex gap-4 items-end max-w-3xl mx-auto">
+        <div className="p-3 lg:p-4 bg-white border-t border-slate-100 sticky bottom-0">
+           <form onSubmit={handleSend} className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-stretch lg:items-end max-w-3xl mx-auto">
               <div className="flex-1 bg-slate-50 rounded-xl border border-slate-200 focus-within:ring-2 focus-within:ring-brand-100 focus-within:border-brand-300 transition-all flex items-center p-1">
                  <button
                    type="button"
@@ -191,7 +191,7 @@ const Team = () => {
               <button 
                 type="submit"
                 disabled={!newMessage.trim()}
-                className="p-3 bg-brand-600 text-white rounded-xl hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-500/30 transition-all active:scale-95"
+                className="p-3 bg-brand-600 text-white rounded-xl hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-500/30 transition-all active:scale-95 lg:self-end"
               >
                 <Send size={20} />
               </button>
