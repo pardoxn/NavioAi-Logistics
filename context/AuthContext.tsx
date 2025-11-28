@@ -9,12 +9,14 @@ interface AuthContextType {
   isAdmin: boolean;
   isDispo: boolean;
   isLager: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const mapSupabaseUser = (raw: any): User => {
     const metaRole = (raw?.user_metadata?.role || '').toString().toUpperCase() as UserRole;
@@ -61,6 +63,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (data.session) {
         setUser(mapSupabaseUser(data.session.user));
       }
+      setIsLoading(false);
     });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
@@ -68,6 +71,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } else {
         setUser(null);
       }
+      setIsLoading(false);
     });
     return () => {
       listener?.subscription?.unsubscribe();
@@ -81,6 +85,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     isAdmin: user?.role === UserRole.ADMIN,
     isDispo: user?.role === UserRole.DISPO || user?.role === UserRole.ADMIN,
     isLager: user?.role === UserRole.LAGER || user?.role === UserRole.ADMIN,
+    isLoading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -17,9 +17,17 @@ import Settings from './pages/Settings';
 import Signup from './pages/Signup';
 import Terms from './pages/Terms';
 import AdminPage from './pages/Admin';
+import { useState } from 'react';
 
 const ProtectedLayout = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500">
+        Lädt...
+      </div>
+    );
+  }
   if (!user) return <Navigate to="/" />;
 
   return (
