@@ -8,6 +8,7 @@ import { Map, Truck, Lock, Unlock, FileText, Play, AlertTriangle, MapPin, Layers
 import Papa from 'papaparse';
 import TourMap from '../components/TourMap';
 import { useLocation } from 'react-router-dom';
+import { getOptimizationAdvice } from '../services/geminiService';
 
 const Planning = () => {
   const { orders, tours, updateTourStatus, setTourFreightStatus, updateOrderPlannedStatus, addTour, deleteTour, deleteTourAndOrders, dissolveAllTours, removeOrder, removeOrders, moveOrderToTour, moveOrderToPool, reorderTourStops, updateOrder, cmrConfig } = useData();
@@ -29,6 +30,9 @@ const Planning = () => {
 
   // HIGHLIGHT STATE (for Notifications)
   const [highlightIds, setHighlightIds] = useState<string[]>([]);
+  const [aiSuggestion, setAiSuggestion] = useState<string>('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   // Check for highlight requests from navigation
   useEffect(() => {
@@ -40,6 +44,20 @@ const Planning = () => {
         return () => clearTimeout(timer);
     }
   }, [location.state]);
+
+  const handleAiSuggest = async () => {
+    setAiError('');
+    setAiSuggestion('');
+    setAiLoading(true);
+    try {
+      const advice = await getOptimizationAdvice(allUnplannedOrders);
+      setAiSuggestion(advice || 'Keine Empfehlung erhalten.');
+    } catch (e: any) {
+      setAiError(e?.message || 'Fehler bei der KI-Empfehlung.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   // --- FILTER LOGIC ---
   const allUnplannedOrders = orders.filter(o => !o.isPlanned).sort((a, b) => a.shippingPostcode.localeCompare(b.shippingPostcode));
@@ -358,10 +376,37 @@ const Planning = () => {
                 <Play size={16} fill="currentColor" />
                 <span className="hidden md:inline">Auto-Plan</span>
               </button>
+              <button
+                onClick={handleAiSuggest}
+                disabled={aiLoading || filteredPool.length === 0}
+                className="justify-center px-4 py-2.5 bg-white text-brand-600 border border-brand-200 rounded-xl hover:bg-brand-50 text-sm font-semibold flex items-center gap-2 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                title="KI-Empfehlung anzeigen"
+              >
+                <Globe size={16} />
+                <span className="hidden md:inline">{aiLoading ? 'KI lädt...' : 'KI-Vorschlag'}</span>
+                <span className="md:hidden">{aiLoading ? '...' : 'KI'}</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* KI Suggestion */}
+      {(aiSuggestion || aiError || aiLoading) && (
+        <div className="mx-4 md:mx-6 mb-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700">
+              <Globe size={16} className="text-brand-500" />
+              KI-Empfehlung
+            </div>
+            {aiLoading && <p className="text-slate-500 text-sm">Lade Empfehlung...</p>}
+            {aiError && <p className="text-sm text-red-600">{aiError}</p>}
+            {aiSuggestion && !aiError && (
+              <p className="text-sm text-slate-700 whitespace-pre-line">{aiSuggestion}</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Mobile Tabs */}
       <div className="md:hidden flex border-b border-slate-200 bg-white z-20">
