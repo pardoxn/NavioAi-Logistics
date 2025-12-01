@@ -5,7 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { LayoutDashboard, Truck, Package, Users, LogOut, FileSpreadsheet, Archive, Disc, History, MessageSquare, Settings as SettingsIcon } from 'lucide-react';
 import Logo from './Logo';
+const AVATAR_SRC = '/robot-avatar.png';
 import NotificationBell from './NotificationBell';
+const AVATAR_SRC = '/robot-avatar.png';
 
 const Sidebar = () => {
   const { user, logout, isAdmin, isDispo, isLager } = useAuth();
@@ -161,8 +163,8 @@ const Sidebar = () => {
       <div className="p-4 relative z-10">
         <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-2xl p-4 shadow-lg group hover:bg-white/10 transition-colors">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-brand-600 border-2 border-white/10 flex items-center justify-center text-sm font-bold text-white shadow-lg">
-              {user?.username.charAt(0).toUpperCase()}
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/10 bg-slate-200 shadow-lg">
+              <img src={AVATAR_SRC} alt="avatar" className="w-full h-full object-cover" />
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-semibold text-white truncate group-hover:text-cyan-200 transition-colors">{user?.username}</p>
