@@ -6,11 +6,13 @@ import { useData } from '../context/DataContext';
 import { LayoutDashboard, Truck, Package, Users, LogOut, FileSpreadsheet, Archive, Disc, History, MessageSquare, Settings as SettingsIcon } from 'lucide-react';
 import Logo from './Logo';
 import NotificationBell from './NotificationBell';
+import { UserRole } from '../types';
 
 const AVATAR_SRC = '/robot-avatar.png';
 
 const Sidebar = () => {
   const { user, logout, isAdmin, isDispo, isLager } = useAuth();
+  const isLagerOnly = user?.role === UserRole.LAGER;
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -53,7 +55,7 @@ const Sidebar = () => {
       {/* Navigation */}
       <nav className="flex-1 px-0 py-6 overflow-y-auto relative z-10 custom-scrollbar">
         <div className="px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Main Menu</div>
-        {!isLager && (
+        {!isLagerOnly && (
           <NavLink to="/dashboard" className={linkClass}>
             {({ isActive }) => (
               <>
@@ -98,7 +100,7 @@ const Sidebar = () => {
         )}
 
         {/* Lager-Ansicht: Verladung + Archiv + Team & Chat (oben schon) */}
-        {isLager && (
+        {isLagerOnly && (
           <>
             <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between group cursor-default">
               Lager
@@ -128,7 +130,7 @@ const Sidebar = () => {
         )}
 
         {/* History für Nicht-Lager */}
-        {!isLager && (
+        {!isLagerOnly && (
           <>
             <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between">
               History
