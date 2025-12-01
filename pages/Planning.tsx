@@ -8,7 +8,7 @@ import { Map, Truck, Lock, Unlock, FileText, Play, AlertTriangle, MapPin, Layers
 import Papa from 'papaparse';
 import TourMap from '../components/TourMap';
 import { useLocation } from 'react-router-dom';
-import { getOptimizationAdvice } from '../services/geminiService';
+import { getOptimizationAdvice, askBenni } from '../services/geminiService';
 
 const Planning = () => {
   const { orders, tours, updateTourStatus, setTourFreightStatus, updateOrderPlannedStatus, addTour, deleteTour, deleteTourAndOrders, dissolveAllTours, removeOrder, removeOrders, moveOrderToTour, moveOrderToPool, reorderTourStops, updateOrder, cmrConfig } = useData();
@@ -33,6 +33,10 @@ const Planning = () => {
   const [aiSuggestion, setAiSuggestion] = useState<string>('');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
+  const [benniOpen, setBenniOpen] = useState(false);
+  const [benniInput, setBenniInput] = useState('');
+  const [benniReply, setBenniReply] = useState<string>('');
+  const [benniLoading, setBenniLoading] = useState(false);
 
   // Check for highlight requests from navigation
   useEffect(() => {
@@ -56,6 +60,20 @@ const Planning = () => {
       setAiError(e?.message || 'Fehler bei der KI-Empfehlung.');
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  const handleAskBenni = async () => {
+    if (!benniInput.trim()) return;
+    setBenniLoading(true);
+    setBenniReply('');
+    try {
+      const reply = await askBenni(benniInput, allUnplannedOrders);
+      setBenniReply(reply || 'Keine Antwort erhalten.');
+    } catch (e: any) {
+      setBenniReply('Benni hat gerade ein Problem.');
+    } finally {
+      setBenniLoading(false);
     }
   };
 
@@ -407,6 +425,49 @@ const Planning = () => {
           </div>
         </div>
       )}
+
+      {/* Benni Assistant */}
+      <div className="fixed bottom-6 right-4 md:right-8 z-40 flex flex-col items-end space-y-2">
+        {benniOpen && (
+          <div className="w-80 max-w-[90vw] bg-white shadow-2xl border border-slate-200 rounded-2xl p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold">B</div>
+                <div className="text-sm font-semibold text-slate-700">Benni (KI)</div>
+              </div>
+              <button onClick={() => setBenniOpen(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-2">
+              <textarea
+                value={benniInput}
+                onChange={(e) => setBenniInput(e.target.value)}
+                placeholder="Frag Benni z.B. nach einer Touren-Idee..."
+                className="w-full bg-transparent border-none focus:outline-none text-sm text-slate-800 resize-none"
+                rows={2}
+              />
+            </div>
+            <button
+              onClick={handleAskBenni}
+              disabled={benniLoading || !benniInput.trim()}
+              className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+            >
+              {benniLoading ? 'Denkt...' : 'Senden'}
+            </button>
+            {benniReply && (
+              <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2">
+                {benniReply}
+              </div>
+            )}
+          </div>
+        )}
+        <button
+          onClick={() => setBenniOpen(!benniOpen)}
+          className="w-12 h-12 rounded-full bg-brand-600 text-white shadow-lg shadow-brand-500/30 flex items-center justify-center hover:bg-brand-700 active:scale-95"
+          title="Benni KI-Assistent"
+        >
+          B
+        </button>
+      </div>
 
       {/* Mobile Tabs */}
       <div className="md:hidden flex border-b border-slate-200 bg-white z-20">

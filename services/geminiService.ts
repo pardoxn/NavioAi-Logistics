@@ -1,14 +1,15 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { Order } from "../types";
 
 // Helper to simulate "AI" route grouping reasoning
 export const getOptimizationAdvice = async (orders: Order[]) => {
-  if (!process.env.API_KEY) {
+  const apiKey = (import.meta as any)?.env?.VITE_GEMINI_API_KEY || process.env.API_KEY;
+  if (!apiKey) {
     console.warn("No API KEY for Gemini");
     return "AI-Dienst nicht verfügbar (Kein API Key).";
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey });
   
   // We send a simplified list to save tokens
   const orderSummary = orders.map(o => 
@@ -42,5 +43,33 @@ export const getOptimizationAdvice = async (orders: Order[]) => {
   } catch (error) {
     console.error("Gemini Error", error);
     return "Fehler bei der KI-Analyse.";
+  }
+};
+
+export const askBenni = async (prompt: string, orders: Order[] = []) => {
+  const apiKey = (import.meta as any)?.env?.VITE_GEMINI_API_KEY || process.env.API_KEY;
+  if (!apiKey) return "Benni hat keinen API-Key konfiguriert.";
+  const ai = new GoogleGenAI({ apiKey });
+  const orderSummary = orders.slice(0, 20).map(o =>
+    `- ${o.documentNumber} ${o.shippingCity} (${o.shippingPostcode}) ${o.totalWeightKg}kg`
+  ).join('\n');
+  const contents = `
+    Du bist Benni, ein freundlicher Logistik-Assistent. Antworte kurz und prägnant.
+    Falls der Nutzer Tourenplanung möchte, schlage 1-2 sinnvolle Touren vor.
+    Aufträge (Pool, max 20 gezeigt):
+    ${orderSummary || 'Keine Aufträge übergeben.'}
+
+    Nutzerfrage:
+    ${prompt}
+  `;
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents
+    });
+    return response.text;
+  } catch (e) {
+    console.error("Benni Error", e);
+    return "Benni konnte keine Antwort liefern.";
   }
 };
