@@ -116,7 +116,7 @@ const Planning = () => {
   const submitFeedback = async (tourId: string, rating: 'UP' | 'DOWN', comment?: string) => {
     if (!tourId) return;
     if (!supabase) {
-      setFeedbackToast({ message: 'Feedback konnte nicht gespeichert werden (kein Supabase).', type: 'error' });
+      setFeedbackToast({ message: 'Feedback konnte nicht gespeichert werden (kein Supabase-Client).', type: 'error' });
       setTimeout(() => setFeedbackToast(null), 2000);
       return;
     }
@@ -131,7 +131,7 @@ const Planning = () => {
       });
       if (error) {
         console.error('Feedback insert failed', error);
-        setFeedbackToast({ message: 'Feedback konnte nicht gespeichert werden.', type: 'error' });
+        setFeedbackToast({ message: `Feedback konnte nicht gespeichert werden: ${error.message}`, type: 'error' });
         setTimeout(() => setFeedbackToast(null), 2000);
         return;
       }
@@ -147,9 +147,9 @@ const Planning = () => {
         const notes = data.map((f: any) => `${f.rating === 'UP' ? '👍' : '👎'} ${f.comment || ''}`.trim()).join('\n');
         setFeedbackNotes(notes);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Feedback insert exception', e);
-      setFeedbackToast({ message: 'Feedback konnte nicht gespeichert werden.', type: 'error' });
+      setFeedbackToast({ message: `Feedback konnte nicht gespeichert werden: ${e?.message || e}`, type: 'error' });
       setTimeout(() => setFeedbackToast(null), 2000);
     }
   };
@@ -556,7 +556,7 @@ const Planning = () => {
 
       {/* Feedback Toast */}
       {feedbackToast && (
-        <div className={`fixed bottom-24 right-4 md:right-8 z-50 px-4 py-3 rounded-xl shadow-xl text-sm font-semibold ${
+        <div className={`fixed bottom-24 right-4 left-4 md:left-auto md:right-8 z-50 px-4 py-3 rounded-xl shadow-xl text-sm font-semibold text-center ${
           feedbackToast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
         }`}>
           {feedbackToast.message}
