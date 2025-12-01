@@ -432,7 +432,7 @@ const Planning = () => {
           <div className="w-80 max-w-[90vw] bg-white shadow-2xl border border-slate-200 rounded-2xl p-3 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold">B</div>
+                <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold">🤖</div>
                 <div className="text-sm font-semibold text-slate-700">Benni (KI)</div>
               </div>
               <button onClick={() => setBenniOpen(false)} className="text-slate-400 hover:text-slate-600">✕</button>
@@ -465,7 +465,7 @@ const Planning = () => {
           className="w-12 h-12 rounded-full bg-brand-600 text-white shadow-lg shadow-brand-500/30 flex items-center justify-center hover:bg-brand-700 active:scale-95"
           title="Benni KI-Assistent"
         >
-          B
+          🤖
         </button>
       </div>
 
