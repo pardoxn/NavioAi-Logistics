@@ -495,11 +495,19 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const dissolveAllTours = () => {
     if (tours.length === 0) return;
-    
-    logActivity('DISSOLVE_TOUR', `Alle Touren aufgelöst (${tours.length})`, tours);
-    setOrders(prev => prev.map(o => ({ ...o, isPlanned: false })));
-    setToursState([]);
-    addNotification(`Alle Touren wurden zurückgesetzt.`);
+
+    const archivedTours = tours.filter(t => t.status === TourStatus.ARCHIVED);
+    const activeTours = tours.filter(t => t.status !== TourStatus.ARCHIVED);
+
+    // Nur aktive Touren zurücksetzen; Archiv bleibt bestehen (max. letzte 12)
+    const orderIdsToRelease = activeTours.flatMap(t => t.stops.map(s => s.id));
+    if (orderIdsToRelease.length) updateOrderPlannedStatus(orderIdsToRelease, false);
+
+    const keepArchived = archivedTours.slice(-12);
+
+    logActivity('DISSOLVE_TOUR', `Alle offenen Touren aufgelöst (${activeTours.length}), Archiv bleibt.`, activeTours);
+    setToursState(keepArchived);
+    addNotification(`Touren zurückgesetzt. Archiv (bis zu 12 Einträge) bleibt erhalten.`);
   };
 
   const deleteTourAndOrders = (tourId: string) => {
