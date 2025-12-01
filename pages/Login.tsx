@@ -81,79 +81,91 @@ const Login = () => {
       </div>
 
       {/* RIGHT SIDE: Login Form (Full Height) */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 relative bg-white">
-        
-        <div className="w-full max-w-md space-y-8 animate-fade-in">
-          <div className="text-center md:text-left">
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 md:p-10 relative bg-gradient-to-br from-white via-slate-50 to-slate-100">
+        <div className="absolute inset-0 pointer-events-none opacity-70" style={{ backgroundImage: 'radial-gradient(#0ea5e9 1px, transparent 1px)', backgroundSize: '34px 34px' }}></div>
+        <div className="w-full max-w-lg space-y-6 relative z-10">
+          <div className="text-center md:text-left space-y-1">
             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Willkommen zurück</h2>
-            <p className="mt-2 text-slate-500">Bitte melden Sie sich an, um auf das Portal zuzugreifen.</p>
+            <p className="text-slate-500 text-sm">Melde dich an, um Navio AI zu nutzen. Sessions bleiben auch nach Refresh aktiv.</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Email Adresse</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-600">
-                  <Mail className="h-5 w-5 text-slate-400" />
+          <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-xl p-6 space-y-6">
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">E-Mail</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-600">
+                    <Mail className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all bg-slate-50 focus:bg-white"
+                    placeholder="name@company.com"
+                  />
                 </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all bg-slate-50 focus:bg-white"
-                  placeholder="name@company.com"
-                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-semibold text-slate-700">Passwort</label>
+                  <span className="text-xs font-semibold text-brand-600">Vergessen?</span>
+                </div>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-600">
+                    <Lock className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all bg-slate-50 focus:bg-white"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="text-red-600 text-sm bg-red-50 p-4 rounded-xl flex items-center gap-3 border border-red-100 animate-shake">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full flex justify-center py-3.5 px-4 rounded-xl shadow-lg shadow-brand-500/30 text-sm font-bold text-white bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all hover:scale-[1.01] active:scale-[0.99]"
+              >
+                Anmelden
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </button>
+            </form>
+
+            <div className="grid grid-cols-2 gap-3 text-xs text-slate-600">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <div className="flex items-center gap-2 font-semibold text-slate-700"><ShieldCheck size={14} className="text-emerald-500" /> Sicherheit</div>
+                <p className="mt-1">Supabase-Login, Session bleibt aktiv nach Refresh.</p>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <div className="flex items-center gap-2 font-semibold text-slate-700"><Truck size={14} className="text-brand-500" /> Schnellstart</div>
+                <p className="mt-1">Rolle wird automatisch zugewiesen; Dispo sieht Planung, Lager Verladung.</p>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                 <label className="text-sm font-medium text-slate-700">Passwort</label>
-                 <a href="#" className="text-xs font-semibold text-brand-600 hover:text-brand-500">Vergessen?</a>
-              </div>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-600">
-                  <Lock className="h-5 w-5 text-slate-400" />
-                </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all bg-slate-50 focus:bg-white"
-                  placeholder="••••••••"
-                />
-              </div>
+            <div className="pt-2 text-center text-sm text-slate-500">
+              Kein Account? <Link to="/signup" className="text-brand-600 font-semibold">Jetzt registrieren</Link>
             </div>
-
-            {error && (
-              <div className="text-red-600 text-sm bg-red-50 p-4 rounded-xl flex items-center gap-3 border border-red-100 animate-shake">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg shadow-brand-500/30 text-sm font-bold text-white bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all hover:scale-[1.01] active:scale-[0.99]"
-            >
-              Anmelden
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </button>
-          </form>
-
-          <div className="pt-6 text-center text-sm text-slate-500">
-            Kein Account? <Link to="/signup" className="text-brand-600 font-semibold">Jetzt registrieren</Link>
           </div>
 
         </div>
 
         {/* Footer / Copyright */}
         <div className="absolute bottom-6 w-full text-center">
-           <p className="text-xs text-slate-400 font-medium flex items-center justify-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
-             Created with <Heart size={12} className="text-red-500 fill-red-500 animate-pulse" /> by Benedikt Niewels
-           </p>
+          <p className="text-xs text-slate-400 font-medium flex items-center justify-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+            Created with <Heart size={12} className="text-red-500 fill-red-500 animate-pulse" /> by Benedikt Niewels
+          </p>
         </div>
 
       </div>
