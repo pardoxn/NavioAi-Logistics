@@ -113,11 +113,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const applyRemoteState = (payload: any) => {
     try {
       if (!payload?.state) return;
-      const { orders: ro, tours: rt, activities: ra, notifications: rn } = payload.state;
+      const { orders: ro, tours: rt, activities: ra, notifications: rn, cmrConfig: rc } = payload.state;
       if (ro) setOrders(ro);
       if (rt) setToursState(rt);
       if (ra) setActivities(ra);
       if (rn) setNotifications(rn);
+      if (rc) setCmrConfig(rc);
       lastRemoteUpdate.current = payload.updated_at || new Date().toISOString();
     } catch (err) {
       console.warn('Remote state apply failed', err);
@@ -150,6 +151,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       tours,
       activities,
       notifications,
+      cmrConfig,
     };
     const payload = {
       id: STATE_ID,
@@ -272,6 +274,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     localStorage.setItem('navio_cmr_config', JSON.stringify(cmrConfig));
+    scheduleSave();
   }, [cmrConfig]);
 
   // --- Helper: Add Notification ---
@@ -613,68 +616,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const updateCmrConfig = (config: CmrConfig) => {
     setCmrConfig(config);
   };
-
-  // --- Supabase State Sync (orders/tours/activities/notifications/cmrConfig) ---
-  const applyRemoteState = (data: any) => {
-    if (!data) return;
-    if (data.orders) setOrders(data.orders);
-    if (data.tours) setToursState(data.tours);
-    if (data.activities) setActivities(data.activities);
-    if (data.notifications) setNotifications(data.notifications);
-    if (data.cmrConfig) setCmrConfig(data.cmrConfig);
-  };
-
-  // Load initial state from Supabase once user is available
-  useEffect(() => {
-    const load = async () => {
-      if (!supabase || !user || stateLoaded.current) return;
-      const { data, error } = await supabase
-        .from('navio_state')
-        .select('state,updated_at')
-        .eq('id', STATE_ID)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (!error && data?.state) {
-        applyRemoteState(data.state);
-        if (data.updated_at) lastRemoteUpdate.current = data.updated_at;
-      }
-      stateLoaded.current = true;
-    };
-    load();
-  }, [user]);
-
-  // Save changes to Supabase (debounced)
-  useEffect(() => {
-    if (!supabase || !stateLoaded.current) return;
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(async () => {
-      const payload = {
-        id: STATE_ID,
-        org: ORG_KEY,
-        state: { orders, tours, activities, notifications, cmrConfig },
-      };
-      const { data } = await supabase.from('navio_state').upsert(payload).select('updated_at').single();
-      if (data?.updated_at) lastRemoteUpdate.current = data.updated_at;
-    }, 500);
-  }, [orders, tours, activities, notifications, cmrConfig]);
-
-  // Realtime updates from Supabase
-  useEffect(() => {
-    if (!supabase) return;
-    const channel = supabase
-      .channel('navio_state_sync')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'navio_state', filter: `id=eq.${STATE_ID}` }, (payload) => {
-        const updatedAt = (payload.new as any)?.updated_at;
-        if (!updatedAt || updatedAt === lastRemoteUpdate.current) return;
-        applyRemoteState((payload.new as any)?.state);
-        lastRemoteUpdate.current = updatedAt;
-      })
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
 
   // --- Team Features ---
   const sendChatMessage = async (text: string, isTask: boolean, assignee?: { id: string; name: string }) => {
