@@ -97,44 +97,60 @@ const Sidebar = () => {
           </>
         )}
 
+        {/* Lager-Ansicht: Verladung + Archiv + Team & Chat (oben schon) */}
         {isLager && (
           <>
             <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between group cursor-default">
               Lager
               <div className="h-[1px] flex-1 bg-white/5 ml-3 group-hover:bg-white/10 transition-colors"></div>
             </div>
-            <NavLink to="/planning" className={linkClass}>
+            <NavLink to="/warehouse" className={linkClass}>
               {({ isActive }) => (
                 <>
-                  <Disc size={18} className={isActive ? "text-cyan-400 animate-spin-slow" : ""} />
-                  Tourenplanung
+                  <Package size={18} className={isActive ? "text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]" : ""} />
+                  Verladung
+                </>
+              )}
+            </NavLink>
+            <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between">
+              History
+              <div className="h-[1px] flex-1 bg-white/5 ml-3"></div>
+            </div>
+            <NavLink to="/archive" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Archive size={18} className={isActive ? "text-amber-400" : ""} />
+                  Archiv
                 </>
               )}
             </NavLink>
           </>
         )}
-        
-        <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between">
-           History
-           <div className="h-[1px] flex-1 bg-white/5 ml-3"></div>
-        </div>
-        <NavLink to="/archive" className={linkClass}>
-          {({ isActive }) => (
-            <>
-              <Archive size={18} className={isActive ? "text-amber-400" : ""} />
-              Archiv
-            </>
-          )}
-        </NavLink>
+
+        {/* History für Nicht-Lager */}
         {!isLager && (
-          <NavLink to="/activities" className={linkClass}>
-            {({ isActive }) => (
-              <>
-                <History size={18} className={isActive ? "text-blue-400" : ""} />
-                Aktivitäten
-              </>
-            )}
-          </NavLink>
+          <>
+            <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between">
+              History
+              <div className="h-[1px] flex-1 bg-white/5 ml-3"></div>
+            </div>
+            <NavLink to="/archive" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Archive size={18} className={isActive ? "text-amber-400" : ""} />
+                  Archiv
+                </>
+              )}
+            </NavLink>
+            <NavLink to="/activities" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <History size={18} className={isActive ? "text-blue-400" : ""} />
+                  Aktivitäten
+                </>
+              )}
+            </NavLink>
+          </>
         )}
 
         {isAdmin && (
