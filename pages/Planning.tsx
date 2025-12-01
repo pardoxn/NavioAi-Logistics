@@ -522,54 +522,74 @@ const Planning = () => {
       </div>
 
       {/* Benni Assistant */}
-      <div className="fixed bottom-6 right-4 md:right-8 z-40 flex flex-col items-end space-y-2">
-        {benniOpen && (
-          <div className="w-80 max-w-[90vw] bg-white shadow-2xl border border-slate-200 rounded-2xl p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold">🤖</div>
-                <div className="text-sm font-semibold text-slate-700">Benni (KI)</div>
-              </div>
-              <button onClick={() => setBenniOpen(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+      {/* Benni Assistant */}
+      <div className="fixed bottom-6 right-4 md:right-8 z-40">
+        <div className="w-[320px] max-w-[90vw] bg-white shadow-2xl border border-slate-200 rounded-2xl p-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-lg">🤖</div>
+            <div>
+              <div className="text-sm font-semibold text-slate-700">Benni (KI)</div>
+              <div className="text-xs text-slate-500">Frag nach Touren, Planung, Aufgaben…</div>
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-2">
-              <textarea
-                value={benniInput}
-                onChange={(e) => setBenniInput(e.target.value)}
-                placeholder="Frag Benni z.B. nach einer Touren-Idee..."
-                className="w-full bg-transparent border-none focus:outline-none text-sm text-slate-800 resize-none"
-                rows={2}
-              />
-            </div>
-            <button
-              onClick={handleAskBenni}
-              disabled={benniLoading || !benniInput.trim()}
-              className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
-            >
-              {benniLoading ? 'Denkt...' : 'Senden'}
-            </button>
-            {benniReply && (
-              <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2 space-y-2">
-                <div>{benniReply}</div>
-                {benniActionPending && filteredPool.length > 0 && (
-                  <button
-                    onClick={handleBenniAutoPlan}
-                    className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-brand-700"
-                  >
-                    Touren jetzt automatisch planen
-                  </button>
-                )}
-              </div>
-            )}
           </div>
-        )}
-        <button
-          onClick={() => setBenniOpen(!benniOpen)}
-          className="w-12 h-12 rounded-full bg-brand-600 text-white shadow-lg shadow-brand-500/30 flex items-center justify-center hover:bg-brand-700 active:scale-95"
-          title="Benni KI-Assistent"
-        >
-          🤖
-        </button>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setBenniInput('Plane die offenen Aufträge für 1.3t in zwei logische Touren.')}
+              className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold hover:bg-slate-200"
+            >
+              Tour (1.3t) planen
+            </button>
+            <button
+              onClick={() => setBenniInput('Optimiere Verladung/Stapeln für den Polensprinter.')}
+              className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold hover:bg-slate-200"
+            >
+              Verladung optimieren
+            </button>
+            <button
+              onClick={() => setBenniInput('Kombiniere Aufträge entlang A44/A2 ohne Zick-Zack.')}
+              className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold hover:bg-slate-200"
+            >
+              Autobahn-Linie
+            </button>
+            <button
+              onClick={() => setBenniInput('Prüfe Auslastung und schlage Anpassungen vor.')}
+              className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold hover:bg-slate-200"
+            >
+              Auslastung prüfen
+            </button>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-2">
+            <textarea
+              value={benniInput}
+              onChange={(e) => setBenniInput(e.target.value)}
+              placeholder="Frag Benni z.B. nach einer Touren-Idee..."
+              className="w-full bg-transparent border-none focus:outline-none text-sm text-slate-800 resize-none"
+              rows={3}
+            />
+          </div>
+          <button
+            onClick={handleAskBenni}
+            disabled={benniLoading || !benniInput.trim()}
+            className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 hover:bg-brand-700"
+          >
+            {benniLoading ? 'Denkt...' : 'Senden'}
+          </button>
+          {benniReply && (
+            <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2 space-y-2">
+              <div>{benniReply}</div>
+              {benniActionPending && filteredPool.length > 0 && (
+                <button
+                  onClick={handleBenniAutoPlan}
+                  className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-brand-700"
+                >
+                  Touren jetzt automatisch planen
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Feedback Toast */}
