@@ -11,9 +11,11 @@ import TourMap from '../components/TourMap';
 import { useLocation } from 'react-router-dom';
 import { getOptimizationAdvice, askBenni } from '../services/geminiService';
 import { supabase } from '../lib/supabaseClient';
-import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ThumbsDown } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Planning = () => {
+  const { user } = useAuth();
   const { orders, tours, updateTourStatus, setTourFreightStatus, updateOrderPlannedStatus, addTour, deleteTour, deleteTourAndOrders, dissolveAllTours, removeOrder, removeOrders, moveOrderToTour, moveOrderToPool, reorderTourStops, updateOrder, cmrConfig } = useData();
   const location = useLocation(); // Hook to get navigation state
   
