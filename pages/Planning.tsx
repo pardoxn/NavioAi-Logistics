@@ -37,6 +37,7 @@ const Planning = () => {
   const [benniInput, setBenniInput] = useState('');
   const [benniReply, setBenniReply] = useState<string>('');
   const [benniLoading, setBenniLoading] = useState(false);
+  const [benniActionPending, setBenniActionPending] = useState(false);
 
   // Check for highlight requests from navigation
   useEffect(() => {
@@ -67,14 +68,25 @@ const Planning = () => {
     if (!benniInput.trim()) return;
     setBenniLoading(true);
     setBenniReply('');
+    setBenniActionPending(false);
     try {
       const reply = await askBenni(benniInput, allUnplannedOrders);
       setBenniReply(reply || 'Keine Antwort erhalten.');
+      // Simple intent check: if user asks to plan/auto-plan, offer action
+      const lower = benniInput.toLowerCase();
+      if (lower.includes('plan') || lower.includes('tour') || lower.includes('auto')) {
+        setBenniActionPending(true);
+      }
     } catch (e: any) {
       setBenniReply('Benni hat gerade ein Problem.');
     } finally {
       setBenniLoading(false);
     }
+  };
+
+  const handleBenniAutoPlan = () => {
+    handleAutoPlan();
+    setBenniActionPending(false);
   };
 
   // --- FILTER LOGIC ---
@@ -454,8 +466,16 @@ const Planning = () => {
               {benniLoading ? 'Denkt...' : 'Senden'}
             </button>
             {benniReply && (
-              <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2">
-                {benniReply}
+              <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2 space-y-2">
+                <div>{benniReply}</div>
+                {benniActionPending && filteredPool.length > 0 && (
+                  <button
+                    onClick={handleBenniAutoPlan}
+                    className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-brand-700"
+                  >
+                    Touren jetzt automatisch planen
+                  </button>
+                )}
               </div>
             )}
           </div>
