@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { optimizeTours } from '../services/optimizerService';
-import { generateCMR } from '../services/pdfService';
+import { generateCMRBundle } from '../services/pdfService';
 import { TourStatus, Order, Tour, FreightStatus } from '../types';
 import { Map, Truck, Lock, Unlock, FileText, Play, AlertTriangle, MapPin, Layers, Calculator, Trash2, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, X, Search, Filter, CheckCircle2, Pencil, Download, Navigation, Copy, RefreshCw, CheckSquare, Square, ThumbsUp, Globe, ChevronDown } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
@@ -272,7 +272,7 @@ const Planning = () => {
 
   const handlePrintCMR = (e: React.MouseEvent, tour: any) => {
       e.stopPropagation();
-      tour.stops.forEach((stop: Order) => generateCMR(tour, stop, cmrConfig));
+      generateCMRBundle(tour, tour.stops, cmrConfig);
   };
 
   const handleExportTourList = (e: React.MouseEvent, tour: any) => {

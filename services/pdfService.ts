@@ -104,6 +104,19 @@ export const generateCMR = (tour: Tour, order: Order, config: CmrConfig) => {
   window.open(blobUrl, '_blank');
 };
 
+// Generate one PDF containing multiple CMR pages (one per stop)
+export const generateCMRBundle = (tour: Tour, stops: Order[], config: CmrConfig) => {
+  const doc = new jsPDF();
+  stops.forEach((stop, idx) => {
+    if (idx > 0) doc.addPage();
+    createCmrDocument(doc, config, stop, tour);
+  });
+
+  const blob = doc.output('blob');
+  const blobUrl = URL.createObjectURL(blob);
+  window.open(blobUrl, '_blank');
+};
+
 export const generatePreviewURL = (config: CmrConfig): string => {
   const doc = new jsPDF();
   
