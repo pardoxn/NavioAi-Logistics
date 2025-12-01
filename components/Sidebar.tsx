@@ -8,7 +8,6 @@ import Logo from './Logo';
 import NotificationBell from './NotificationBell';
 
 const AVATAR_SRC = '/robot-avatar.png';
-const AVATAR_SRC = '/robot-avatar.png';
 
 const Sidebar = () => {
   const { user, logout, isAdmin, isDispo, isLager } = useAuth();
