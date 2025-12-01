@@ -4,6 +4,8 @@ import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { SendHorizonal, CheckSquare, Square, Bell, MessageSquare, Clock, CheckCircle2, User, AlertTriangle, Info } from 'lucide-react';
 
+const AVATAR_SRC = '/robot-avatar.png'; // lege die Datei ins public-Verzeichnis
+
 const Team = () => {
   const { chatMessages, notifications, sendChatMessage, toggleTaskDone, markNotificationsRead } = useData();
   const { user } = useAuth();
@@ -98,9 +100,14 @@ const Team = () => {
              const isMe = msg.userId === user?.id;
              return (
                <div key={msg.id} className={`flex gap-3 lg:gap-4 ${isMe ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-9 h-9 lg:w-10 lg:h-10 rounded-full flex items-center justify-center text-xs lg:text-sm font-bold text-white shadow-sm flex-shrink-0 ${isMe ? 'bg-brand-500' : 'bg-slate-400'}`}>
-                    {msg.userName.charAt(0).toUpperCase()}
-                  </div>
+                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full overflow-hidden shadow-sm flex-shrink-0 border border-slate-200 bg-slate-200">
+                  <img
+                    src={AVATAR_SRC}
+                    alt={msg.userName}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                </div>
                   
                   <div className={`max-w-[88%] lg:max-w-[70%] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
                      <div className="flex items-center gap-2 mb-1 px-1">
