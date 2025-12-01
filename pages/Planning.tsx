@@ -9,6 +9,8 @@ import Papa from 'papaparse';
 import TourMap from '../components/TourMap';
 import { useLocation } from 'react-router-dom';
 import { getOptimizationAdvice, askBenni } from '../services/geminiService';
+import { supabase } from '../lib/supabaseClient';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
 
 const Planning = () => {
   const { orders, tours, updateTourStatus, setTourFreightStatus, updateOrderPlannedStatus, addTour, deleteTour, deleteTourAndOrders, dissolveAllTours, removeOrder, removeOrders, moveOrderToTour, moveOrderToPool, reorderTourStops, updateOrder, cmrConfig } = useData();
@@ -38,6 +40,7 @@ const Planning = () => {
   const [benniReply, setBenniReply] = useState<string>('');
   const [benniLoading, setBenniLoading] = useState(false);
   const [benniActionPending, setBenniActionPending] = useState(false);
+  const [feedbackNotes, setFeedbackNotes] = useState<string>('');
 
   // Check for highlight requests from navigation
   useEffect(() => {
@@ -50,12 +53,31 @@ const Planning = () => {
     }
   }, [location.state]);
 
+  // Load latest feedback (summary string)
+  useEffect(() => {
+    const loadFeedback = async () => {
+      if (!supabase) return;
+      const { data, error } = await supabase
+        .from('tour_feedback')
+        .select('rating,comment')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (error || !data) {
+        setFeedbackNotes('');
+        return;
+      }
+      const notes = data.map((f: any) => `${f.rating === 'UP' ? '👍' : '👎'} ${f.comment || ''}`.trim()).join('\n');
+      setFeedbackNotes(notes);
+    };
+    loadFeedback();
+  }, []);
+
   const handleAiSuggest = async () => {
     setAiError('');
     setAiSuggestion('');
     setAiLoading(true);
     try {
-      const advice = await getOptimizationAdvice(allUnplannedOrders);
+      const advice = await getOptimizationAdvice(allUnplannedOrders, feedbackNotes);
       setAiSuggestion(advice || 'Keine Empfehlung erhalten.');
     } catch (e: any) {
       setAiError(e?.message || 'Fehler bei der KI-Empfehlung.');
@@ -70,7 +92,7 @@ const Planning = () => {
     setBenniReply('');
     setBenniActionPending(false);
     try {
-      const reply = await askBenni(benniInput, allUnplannedOrders);
+      const reply = await askBenni(benniInput, allUnplannedOrders, feedbackNotes);
       setBenniReply(reply || 'Keine Antwort erhalten.');
       // Simple intent check: if user asks to plan/auto-plan, offer action
       const lower = benniInput.toLowerCase();
@@ -87,6 +109,26 @@ const Planning = () => {
   const handleBenniAutoPlan = () => {
     handleAutoPlan();
     setBenniActionPending(false);
+  };
+
+  const submitFeedback = async (tourId: string, rating: 'UP' | 'DOWN', comment?: string) => {
+    if (!supabase) return;
+    await supabase.from('tour_feedback').insert({
+      tour_id: tourId,
+      rating,
+      comment: comment || '',
+      user_name: user?.username || 'unknown'
+    });
+    // Refresh feedback summary
+    const { data } = await supabase
+      .from('tour_feedback')
+      .select('rating,comment')
+      .order('created_at', { ascending: false })
+      .limit(5);
+    if (data) {
+      const notes = data.map((f: any) => `${f.rating === 'UP' ? '👍' : '👎'} ${f.comment || ''}`.trim()).join('\n');
+      setFeedbackNotes(notes);
+    }
   };
 
   // --- FILTER LOGIC ---
@@ -709,6 +751,32 @@ const Planning = () => {
                             </span>
                             <span className="text-slate-300">|</span>
                             <span className="font-mono">~{tour.estimatedDistanceKm} km</span>
+                            <span className="text-slate-300">|</span>
+                            <span>• {tour.stops.length} Stopps</span>
+                            <span>• Ø {tour.utilization}%</span>
+                            <div className="flex items-center gap-2 ml-auto">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  submitFeedback(tour.id, 'UP');
+                                }}
+                                title="Tour gut"
+                                className="p-1 rounded-full text-green-600 hover:bg-green-50 border border-transparent hover:border-green-200 transition-colors"
+                              >
+                                <ThumbsUp size={16} />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const comment = window.prompt('Was war nicht gut? (optional)') || '';
+                                  submitFeedback(tour.id, 'DOWN', comment);
+                                }}
+                                title="Tour neu planen / schlecht"
+                                className="p-1 rounded-full text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-colors"
+                              >
+                                <ThumbsDown size={16} />
+                              </button>
+                            </div>
                           </div>
                         </div>
 

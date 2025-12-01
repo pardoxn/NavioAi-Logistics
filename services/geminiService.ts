@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { Order } from "../types";
 
 // Helper to simulate "AI" route grouping reasoning
-export const getOptimizationAdvice = async (orders: Order[]) => {
+export const getOptimizationAdvice = async (orders: Order[], feedbackNotes?: string) => {
   const apiKey = (import.meta as any)?.env?.VITE_GEMINI_API_KEY || process.env.API_KEY;
   if (!apiKey) {
     console.warn("No API KEY for Gemini");
@@ -30,6 +30,9 @@ export const getOptimizationAdvice = async (orders: Order[]) => {
         
         Hier ist eine Liste von offenen Aufträgen ("Pool"):
         ${orderSummary}
+
+        Feedback aus der Historie (wenn vorhanden):
+        ${feedbackNotes || 'Keine Hinweise.'}
         
         Deine Aufgabe:
         1. Analysiere, welche Aufträge zusammen eine logische One-Way-Linie ab 33181 bilden.
@@ -46,7 +49,7 @@ export const getOptimizationAdvice = async (orders: Order[]) => {
   }
 };
 
-export const askBenni = async (prompt: string, orders: Order[] = []) => {
+export const askBenni = async (prompt: string, orders: Order[] = [], feedbackNotes?: string) => {
   const apiKey = (import.meta as any)?.env?.VITE_GEMINI_API_KEY || process.env.API_KEY;
   if (!apiKey) return "Benni hat keinen API-Key konfiguriert.";
   const ai = new GoogleGenAI({ apiKey });
@@ -56,6 +59,9 @@ export const askBenni = async (prompt: string, orders: Order[] = []) => {
   const contents = `
     Du bist Benni, ein freundlicher Logistik-Assistent. Antworte kurz und prägnant.
     Falls der Nutzer Tourenplanung möchte, schlage 1-2 sinnvolle Touren vor.
+    Beachte auch dieses Feedback (positiv/negativ) aus vergangenen Touren:
+    ${feedbackNotes || 'Kein Feedback übergeben.'}
+
     Aufträge (Pool, max 20 gezeigt):
     ${orderSummary || 'Keine Aufträge übergeben.'}
 
