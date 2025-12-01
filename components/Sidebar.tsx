@@ -4,15 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { LayoutDashboard, Truck, Package, Users, LogOut, FileSpreadsheet, Archive, Disc, History, MessageSquare, Settings as SettingsIcon } from 'lucide-react';
-
-const LogoMark = () => (
-  <div className="relative h-10 w-10">
-    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 shadow-lg shadow-cyan-500/30"></div>
-    <div className="absolute inset-[3px] rounded-xl bg-[#0f172a] border border-white/10 flex items-center justify-center">
-      <Truck className="h-5 w-5 text-cyan-200" />
-    </div>
-  </div>
-);
+import Logo from './Logo';
 import NotificationBell from './NotificationBell';
 
 const Sidebar = () => {
@@ -46,7 +38,7 @@ const Sidebar = () => {
       {/* Header with Bell - High Z-Index to stay above content */}
       <div className="p-6 pb-2 relative z-[60] flex items-center justify-between">
         <div className="flex items-center gap-3">
-           <LogoMark />
+           <Logo size={40} />
            <div>
              <h1 className="text-lg font-bold tracking-tight text-white leading-none">Navio AI</h1>
              <p className="text-[9px] uppercase tracking-[0.2em] text-cyan-200/60 mt-1 font-medium">Logistics</p>

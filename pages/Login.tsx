@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Truck, ArrowRight, Lock, Mail, ShieldCheck, Heart } from 'lucide-react';
+import Logo from '../components/Logo';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -53,9 +54,7 @@ const Login = () => {
         {/* Content Top */}
         <div className="relative z-20">
            <div className="flex items-center gap-3 mb-8 animate-fade-in-down">
-             <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 shadow-xl">
-               <Truck className="h-8 w-8 text-white" />
-             </div>
+             <Logo size={44} className="drop-shadow-xl" />
              <span className="text-xl font-bold tracking-widest uppercase opacity-90 text-blue-100">Navio Logistics</span>
            </div>
            

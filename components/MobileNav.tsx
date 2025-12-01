@@ -3,6 +3,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, Truck, Package, Archive, LogOut, MessageSquare, Settings } from 'lucide-react';
+import Logo from './Logo';
 import NotificationBell from './NotificationBell';
 
 const MobileNav = () => {
@@ -15,6 +16,9 @@ const MobileNav = () => {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 h-16 flex justify-between items-center px-2 z-50 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)]">
+      <div className="flex flex-col items-center justify-center w-full h-full">
+        <Logo size={26} />
+      </div>
       <NavLink to="/dashboard" className={linkClass}>
         {({ isActive }) => (
           <>
