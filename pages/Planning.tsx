@@ -5,6 +5,7 @@ import { optimizeTours } from '../services/optimizerService';
 import { generateCMR } from '../services/pdfService';
 import { TourStatus, Order, Tour, FreightStatus } from '../types';
 import { Map, Truck, Lock, Unlock, FileText, Play, AlertTriangle, MapPin, Layers, Calculator, Trash2, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, X, Search, Filter, CheckCircle2, Pencil, Download, Navigation, Copy, RefreshCw, CheckSquare, Square, ThumbsUp, Globe, ChevronDown } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 import Papa from 'papaparse';
 import TourMap from '../components/TourMap';
 import { useLocation } from 'react-router-dom';
@@ -113,12 +114,19 @@ const Planning = () => {
 
   const submitFeedback = async (tourId: string, rating: 'UP' | 'DOWN', comment?: string) => {
     if (!supabase) return;
-    await supabase.from('tour_feedback').insert({
+    const { error } = await supabase.from('tour_feedback').insert({
+      id: uuidv4(),
       tour_id: tourId,
       rating,
       comment: comment || '',
-      user_name: user?.username || 'unknown'
+      user_name: user?.username || 'unknown',
+      created_at: new Date().toISOString()
     });
+    if (error) {
+      console.error('Feedback insert failed', error);
+      window.alert('Feedback konnte nicht gespeichert werden.');
+      return;
+    }
     // Refresh feedback summary
     const { data } = await supabase
       .from('tour_feedback')
