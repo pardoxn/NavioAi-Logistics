@@ -1,96 +1,146 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Truck, Package, Archive, LogOut, MessageSquare, Settings, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Truck, Package, Archive, LogOut, MessageSquare, Settings, BookOpen, Menu, X } from 'lucide-react';
 import Logo from './Logo';
-import NotificationBell from './NotificationBell';
 
 const MobileNav = () => {
   const { isDispo, isLager, isAdmin, logout } = useAuth();
+  const [open, setOpen] = useState(false);
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 ${
-      isActive ? 'text-brand-600 scale-105' : 'text-slate-400 hover:text-slate-600'
+    `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+      isActive ? 'bg-brand-50 text-brand-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'
     }`;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 h-16 flex justify-between items-center px-2 z-50 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)]">
-      <div className="flex flex-col items-center justify-center w-full h-full">
-        <Logo size={26} />
-      </div>
-      <NavLink to="/dashboard" className={linkClass}>
-        {({ isActive }) => (
-          <>
-            <LayoutDashboard size={20} className={isActive ? "drop-shadow-md" : ""} />
-            <span className="text-[10px] font-medium">Home</span>
-          </>
-        )}
-      </NavLink>
-
-      <NavLink to="/team" className={linkClass}>
-        {({ isActive }) => (
-          <>
-            <MessageSquare size={20} className={isActive ? "drop-shadow-md" : ""} />
-            <span className="text-[10px] font-medium">Team</span>
-          </>
-        )}
-      </NavLink>
-      <NavLink to="/handbook" className={linkClass}>
-        {({ isActive }) => (
-          <>
-            <BookOpen size={20} className={isActive ? "drop-shadow-md" : ""} />
-            <span className="text-[10px] font-medium">Handbuch</span>
-          </>
-        )}
-      </NavLink>
-
-      {/* Notification Bell Integrated Here */}
-      <div className="flex flex-col items-center justify-center w-full h-full">
-         <div className="bg-slate-900 rounded-full p-1 shadow-lg -mt-4">
-            {/* Pass isMobile=true to force dropdown to open upwards */}
-            <NotificationBell isMobile={true} />
-         </div>
-      </div>
-
-      {isDispo && (
-        <NavLink to="/planning" className={linkClass}>
-          {({ isActive }) => (
-            <>
-              <Truck size={20} className={isActive ? "drop-shadow-md" : ""} />
-              <span className="text-[10px] font-medium">Planung</span>
-            </>
-          )}
-        </NavLink>
-      )}
-
-      {isLager && (
-        <NavLink to="/warehouse" className={linkClass}>
-          {({ isActive }) => (
-            <>
-              <Package size={20} className={isActive ? "drop-shadow-md" : ""} />
-              <span className="text-[10px] font-medium">Lager</span>
-            </>
-          )}
-        </NavLink>
-      )}
-      
-      {isAdmin && (
-        <NavLink to="/settings" className={linkClass}>
-          {({ isActive }) => (
-            <>
-              <Settings size={20} className={isActive ? "drop-shadow-md" : ""} />
-              <span className="text-[10px] font-medium">Setup</span>
-            </>
-          )}
-        </NavLink>
-      )}
-
-      <button onClick={logout} className="flex flex-col items-center justify-center w-full h-full space-y-1 text-slate-300 hover:text-red-400 transition-colors">
-        <LogOut size={20} />
-        <span className="text-[10px] font-medium">Exit</span>
+    <>
+      {/* Burger Button */}
+      <button
+        className="md:hidden fixed top-3 left-3 z-50 bg-white shadow-lg rounded-full p-3 border border-slate-200 text-slate-700"
+        onClick={() => setOpen(true)}
+        aria-label="Menü öffnen"
+      >
+        <Menu size={20} />
       </button>
-    </div>
+
+      {/* Drawer Overlay */}
+      {open && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-slate-900/60"
+            onClick={() => setOpen(false)}
+          />
+          <div className="absolute top-0 left-0 h-full w-72 bg-white shadow-2xl border-r border-slate-200 p-4 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Logo size={30} />
+                <span className="text-sm font-bold text-slate-800">Navio AI</span>
+              </div>
+              <button
+                className="p-2 rounded-full hover:bg-slate-100 text-slate-600"
+                onClick={() => setOpen(false)}
+                aria-label="Menü schließen"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <nav className="flex-1 flex flex-col gap-1 overflow-y-auto">
+              <NavLink to="/dashboard" className={linkClass} onClick={() => setOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    <LayoutDashboard size={18} className={isActive ? "text-brand-600" : ""} />
+                    Dashboard
+                  </>
+                )}
+              </NavLink>
+
+              <NavLink to="/team" className={linkClass} onClick={() => setOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    <MessageSquare size={18} className={isActive ? "text-pink-500" : ""} />
+                    Team & Chat
+                  </>
+                )}
+              </NavLink>
+
+              <NavLink to="/handbook" className={linkClass} onClick={() => setOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    <BookOpen size={18} className={isActive ? "text-amber-500" : ""} />
+                    Handbuch
+                  </>
+                )}
+              </NavLink>
+
+              {isDispo && (
+                <>
+                  <NavLink to="/import" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Truck size={18} className={isActive ? "text-brand-600" : ""} />
+                        Import CSV
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/planning" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Truck size={18} className={isActive ? "text-brand-600" : ""} />
+                        Tourenplanung
+                      </>
+                    )}
+                  </NavLink>
+                </>
+              )}
+
+              {isLager && (
+                <NavLink to="/warehouse" className={linkClass} onClick={() => setOpen(false)}>
+                  {({ isActive }) => (
+                    <>
+                      <Package size={18} className={isActive ? "text-green-500" : ""} />
+                      Verladung
+                    </>
+                  )}
+                </NavLink>
+              )}
+
+              <NavLink to="/archive" className={linkClass} onClick={() => setOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    <Archive size={18} className={isActive ? "text-amber-500" : ""} />
+                    Archiv
+                  </>
+                )}
+              </NavLink>
+
+              {isAdmin && (
+                <NavLink to="/settings" className={linkClass} onClick={() => setOpen(false)}>
+                  {({ isActive }) => (
+                    <>
+                      <Settings size={18} className={isActive ? "text-slate-800" : ""} />
+                      Einstellungen
+                    </>
+                  )}
+                </NavLink>
+              )}
+            </nav>
+
+            <button
+              onClick={() => {
+                setOpen(false);
+                logout();
+              }}
+              className="flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 rounded-xl border border-red-100 hover:bg-red-100 font-semibold"
+            >
+              <LogOut size={16} />
+              Abmelden
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
