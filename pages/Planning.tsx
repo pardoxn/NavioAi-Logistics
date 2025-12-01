@@ -37,7 +37,6 @@ const Planning = () => {
   const [highlightIds, setHighlightIds] = useState<string[]>([]);
   const [aiSuggestion, setAiSuggestion] = useState<string>('');
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState('');
   const [benniOpen, setBenniOpen] = useState(false);
   const [benniInput, setBenniInput] = useState('');
   const [benniReply, setBenniReply] = useState<string>('');
@@ -76,20 +75,6 @@ const Planning = () => {
     };
     loadFeedback();
   }, []);
-
-  const handleAiSuggest = async () => {
-    setAiError('');
-    setAiSuggestion('');
-    setAiLoading(true);
-    try {
-      const advice = await getOptimizationAdvice(allUnplannedOrders, feedbackNotes);
-      setAiSuggestion(advice || 'Keine Empfehlung erhalten.');
-    } catch (e: any) {
-      setAiError(e?.message || 'Fehler bei der KI-Empfehlung.');
-    } finally {
-      setAiLoading(false);
-    }
-  };
 
   const handleAskBenni = async () => {
     if (!benniInput.trim()) return;
@@ -523,36 +508,18 @@ const Planning = () => {
                 <span className="hidden md:inline">Auto-Plan</span>
               </button>
               <button
-                onClick={handleAiSuggest}
-                disabled={aiLoading || filteredPool.length === 0}
-                className="justify-center px-4 py-2.5 bg-white text-brand-600 border border-brand-200 rounded-xl hover:bg-brand-50 text-sm font-semibold flex items-center gap-2 transition-all shadow-sm active:scale-95 disabled:opacity-50"
-                title="KI-Empfehlung anzeigen"
+                onClick={() => setBenniOpen(true)}
+                className="justify-center px-4 py-2.5 bg-white text-brand-600 border border-brand-200 rounded-xl hover:bg-brand-50 text-sm font-semibold flex items-center gap-2 transition-all shadow-sm active:scale-95"
+                title="Benni fragen"
               >
                 <Globe size={16} />
-                <span className="hidden md:inline">{aiLoading ? 'KI lädt...' : 'KI-Vorschlag'}</span>
-                <span className="md:hidden">{aiLoading ? '...' : 'KI'}</span>
+                <span className="hidden md:inline">Benni (KI)</span>
+                <span className="md:hidden">KI</span>
               </button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* KI Suggestion */}
-      {(aiSuggestion || aiError || aiLoading) && (
-        <div className="mx-4 md:mx-6 mb-4">
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700">
-              <Globe size={16} className="text-brand-500" />
-              KI-Empfehlung
-            </div>
-            {aiLoading && <p className="text-slate-500 text-sm">Lade Empfehlung...</p>}
-            {aiError && <p className="text-sm text-red-600">{aiError}</p>}
-            {aiSuggestion && !aiError && (
-              <p className="text-sm text-slate-700 whitespace-pre-line">{aiSuggestion}</p>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Benni Assistant */}
       <div className="fixed bottom-6 right-4 md:right-8 z-40 flex flex-col items-end space-y-2">
