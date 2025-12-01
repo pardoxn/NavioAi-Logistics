@@ -16,7 +16,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Planning = () => {
   const { user, isLager } = useAuth();
-  const { orders, tours, updateTourStatus, setTourFreightStatus, updateOrderPlannedStatus, addTour, deleteTour, deleteTourAndOrders, dissolveAllTours, removeOrder, removeOrders, moveOrderToTour, moveOrderToPool, reorderTourStops, updateOrder, cmrConfig } = useData();
+  const { orders, tours, setTours, updateTourStatus, setTourFreightStatus, updateOrderPlannedStatus, addTour, deleteTour, deleteTourAndOrders, dissolveAllTours, removeOrder, removeOrders, moveOrderToTour, moveOrderToPool, reorderTourStops, updateOrder, cmrConfig } = useData();
   const location = useLocation(); // Hook to get navigation state
   
   // Settings & Filter State
@@ -98,6 +98,37 @@ const Planning = () => {
 
   const handleBenniAutoPlan = () => {
     handleAutoPlan();
+    setBenniActionPending(false);
+  };
+
+  const handleBenniReplanAll = () => {
+    // Replant alle nicht-gesperrten Touren + Pool, lässt LOCKED stehen
+    const unlockedTours = tours.filter(t => t.status !== TourStatus.LOCKED);
+    const lockedTours = tours.filter(t => t.status === TourStatus.LOCKED);
+    const unlockedIds = unlockedTours.flatMap(t => t.stops.map(s => s.id));
+
+    // Pool sind alle ungeplanten plus die aus entsperrten Touren
+    const replanPool = orders.filter(o => !o.isPlanned || unlockedIds.includes(o.id));
+    if (replanPool.length === 0) {
+      setBenniReply('Keine offenen Aufträge zum Neuplanen gefunden.');
+      return;
+    }
+
+    // Reset: entsperrte Touren raus, Locked bleiben erhalten
+    setTours(lockedTours);
+    if (unlockedIds.length) updateOrderPlannedStatus(unlockedIds, false);
+
+    const newTours = optimizeTours(replanPool, vehicleCapacity);
+    if (newTours.length === 0) {
+      setBenniReply('Benni konnte keine sinnvolle Neuplanung erzeugen.');
+      return;
+    }
+
+    newTours.forEach(t => addTour(t));
+    const plannedIds = newTours.flatMap(t => t.stops.map(s => s.id));
+    if (plannedIds.length) updateOrderPlannedStatus(plannedIds, true);
+    setActiveTab('tours');
+    setBenniReply('Neuplanung abgeschlossen. Gesperrte Touren wurden nicht verändert.');
     setBenniActionPending(false);
   };
 
@@ -515,7 +546,7 @@ const Planning = () => {
       {/* Benni Assistant */}
       {benniOpen ? (
         <div className="fixed bottom-6 right-4 md:right-8 z-40">
-          <div className="w-[320px] max-w-[90vw] bg-white shadow-2xl border border-slate-200 rounded-2xl p-4 space-y-3">
+          <div className="w-[320px] max-w-[90vw] bg-white shadow-2xl border border-slate-200 rounded-2xl p-4 flex flex-col gap-3 max-h-[75vh] overflow-hidden">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-lg">🤖</div>
               <div className="flex-1">
@@ -531,17 +562,17 @@ const Planning = () => {
                 className="text-slate-400 hover:text-slate-600"
                 title="Schließen"
                 type="button"
-              >
-                ✕
-              </button>
-            </div>
+            >
+              ✕
+            </button>
+          </div>
 
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setBenniInput('Plane die offenen Aufträge für 1.3t in zwei logische Touren.')}
-                className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold hover:bg-slate-200"
-              >
-                Tour (1.3t) planen
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setBenniInput('Plane die offenen Aufträge für 1.3t in zwei logische Touren.')}
+              className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold hover:bg-slate-200"
+            >
+              Tour (1.3t) planen
               </button>
               <button
                 onClick={() => setBenniInput('Optimiere Verladung/Stapeln für den Polensprinter.')}
@@ -575,25 +606,33 @@ const Planning = () => {
             <button
               onClick={handleAskBenni}
               disabled={benniLoading || !benniInput.trim()}
-              className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 hover:bg-brand-700"
-            >
-              {benniLoading ? 'Denkt...' : 'Senden'}
-            </button>
-            {benniReply && (
-              <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2 space-y-2">
-                <div>{benniReply}</div>
+            className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 hover:bg-brand-700"
+          >
+            {benniLoading ? 'Denkt...' : 'Senden'}
+          </button>
+          {benniReply && (
+            <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2 space-y-2 flex-1 overflow-y-auto pr-1">
+              <div className="min-h-[60px]">{benniReply}</div>
+              <div className="space-y-2">
                 {benniActionPending && filteredPool.length > 0 && (
                   <button
                     onClick={handleBenniAutoPlan}
                     className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-brand-700"
                   >
-                    Touren jetzt automatisch planen
+                    Offene Aufträge automatisch planen
                   </button>
                 )}
+                <button
+                  onClick={handleBenniReplanAll}
+                  className="w-full bg-slate-900 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-800"
+                >
+                  Alles neu planen (gesperrte Touren bleiben)
+                </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+      </div>
       ) : (
         <button
           className="fixed bottom-6 right-4 md:right-8 z-40 bg-white shadow-xl border border-slate-200 rounded-full px-4 py-2 flex items-center gap-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
