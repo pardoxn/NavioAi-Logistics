@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { Order } from "../types";
+import { Order, Tour } from "../types";
 
 // Helper to simulate "AI" route grouping reasoning
 export const getOptimizationAdvice = async (orders: Order[], feedbackNotes?: string) => {
@@ -49,21 +49,32 @@ export const getOptimizationAdvice = async (orders: Order[], feedbackNotes?: str
   }
 };
 
-export const askBenni = async (prompt: string, orders: Order[] = [], feedbackNotes?: string) => {
+export const askBenni = async (prompt: string, orders: Order[] = [], feedbackNotes?: string, tours: Tour[] = []) => {
   const apiKey = (import.meta as any)?.env?.VITE_GEMINI_API_KEY || process.env.API_KEY;
   if (!apiKey) return "Benni hat keinen API-Key konfiguriert.";
   const ai = new GoogleGenAI({ apiKey });
   const orderSummary = orders.slice(0, 20).map(o =>
     `- ${o.documentNumber} ${o.shippingCity} (${o.shippingPostcode}) ${o.totalWeightKg}kg`
   ).join('\n');
+
+  const tourSummary = tours.slice(0, 12).map(t => {
+    const locked = t.status === 'LOCKED' ? 'LOCKED' : 'OPEN';
+    const stops = t.stops.slice(0, 5).map(s => `${s.shippingCity} ${s.shippingPostcode}`).join(', ');
+    return `• ${t.name} [${locked}] ${t.totalWeight}/${t.maxWeight}kg | Stops: ${stops}${t.stops.length > 5 ? '…' : ''}`;
+  }).join('\n');
+
   const contents = `
     Du bist Benni, ein freundlicher Logistik-Assistent. Antworte kurz und prägnant.
-    Falls der Nutzer Tourenplanung möchte, schlage 1-2 sinnvolle Touren vor.
+    Falls der Nutzer Tourenplanung möchte, schlage 1-2 sinnvolle Touren vor oder beschreibe Umbauten.
+    LOCKED-Touren dürfen NICHT verändert werden, nur offene.
     Beachte auch dieses Feedback (positiv/negativ) aus vergangenen Touren:
     ${feedbackNotes || 'Kein Feedback übergeben.'}
 
     Aufträge (Pool, max 20 gezeigt):
     ${orderSummary || 'Keine Aufträge übergeben.'}
+
+    Aktuelle Touren (max 12 gezeigt):
+    ${tourSummary || 'Keine Touren übergeben.'}
 
     Nutzerfrage:
     ${prompt}

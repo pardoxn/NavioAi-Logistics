@@ -84,7 +84,7 @@ const Planning = () => {
     setBenniActionPending(false);
     setBenniIntent(null);
     try {
-      const reply = await askBenni(benniInput, allUnplannedOrders, feedbackNotes);
+      const reply = await askBenni(benniInput, allUnplannedOrders, feedbackNotes, tours);
       setBenniReply(reply || 'Keine Antwort erhalten.');
       const lower = benniInput.toLowerCase();
       if (lower.includes('replan') || lower.includes('neu') || lower.includes('umbau')) {
