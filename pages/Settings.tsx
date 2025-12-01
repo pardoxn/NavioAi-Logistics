@@ -12,6 +12,7 @@ const Settings = () => {
   const [config, setConfig] = useState<CmrConfig>(cmrConfig);
   const [saved, setSaved] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [bgLoading, setBgLoading] = useState(false);
 
   // Update local state when context changes (initial load)
   useEffect(() => {
@@ -57,6 +58,29 @@ const Settings = () => {
     };
     reader.readAsDataURL(file);
   };
+
+  // If previewBackground is a URL (not data:), load and convert once
+  useEffect(() => {
+    const convertBg = async () => {
+      if (!config.previewBackground || config.previewBackground.startsWith('data:')) return;
+      try {
+        setBgLoading(true);
+        const res = await fetch(config.previewBackground);
+        const blob = await res.blob();
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const dataUrl = ev.target?.result as string;
+          setConfig(prev => ({ ...prev, previewBackground: dataUrl }));
+          setBgLoading(false);
+        };
+        reader.readAsDataURL(blob);
+      } catch (e) {
+        console.warn('Konnte Hintergrund nicht laden', e);
+        setBgLoading(false);
+      }
+    };
+    convertBg();
+  }, [config.previewBackground]);
 
   const addCustomField = () => {
     const newField: CmrFieldConfig = {

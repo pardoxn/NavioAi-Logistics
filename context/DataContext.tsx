@@ -104,7 +104,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       footerPlace: { x: 15, y: 235, visible: true, label: 'Feld 21: Ausgestellt in', value: '33181 Bad Wünnenberg' },
       footerSignature: { x: 145, y: 250, visible: true, label: 'Feld 24: Palettentausch (X)', value: 'X' },
       customFields: [],
-      previewBackground: ''
+      previewBackground: '/cmr-template.png'
     };
   });
 

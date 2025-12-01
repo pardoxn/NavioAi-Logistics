@@ -121,7 +121,7 @@ export const generatePreviewURL = (config: CmrConfig): string => {
   const doc = new jsPDF();
 
   // Optional Editor-Background (nur für Preview, nicht im echten Export)
-  if (config.previewBackground) {
+  if (config.previewBackground && config.previewBackground.startsWith('data:')) {
     try {
       doc.addImage(config.previewBackground, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
     } catch (e) {
