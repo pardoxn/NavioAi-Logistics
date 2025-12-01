@@ -65,8 +65,7 @@ const Planning = () => {
       const { data, error } = await supabase
         .from('tour_feedback')
         .select('rating,comment')
-        .order('created_at', { ascending: false })
-        .limit(5);
+        .order('created_at', { ascending: false });
       if (error || !data) {
         setFeedbackNotes('');
         return;
@@ -170,8 +169,7 @@ const Planning = () => {
         const { data, error: loadErr } = await supabase
         .from('tour_feedback')
         .select('rating,comment')
-        .order('created_at', { ascending: false })
-        .limit(5);
+        .order('created_at', { ascending: false });
       if (!loadErr && data) {
         const notes = data.map((f: any) => `${f.rating === 'UP' ? '👍' : '👎'} ${f.comment || ''}`.trim()).join('\n');
         setFeedbackNotes(notes);
