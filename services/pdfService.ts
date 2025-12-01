@@ -119,6 +119,15 @@ export const generateCMRBundle = (tour: Tour, stops: Order[], config: CmrConfig)
 
 export const generatePreviewURL = (config: CmrConfig): string => {
   const doc = new jsPDF();
+
+  // Optional Editor-Background (nur für Preview, nicht im echten Export)
+  if (config.previewBackground) {
+    try {
+      doc.addImage(config.previewBackground, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+    } catch (e) {
+      console.warn('Preview background konnte nicht geladen werden', e);
+    }
+  }
   
   // Dummy Data for Preview
   const dummyOrder = {
