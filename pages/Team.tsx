@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
-import { Send, CheckSquare, Square, Bell, MessageSquare, Clock, CheckCircle2, User, AlertTriangle, Info } from 'lucide-react';
+import { SendHorizonal, CheckSquare, Square, Bell, MessageSquare, Clock, CheckCircle2, User, AlertTriangle, Info } from 'lucide-react';
 
 const Team = () => {
   const { chatMessages, notifications, sendChatMessage, toggleTaskDone, markNotificationsRead } = useData();
@@ -86,7 +86,7 @@ const Team = () => {
 
       <div className="flex-1 flex flex-col bg-white lg:bg-white/50 backdrop-blur-sm">
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6 custom-scrollbar" ref={scrollRef}>
+        <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6 pb-28 custom-scrollbar" ref={scrollRef}>
            {chatMessages.length === 0 && (
              <div className="text-center text-slate-400 py-20">
                 <MessageSquare size={48} className="mx-auto mb-4 opacity-20"/>
@@ -144,27 +144,27 @@ const Team = () => {
         </div>
 
         {/* Input Area */}
-        <div className="p-3 lg:p-4 bg-white border-t border-slate-100 sticky bottom-0 z-20">
-           <form onSubmit={handleSend} className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-stretch lg:items-end max-w-5xl w-full mx-auto px-1">
-              <div className="flex-1 bg-slate-50 rounded-xl border border-slate-200 focus-within:ring-2 focus-within:ring-brand-100 focus-within:border-brand-300 transition-all flex items-center p-1">
+        <div className="p-3 lg:p-4 bg-white/95 backdrop-blur border-t border-slate-100 sticky bottom-0 z-30 shadow-[0_-8px_20px_-10px_rgba(0,0,0,0.12)]">
+           <form onSubmit={handleSend} className="flex flex-col sm:flex-row gap-3 lg:gap-4 items-stretch max-w-5xl w-full mx-auto px-1">
+              <div className="flex-1 bg-slate-50 rounded-2xl border border-slate-200 focus-within:ring-2 focus-within:ring-brand-100 focus-within:border-brand-300 transition-all flex items-center p-1.5">
                  <button
                    type="button"
                    onClick={() => setIsTask(!isTask)}
                    className={`p-2 rounded-lg transition-colors ${isTask ? 'bg-amber-100 text-amber-600' : 'text-slate-400 hover:bg-slate-200'}`}
                    title="Als Aufgabe markieren"
-                 >
-                   <CheckCircle2 size={20} />
-                 </button>
-                 <input 
-                   type="text"
-                   value={newMessage}
+                >
+                  <CheckCircle2 size={20} />
+                </button>
+                <input 
+                  type="text"
+                  value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder={isTask ? "Neue Aufgabe erstellen..." : "Nachricht schreiben..."}
                   className="flex-1 bg-transparent border-none focus:ring-0 px-3 py-3 text-sm text-slate-800 placeholder-slate-400"
                 />
               </div>
               {isTask && (
-                <div className="bg-white border border-slate-200 rounded-xl px-3 py-2 flex items-center gap-2">
+                <div className="bg-white border border-slate-200 rounded-2xl px-3 py-3 flex items-center gap-2 w-full sm:w-60">
                   <User size={16} className="text-slate-400" />
                   <select
                     value={assignee}
@@ -188,9 +188,9 @@ const Team = () => {
               <button 
                 type="submit"
                 disabled={!newMessage.trim()}
-                className="p-3 bg-brand-600 text-white rounded-xl hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-500/30 transition-all active:scale-95 lg:self-end"
+                className="px-5 py-3 min-h-[52px] bg-brand-600 text-white rounded-2xl hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-500/30 transition-all active:scale-95 flex items-center justify-center"
               >
-                <Send size={20} />
+                <SendHorizonal size={20} />
               </button>
            </form>
         </div>
