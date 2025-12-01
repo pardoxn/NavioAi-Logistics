@@ -72,7 +72,7 @@ const Team = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-slate-50">
       {/* Header */}
       <div className="p-3 lg:p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
         <h2 className="text-xl lg:text-2xl font-bold text-slate-800 flex items-center gap-3">
@@ -84,10 +84,7 @@ const Team = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden">
-        {/* Chat Column */}
-        <div className="flex-1 flex flex-col w-full lg:max-w-5xl bg-white lg:bg-white/50 backdrop-blur-sm">
-        
+      <div className="flex-1 flex flex-col bg-white lg:bg-white/50 backdrop-blur-sm">
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6 custom-scrollbar" ref={scrollRef}>
 
@@ -199,9 +196,6 @@ const Team = () => {
                 <Send size={20} />
               </button>
            </form>
-        </div>
-      </div>
-
         </div>
       </div>
     </div>
