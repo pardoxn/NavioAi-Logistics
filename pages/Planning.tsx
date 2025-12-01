@@ -122,12 +122,13 @@ const Planning = () => {
       return;
     }
     try {
+      const userName = user?.username || 'unknown';
       const { error } = await supabase.from('tour_feedback').insert({
         id: uuidv4(),
         tour_id: tourId,
         rating,
         comment: comment || '',
-        user_name: user?.username || 'unknown',
+        user_name: userName,
         created_at: new Date().toISOString()
       });
       if (error) {
@@ -139,7 +140,7 @@ const Planning = () => {
       setFeedbackToast({ message: 'Danke! Navio AI lernt durch dein Feedback.', type: 'success' });
       setTimeout(() => setFeedbackToast(null), 2000);
       // Refresh feedback summary
-      const { data, error: loadErr } = await supabase
+        const { data, error: loadErr } = await supabase
         .from('tour_feedback')
         .select('rating,comment')
         .order('created_at', { ascending: false })
