@@ -438,7 +438,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           storedUrl = publicData?.publicUrl || null;
         } else {
           console.warn('Upload fehlgeschlagen, nutze lokalen Fallback', uploadError.message);
+          addNotification('Foto-Upload fehlgeschlagen, Bild nur lokal gespeichert.', 'WARNING');
         }
+      } else {
+        addNotification('Kein Supabase-Client verfügbar, Foto nur lokal gespeichert.', 'WARNING');
       }
 
       // Fallback auf Base64, falls kein Supabase oder Upload fehlgeschlagen
