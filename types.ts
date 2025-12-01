@@ -107,6 +107,8 @@ export interface CmrConfig {
   carrier: CmrFieldConfig;      // Feld 16
   footerPlace: CmrFieldConfig;  // Feld 21 (Ort/Datum)
   footerSignature: CmrFieldConfig; // Feld 22/23 (Unterschriften/Kreuze)
+  customFields?: CmrFieldConfig[];
+  previewBackground?: string; // DataURL nur für Editor-Preview, nicht für Export
 }
 
 // --- Activity Log System ---

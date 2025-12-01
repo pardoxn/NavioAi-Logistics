@@ -80,6 +80,18 @@ const createCmrDocument = (doc: jsPDF, config: CmrConfig, order: any, tour: any)
         doc.text("X", config.footerSignature.x + 45, config.footerSignature.y); 
      }
   }
+
+  // Custom Fields (optional)
+  if (config.customFields && Array.isArray(config.customFields)) {
+    config.customFields.forEach((field, idx) => {
+      if (field.visible && field.value) {
+        const lines = (field.value || '').split('\n');
+        lines.forEach((line, i) => {
+          doc.text(line, field.x, field.y + (i * 5));
+        });
+      }
+    });
+  }
 };
 
 export const generateCMR = (tour: Tour, order: Order, config: CmrConfig) => {

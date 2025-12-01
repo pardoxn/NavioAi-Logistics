@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
-import { Save, Settings as SettingsIcon, Eye, EyeOff, Move } from 'lucide-react';
+import { Save, Settings as SettingsIcon, Eye, EyeOff, Move, Copy, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 import { CmrConfig, CmrFieldConfig } from '../types';
 import { generatePreviewURL } from '../services/pdfService';
 
@@ -44,6 +44,61 @@ const Settings = () => {
     updateCmrConfig(config);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setConfig(prev => ({ ...prev, previewBackground: dataUrl }));
+      setSaved(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addCustomField = () => {
+    const newField: CmrFieldConfig = {
+      x: 10,
+      y: 10,
+      visible: true,
+      label: 'Benutzerfeld',
+      value: ''
+    };
+    setConfig(prev => ({
+      ...prev,
+      customFields: [...(prev.customFields || []), newField]
+    }));
+    setSaved(false);
+  };
+
+  const updateCustomField = (idx: number, field: Partial<CmrFieldConfig>) => {
+    setConfig(prev => {
+      const list = [...(prev.customFields || [])];
+      list[idx] = { ...list[idx], ...field };
+      return { ...prev, customFields: list };
+    });
+    setSaved(false);
+  };
+
+  const duplicateCustomField = (idx: number) => {
+    setConfig(prev => {
+      const list = [...(prev.customFields || [])];
+      const copy = { ...list[idx], label: `${list[idx].label} (Kopie)` };
+      list.splice(idx + 1, 0, copy);
+      return { ...prev, customFields: list };
+    });
+    setSaved(false);
+  };
+
+  const removeCustomField = (idx: number) => {
+    setConfig(prev => {
+      const list = [...(prev.customFields || [])];
+      list.splice(idx, 1);
+      return { ...prev, customFields: list };
+    });
+    setSaved(false);
   };
 
   const renderFieldEditor = (key: string, field: CmrFieldConfig) => (
@@ -131,11 +186,97 @@ const Settings = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {Object.keys(config).map((key) => renderFieldEditor(key, config[key as keyof CmrConfig]))}
+            <div className="flex flex-col gap-6">
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-700">Hintergrund für Editor</p>
+                    <p className="text-xs text-slate-500">Wird nur in der Vorschau angezeigt, nicht beim Druck.</p>
+                  </div>
+                  <label className="px-3 py-2 bg-slate-100 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer flex items-center gap-2">
+                    <ImageIcon size={16}/> Datei wählen
+                    <input type="file" accept="image/*" className="hidden" onChange={handleBackgroundUpload}/>
+                  </label>
                 </div>
-            </form>
+                {config.previewBackground && (
+                  <div className="text-xs text-slate-500">Vorschaubild gespeichert.</div>
+                )}
+              </div>
+
+              <form onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  {Object.keys(config)
+                    .filter(key => !['customFields','previewBackground'].includes(key))
+                    .map((key) => renderFieldEditor(key, config[key as keyof CmrConfig] as any))}
+                  </div>
+
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-semibold text-slate-700">Benutzerfelder</p>
+                      <button type="button" onClick={addCustomField} className="px-3 py-2 bg-brand-50 text-brand-600 border border-brand-200 rounded-lg text-sm font-semibold flex items-center gap-2">
+                        <Plus size={14}/> Feld hinzufügen
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(config.customFields || []).map((field, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3">
+                          <div className="flex items-center justify-between">
+                            <input
+                              type="text"
+                              value={field.label}
+                              onChange={(e)=>updateCustomField(idx,{label:e.target.value})}
+                              className="text-sm font-semibold text-slate-800 bg-slate-50 px-2 py-1 rounded border border-slate-200 focus:ring-1 focus:ring-brand-500 focus:border-brand-500"
+                              placeholder="Label"
+                            />
+                            <div className="flex items-center gap-2">
+                              <button type="button" onClick={()=>updateCustomField(idx,{visible:!field.visible})} className={`p-1 rounded ${field.visible ? 'text-brand-600 bg-brand-50' : 'text-slate-300 bg-slate-100'}`}>
+                                {field.visible ? <Eye size={14}/> : <EyeOff size={14}/>}
+                              </button>
+                              <button type="button" onClick={()=>duplicateCustomField(idx)} className="p-1 rounded text-slate-400 hover:text-slate-600">
+                                <Copy size={14}/>
+                              </button>
+                              <button type="button" onClick={()=>removeCustomField(idx)} className="p-1 rounded text-red-500 hover:bg-red-50">
+                                <Trash2 size={14}/>
+                              </button>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1 mb-1">
+                                <Move size={10}/> X (mm)
+                              </label>
+                              <input
+                                type="number"
+                                value={field.x}
+                                onChange={(e)=>updateCustomField(idx,{x:parseInt(e.target.value)})}
+                                className="w-full px-2 py-1.5 rounded border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-slate-50 focus:bg-white text-slate-900"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1 mb-1">
+                                <Move size={10} className="rotate-90"/> Y (mm)
+                              </label>
+                              <input
+                                type="number"
+                                value={field.y}
+                                onChange={(e)=>updateCustomField(idx,{y:parseInt(e.target.value)})}
+                                className="w-full px-2 py-1.5 rounded border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-slate-50 focus:bg-white text-slate-900"
+                              />
+                            </div>
+                          </div>
+                          <textarea
+                            rows={2}
+                            value={field.value || ''}
+                            onChange={(e)=>updateCustomField(idx,{value:e.target.value})}
+                            className="w-full px-2 py-1.5 rounded border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-slate-50 focus:bg-white text-slate-900 resize-none"
+                            placeholder="Standard-Text"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+              </form>
+            </div>
         </div>
       </div>
 
@@ -147,11 +288,16 @@ const Settings = () => {
                <span className="text-slate-400">A4 PDF</span>
             </div>
             <div className="flex-1 bg-slate-500 relative">
+               {config.previewBackground && (
+                 <div className="absolute inset-0">
+                   <img src={config.previewBackground} alt="bg" className="w-full h-full object-contain opacity-70" />
+                 </div>
+               )}
                {previewUrl ? (
                  <embed 
                    src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
                    type="application/pdf"
-                   className="w-full h-full border-none"
+                   className="w-full h-full border-none relative"
                  />
                ) : (
                  <div className="flex items-center justify-center h-full text-white">Lade Vorschau...</div>
