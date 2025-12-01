@@ -507,15 +507,6 @@ const Planning = () => {
                 <Play size={16} fill="currentColor" />
                 <span className="hidden md:inline">Auto-Plan</span>
               </button>
-              <button
-                onClick={() => setBenniOpen(true)}
-                className="justify-center px-4 py-2.5 bg-white text-brand-600 border border-brand-200 rounded-xl hover:bg-brand-50 text-sm font-semibold flex items-center gap-2 transition-all shadow-sm active:scale-95"
-                title="Benni fragen"
-              >
-                <Globe size={16} />
-                <span className="hidden md:inline">Benni (KI)</span>
-                <span className="md:hidden">KI</span>
-              </button>
             </div>
           </div>
         </div>
