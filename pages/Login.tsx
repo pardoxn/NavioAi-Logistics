@@ -53,19 +53,20 @@ const Login = () => {
 
         {/* Content Top */}
         <div className="relative z-20">
-           <div className="flex items-center gap-3 mb-8 animate-fade-in-down">
-             <Logo size={44} className="drop-shadow-xl" />
-             <span className="text-xl font-bold tracking-widest uppercase opacity-90 text-blue-100">Navio Logistics</span>
+           <div className="flex items-center gap-4 mb-8 animate-fade-in-down">
+             <Logo size={64} className="drop-shadow-xl" />
+             <div className="flex flex-col">
+               <span className="text-xl font-extrabold tracking-[0.2em] uppercase text-white drop-shadow">Navio AI</span>
+               <span className="text-xs text-blue-100/80 tracking-[0.25em] uppercase">Logistics</span>
+             </div>
            </div>
            
            <div className="space-y-6 animate-fade-in-up">
-             <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+             <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white drop-shadow-lg">
                Die Zukunft der <br/>
-               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white drop-shadow-sm">
-                 Tourenplanung.
-               </span>
+               <span className="text-cyan-200">Tourenplanung.</span>
              </h1>
-             <p className="text-brand-100 text-lg max-w-md leading-relaxed opacity-90 font-light border-l-2 border-cyan-400/30 pl-6">
+             <p className="text-blue-50 text-lg max-w-md leading-relaxed opacity-90 font-light border-l-2 border-cyan-400/40 pl-6">
                Automatisierte Logistik-Prozesse, KI-gestützte Optimierung und digitales Frachtmanagement für maximale Effizienz.
              </p>
            </div>
