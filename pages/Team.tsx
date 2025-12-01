@@ -72,21 +72,24 @@ const Team = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50 lg:pt-4 overflow-hidden">
-      
-      {/* LEFT: CHAT & TASKS */}
-      <div className="flex-1 flex flex-col w-full lg:max-w-4xl border-b lg:border-b-0 lg:border-r border-slate-200/60 bg-white lg:bg-white/50 backdrop-blur-sm">
-        
-        {/* Header */}
-        <div className="p-3 lg:p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
-           <h2 className="text-xl lg:text-2xl font-bold text-slate-800 flex items-center gap-3">
-             <div className="p-2 bg-brand-50 rounded-lg text-brand-600"><MessageSquare size={22} /></div>
-             Team Chat
-           </h2>
-           <div className="text-[11px] lg:text-xs font-medium px-3 py-1 bg-slate-100 rounded-full text-slate-500">
-             {user?.username} (Online)
-           </div>
+    <div className="min-h-screen flex flex-col bg-slate-50 overflow-hidden">
+      {/* Header */}
+      <div className="p-3 lg:p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
+        <h2 className="text-xl lg:text-2xl font-bold text-slate-800 flex items-center gap-3">
+          <div className="p-2 bg-brand-50 rounded-lg text-brand-600"><MessageSquare size={22} /></div>
+          Team Chat
+        </h2>
+        <div className="text-[11px] lg:text-xs font-medium px-3 py-1 bg-slate-100 rounded-full text-slate-500">
+          {user?.username} (Online)
         </div>
+      </div>
+
+      <div className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden">
+        {/* Chat Column */}
+        <div className="flex-1 flex flex-col w-full lg:max-w-5xl bg-white lg:bg-white/50 backdrop-blur-sm">
+        
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6 custom-scrollbar" ref={scrollRef}>
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6 custom-scrollbar" ref={scrollRef}>
@@ -199,39 +202,8 @@ const Team = () => {
         </div>
       </div>
 
-      {/* RIGHT: NOTIFICATIONS */}
-      <div className="w-80 bg-white border-l border-slate-200 flex flex-col hidden xl:flex shadow-xl shadow-slate-200/50 z-10">
-         <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-            <h3 className="font-bold text-slate-800 flex items-center gap-2">
-              <Bell size={18} className="text-slate-400" />
-              Meldungen
-            </h3>
-         </div>
-         <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-50/30">
-            {notifications.length === 0 ? (
-               <div className="text-center text-slate-400 mt-10 text-sm">Keine neuen Meldungen.</div>
-            ) : (
-               notifications.map(note => (
-                 <div key={note.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex gap-3 animate-fade-in-up">
-                    <div className={`mt-0.5 ${
-                       note.type === 'SUCCESS' ? 'text-green-500' : 
-                       note.type === 'WARNING' ? 'text-amber-500' : 'text-blue-500'
-                    }`}>
-                       {note.type === 'SUCCESS' ? <CheckCircle2 size={16}/> : 
-                        note.type === 'WARNING' ? <AlertTriangle size={16}/> : <Info size={16}/>}
-                    </div>
-                    <div>
-                       <p className="text-sm text-slate-700 leading-snug">{note.text}</p>
-                       <p className="text-[10px] text-slate-400 mt-2 flex items-center gap-1">
-                         <Clock size={10} /> {formatTime(note.timestamp)}
-                       </p>
-                    </div>
-                 </div>
-               ))
-            )}
-         </div>
+        </div>
       </div>
-
     </div>
   );
 };
