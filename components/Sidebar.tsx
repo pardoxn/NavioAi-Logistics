@@ -5,8 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { LayoutDashboard, Truck, Package, Users, LogOut, FileSpreadsheet, Archive, Disc, History, MessageSquare, Settings as SettingsIcon } from 'lucide-react';
 import Logo from './Logo';
-const AVATAR_SRC = '/robot-avatar.png';
 import NotificationBell from './NotificationBell';
+
+const AVATAR_SRC = '/robot-avatar.png';
 const AVATAR_SRC = '/robot-avatar.png';
 
 const Sidebar = () => {
