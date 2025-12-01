@@ -43,6 +43,7 @@ const Planning = () => {
   const [benniActionPending, setBenniActionPending] = useState(false);
   const [feedbackNotes, setFeedbackNotes] = useState<string>('');
   const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [feedbackModal, setFeedbackModal] = useState<{ open: boolean; tourId?: string; rating?: 'UP' | 'DOWN'; comment?: string }>({ open: false, comment: '' });
 
   // Check for highlight requests from navigation
   useEffect(() => {
@@ -399,6 +400,53 @@ const Planning = () => {
       <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.4]"
            style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
       </div>
+
+      {/* Feedback Modal */}
+      {feedbackModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-96 max-w-[90vw] p-6 relative">
+            <button
+              onClick={() => setFeedbackModal({ open: false, tourId: undefined, rating: undefined, comment: '' })}
+              className="absolute top-3 right-3 text-slate-400 hover:text-slate-600"
+            >
+              ✕
+            </button>
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${feedbackModal.rating === 'UP' ? 'bg-green-500' : 'bg-red-500'}`}>
+                {feedbackModal.rating === 'UP' ? '👍' : '👎'}
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-slate-700">Feedback zur Tour</div>
+                <div className="text-xs text-slate-500">Hilf Benni, besser zu planen</div>
+              </div>
+            </div>
+            <textarea
+              value={feedbackModal.comment}
+              onChange={(e) => setFeedbackModal(prev => ({ ...prev, comment: e.target.value }))}
+              placeholder="Was war gut/schlecht? (optional)"
+              className="w-full border border-slate-200 rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-200"
+              rows={3}
+            />
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={() => setFeedbackModal({ open: false, tourId: undefined, rating: undefined, comment: '' })}
+                className="flex-1 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={() => {
+                  submitFeedback(feedbackModal.tourId || '', feedbackModal.rating || 'UP', feedbackModal.comment);
+                  setFeedbackModal({ open: false, tourId: undefined, rating: undefined, comment: '' });
+                }}
+                className="flex-1 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-md active:scale-95"
+              >
+                Feedback senden
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* HEADER */}
       <div className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-3 md:px-6 md:py-4 flex-none z-20 shadow-sm">
@@ -790,7 +838,7 @@ const Planning = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  submitFeedback(tour.id, 'UP');
+                                  setFeedbackModal({ open: true, tourId: tour.id, rating: 'UP', comment: '' });
                                 }}
                                 title="Tour gut"
                                 className="p-1 rounded-full text-green-600 hover:bg-green-50 border border-transparent hover:border-green-200 transition-colors"
@@ -800,8 +848,7 @@ const Planning = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  const comment = window.prompt('Was war nicht gut? (optional)') || '';
-                                  submitFeedback(tour.id, 'DOWN', comment);
+                                  setFeedbackModal({ open: true, tourId: tour.id, rating: 'DOWN', comment: '' });
                                 }}
                                 title="Tour neu planen / schlecht"
                                 className="p-1 rounded-full text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-colors"
