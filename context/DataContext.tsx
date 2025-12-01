@@ -297,25 +297,78 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const completeTourLoading = (tourId: string, imageFile: File, note: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
+  // Compress image to reduce payload
+  const compressImage = async (file: File, maxSize = 1600, quality = 0.75): Promise<Blob> => {
+    const img = document.createElement('img');
+    const fileUrl = URL.createObjectURL(file);
+    img.src = fileUrl;
+    await img.decode();
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas not supported');
+
+    const ratio = Math.min(1, maxSize / Math.max(img.width, img.height));
+    const targetW = Math.round(img.width * ratio);
+    const targetH = Math.round(img.height * ratio);
+    canvas.width = targetW;
+    canvas.height = targetH;
+    ctx.drawImage(img, 0, 0, targetW, targetH);
+    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+    const byteString = atob(dataUrl.split(',')[1]);
+    const mime = dataUrl.split(',')[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+    URL.revokeObjectURL(fileUrl);
+    return new Blob([ab], { type: mime });
+  };
+
+  const completeTourLoading = async (tourId: string, imageFile: File, note: string): Promise<void> => {
+    try {
+      const compressed = await compressImage(imageFile, 1400, 0.75);
+      let storedUrl: string | null = null;
+
+      if (supabase) {
+        const filePath = `${tourId}/${Date.now()}.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from('tour_uploads')
+          .upload(filePath, compressed, {
+            cacheControl: '3600',
+            upsert: true,
+            contentType: 'image/jpeg'
+          });
+        if (!uploadError) {
+          const { data: publicData } = supabase.storage.from('tour_uploads').getPublicUrl(filePath);
+          storedUrl = publicData?.publicUrl || null;
+        } else {
+          console.warn('Upload fehlgeschlagen, nutze lokalen Fallback', uploadError.message);
+        }
+      }
+
+      // Fallback auf Base64, falls kein Supabase oder Upload fehlgeschlagen
+      if (!storedUrl) {
         const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64String = reader.result as string;
-            setToursState(prev => prev.map(t => t.id === tourId ? { 
-                ...t, 
-                status: TourStatus.LOADED,
-                loadedImageUrl: base64String,
-                loadedNote: note
-            } : t));
-            
-            const tour = tours.find(t => t.id === tourId);
-            addNotification(`Tour "${tour?.name || 'Unbekannt'}" wurde erfolgreich verladen.`, 'SUCCESS', 'TOUR', tourId);
-            resolve();
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(imageFile);
-    });
+        storedUrl = await new Promise<string>((resolve, reject) => {
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error('Bild konnte nicht gelesen werden'));
+          reader.readAsDataURL(compressed);
+        });
+      }
+
+      setToursState(prev => prev.map(t => t.id === tourId ? { 
+        ...t, 
+        status: TourStatus.LOADED,
+        loadedImageUrl: storedUrl || undefined,
+        loadedNote: note
+      } : t));
+      
+      const tour = tours.find(t => t.id === tourId);
+      addNotification(`Tour "${tour?.name || 'Unbekannt'}" wurde erfolgreich verladen.`, 'SUCCESS', 'TOUR', tourId);
+    } catch (err) {
+      console.error('completeTourLoading failed', err);
+      throw err;
+    }
   };
 
   const updateOrderPlannedStatus = (orderIds: string[], planned: boolean) => {
