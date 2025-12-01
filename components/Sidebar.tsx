@@ -3,7 +3,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { LayoutDashboard, Truck, Package, Users, LogOut, FileSpreadsheet, Archive, Disc, History, MessageSquare, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, Truck, Package, Users, LogOut, FileSpreadsheet, Archive, Disc, History, MessageSquare, Settings as SettingsIcon, BookOpen } from 'lucide-react';
 import Logo from './Logo';
 import NotificationBell from './NotificationBell';
 import { UserRole } from '../types';
@@ -70,6 +70,14 @@ const Sidebar = () => {
             <>
               <MessageSquare size={18} className={isActive ? "text-pink-400 drop-shadow-[0_0_5px_rgba(244,114,182,0.5)]" : ""} />
               Team & Chat
+            </>
+          )}
+        </NavLink>
+        <NavLink to="/handbook" className={linkClass}>
+          {({ isActive }) => (
+            <>
+              <BookOpen size={18} className={isActive ? "text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]" : ""} />
+              Handbuch
             </>
           )}
         </NavLink>

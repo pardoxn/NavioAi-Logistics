@@ -2,7 +2,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Truck, Package, Archive, LogOut, MessageSquare, Settings } from 'lucide-react';
+import { LayoutDashboard, Truck, Package, Archive, LogOut, MessageSquare, Settings, BookOpen } from 'lucide-react';
 import Logo from './Logo';
 import NotificationBell from './NotificationBell';
 
@@ -33,6 +33,14 @@ const MobileNav = () => {
           <>
             <MessageSquare size={20} className={isActive ? "drop-shadow-md" : ""} />
             <span className="text-[10px] font-medium">Team</span>
+          </>
+        )}
+      </NavLink>
+      <NavLink to="/handbook" className={linkClass}>
+        {({ isActive }) => (
+          <>
+            <BookOpen size={20} className={isActive ? "drop-shadow-md" : ""} />
+            <span className="text-[10px] font-medium">Handbuch</span>
           </>
         )}
       </NavLink>

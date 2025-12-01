@@ -17,6 +17,7 @@ import Settings from './pages/Settings';
 import Signup from './pages/Signup';
 import Terms from './pages/Terms';
 import AdminPage from './pages/Admin';
+import Handbook from './pages/Handbook';
 import { useState } from 'react';
 
 const ProtectedLayout = () => {
@@ -61,6 +62,7 @@ const App = () => {
               <Route path="/archive" element={<Archive />} />
               <Route path="/activities" element={<Activities />} />
               <Route path="/team" element={<Team />} />
+              <Route path="/handbook" element={<Handbook />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
           </Routes>
