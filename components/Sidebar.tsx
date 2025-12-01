@@ -53,14 +53,16 @@ const Sidebar = () => {
       {/* Navigation */}
       <nav className="flex-1 px-0 py-6 overflow-y-auto relative z-10 custom-scrollbar">
         <div className="px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Main Menu</div>
-        <NavLink to="/dashboard" className={linkClass}>
-          {({ isActive }) => (
-            <>
-              <LayoutDashboard size={18} className={isActive ? "text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]" : ""} />
-              Dashboard
-            </>
-          )}
-        </NavLink>
+        {!isLager && (
+          <NavLink to="/dashboard" className={linkClass}>
+            {({ isActive }) => (
+              <>
+                <LayoutDashboard size={18} className={isActive ? "text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]" : ""} />
+                Dashboard
+              </>
+            )}
+          </NavLink>
+        )}
         <NavLink to="/team" className={linkClass}>
           {({ isActive }) => (
             <>
@@ -98,14 +100,14 @@ const Sidebar = () => {
         {isLager && (
           <>
             <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between group cursor-default">
-              Lager & Versand
+              Lager
               <div className="h-[1px] flex-1 bg-white/5 ml-3 group-hover:bg-white/10 transition-colors"></div>
             </div>
-            <NavLink to="/warehouse" className={linkClass}>
+            <NavLink to="/planning" className={linkClass}>
               {({ isActive }) => (
                 <>
-                  <Package size={18} className={isActive ? "text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]" : ""} />
-                  Verladung
+                  <Disc size={18} className={isActive ? "text-cyan-400 animate-spin-slow" : ""} />
+                  Tourenplanung
                 </>
               )}
             </NavLink>
@@ -124,14 +126,16 @@ const Sidebar = () => {
             </>
           )}
         </NavLink>
-        <NavLink to="/activities" className={linkClass}>
-          {({ isActive }) => (
-            <>
-              <History size={18} className={isActive ? "text-blue-400" : ""} />
-              Aktivitäten
-            </>
-          )}
-        </NavLink>
+        {!isLager && (
+          <NavLink to="/activities" className={linkClass}>
+            {({ isActive }) => (
+              <>
+                <History size={18} className={isActive ? "text-blue-400" : ""} />
+                Aktivitäten
+              </>
+            )}
+          </NavLink>
+        )}
 
         {isAdmin && (
           <>

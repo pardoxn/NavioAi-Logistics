@@ -15,7 +15,7 @@ import { ThumbsDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Planning = () => {
-  const { user } = useAuth();
+  const { user, isLager } = useAuth();
   const { orders, tours, updateTourStatus, setTourFreightStatus, updateOrderPlannedStatus, addTour, deleteTour, deleteTourAndOrders, dissolveAllTours, removeOrder, removeOrders, moveOrderToTour, moveOrderToPool, reorderTourStops, updateOrder, cmrConfig } = useData();
   const location = useLocation(); // Hook to get navigation state
   
@@ -456,7 +456,7 @@ const Planning = () => {
           </div>
 
           {/* Right: Controls (Search, Vehicle, Actions) */}
-          <div className="flex flex-col md:flex-row gap-3 w-full xl:w-auto">
+      <div className="flex flex-col md:flex-row gap-3 w-full xl:w-auto">
             
             {/* Search Bar */}
             <div className="relative flex-1 md:w-64">
