@@ -87,9 +87,6 @@ const Team = () => {
       <div className="flex-1 flex flex-col bg-white lg:bg-white/50 backdrop-blur-sm">
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6 custom-scrollbar" ref={scrollRef}>
-
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6 custom-scrollbar" ref={scrollRef}>
            {chatMessages.length === 0 && (
              <div className="text-center text-slate-400 py-20">
                 <MessageSquare size={48} className="mx-auto mb-4 opacity-20"/>
@@ -147,8 +144,8 @@ const Team = () => {
         </div>
 
         {/* Input Area */}
-        <div className="p-3 lg:p-4 bg-white border-t border-slate-100 sticky bottom-0">
-           <form onSubmit={handleSend} className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-stretch lg:items-end max-w-3xl mx-auto">
+        <div className="p-3 lg:p-4 bg-white border-t border-slate-100 sticky bottom-0 z-20">
+           <form onSubmit={handleSend} className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-stretch lg:items-end max-w-5xl w-full mx-auto px-1">
               <div className="flex-1 bg-slate-50 rounded-xl border border-slate-200 focus-within:ring-2 focus-within:ring-brand-100 focus-within:border-brand-300 transition-all flex items-center p-1">
                  <button
                    type="button"
