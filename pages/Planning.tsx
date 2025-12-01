@@ -42,6 +42,7 @@ const Planning = () => {
   const [benniLoading, setBenniLoading] = useState(false);
   const [benniActionPending, setBenniActionPending] = useState(false);
   const [feedbackNotes, setFeedbackNotes] = useState<string>('');
+  const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Check for highlight requests from navigation
   useEffect(() => {
@@ -113,6 +114,7 @@ const Planning = () => {
   };
 
   const submitFeedback = async (tourId: string, rating: 'UP' | 'DOWN', comment?: string) => {
+    if (!tourId) return;
     if (!supabase) return;
     const { error } = await supabase.from('tour_feedback').insert({
       id: uuidv4(),
@@ -127,6 +129,8 @@ const Planning = () => {
       window.alert('Feedback konnte nicht gespeichert werden.');
       return;
     }
+    setFeedbackToast({ message: 'Danke! Navio AI lernt durch dein Feedback.', type: 'success' });
+    setTimeout(() => setFeedbackToast(null), 2000);
     // Refresh feedback summary
     const { data } = await supabase
       .from('tour_feedback')
@@ -538,6 +542,15 @@ const Planning = () => {
           🤖
         </button>
       </div>
+
+      {/* Feedback Toast */}
+      {feedbackToast && (
+        <div className={`fixed bottom-24 right-4 md:right-8 z-50 px-4 py-3 rounded-xl shadow-xl text-sm font-semibold ${
+          feedbackToast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
+        }`}>
+          {feedbackToast.message}
+        </div>
+      )}
 
       {/* Mobile Tabs */}
       <div className="md:hidden flex border-b border-slate-200 bg-white z-20">
