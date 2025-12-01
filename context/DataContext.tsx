@@ -52,6 +52,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
   const ORG_KEY = 'werny';
   const STATE_ID = 'werny-state';
+  const STATE_TABLE = 'navio_state';
   
   // Initialize State from LocalStorage
   const [orders, setOrders] = useState<Order[]>(() => {
@@ -108,17 +109,107 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   });
 
+  // --- Supabase State Sync (orders, tours, activities, notifications) ---
+  const applyRemoteState = (payload: any) => {
+    try {
+      if (!payload?.state) return;
+      const { orders: ro, tours: rt, activities: ra, notifications: rn } = payload.state;
+      if (ro) setOrders(ro);
+      if (rt) setToursState(rt);
+      if (ra) setActivities(ra);
+      if (rn) setNotifications(rn);
+      lastRemoteUpdate.current = payload.updated_at || new Date().toISOString();
+    } catch (err) {
+      console.warn('Remote state apply failed', err);
+    }
+  };
+
+  const loadRemoteState = async () => {
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from(STATE_TABLE)
+      .select('*')
+      .eq('id', STATE_ID)
+      .eq('org', ORG_KEY)
+      .single();
+    if (error) {
+      console.warn('State load fallback to local', error.message);
+      stateLoaded.current = true;
+      return;
+    }
+    if (data) {
+      applyRemoteState(data);
+    }
+    stateLoaded.current = true;
+  };
+
+  const saveRemoteState = async () => {
+    if (!supabase || !stateLoaded.current) return;
+    const state = {
+      orders,
+      tours,
+      activities,
+      notifications,
+    };
+    const payload = {
+      id: STATE_ID,
+      org: ORG_KEY,
+      state,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase
+      .from(STATE_TABLE)
+      .upsert(payload, { onConflict: 'id' });
+    if (error) console.warn('State save failed', error.message);
+    else lastRemoteUpdate.current = payload.updated_at;
+  };
+
+  // Debounced saver
+  const scheduleSave = () => {
+    if (!stateLoaded.current) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(saveRemoteState, 400);
+  };
+
+  useEffect(() => {
+    loadRemoteState();
+  }, []);
+
+  // Listen for remote changes
+  useEffect(() => {
+    if (!supabase) return;
+    const channel = supabase
+      .channel('navio_state_sync')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: STATE_TABLE, filter: `id=eq.${STATE_ID}` },
+        (payload: any) => {
+          const newRow = payload.new;
+          if (!newRow?.updated_at) return;
+          if (lastRemoteUpdate.current && newRow.updated_at <= lastRemoteUpdate.current) return;
+          applyRemoteState(newRow);
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   // Persist Changes
   useEffect(() => {
     localStorage.setItem('navio_orders', JSON.stringify(orders));
+    scheduleSave();
   }, [orders]);
 
   useEffect(() => {
     localStorage.setItem('navio_tours', JSON.stringify(tours));
+    scheduleSave();
   }, [tours]);
 
   useEffect(() => {
     localStorage.setItem('navio_activities', JSON.stringify(activities));
+    scheduleSave();
   }, [activities]);
 
   useEffect(() => {
@@ -176,6 +267,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     localStorage.setItem('navio_notifications', JSON.stringify(notifications));
+    scheduleSave();
   }, [notifications]);
 
   useEffect(() => {
