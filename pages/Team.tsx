@@ -74,21 +74,24 @@ const Team = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* Header */}
-      <div className="p-3 lg:p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
-        <h2 className="text-xl lg:text-2xl font-bold text-slate-800 flex items-center gap-3">
-          <div className="p-2 bg-brand-50 rounded-lg text-brand-600"><MessageSquare size={22} /></div>
-          Team Chat
-        </h2>
-        <div className="text-[11px] lg:text-xs font-medium px-3 py-1 bg-slate-100 rounded-full text-slate-500">
+      <div className="p-3 lg:p-6 border-b border-slate-100/80 flex items-center justify-between bg-white/90 backdrop-blur sticky top-0 z-10 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-brand-50 rounded-xl text-brand-600 shadow-inner"><MessageSquare size={22} /></div>
+          <div>
+            <h2 className="text-xl lg:text-2xl font-bold text-slate-800">Team Chat</h2>
+            <p className="text-xs text-slate-500">Aufgaben & Austausch in Echtzeit</p>
+          </div>
+        </div>
+        <div className="text-[11px] lg:text-xs font-medium px-3 py-1 bg-slate-100 rounded-full text-slate-500 border border-slate-200">
           {user?.username} (Online)
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col bg-white lg:bg-white/50 backdrop-blur-sm">
+      <div className="flex-1 flex flex-col">
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6 pb-28 custom-scrollbar" ref={scrollRef}>
+        <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6 pb-28 custom-scrollbar max-w-5xl w-full mx-auto" ref={scrollRef}>
            {chatMessages.length === 0 && (
              <div className="text-center text-slate-400 py-20">
                 <MessageSquare size={48} className="mx-auto mb-4 opacity-20"/>
@@ -100,7 +103,7 @@ const Team = () => {
              const isMe = msg.userId === user?.id;
              return (
                <div key={msg.id} className={`flex gap-3 lg:gap-4 ${isMe ? 'flex-row-reverse' : ''}`}>
-                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full overflow-hidden shadow-sm flex-shrink-0 border border-slate-200 bg-slate-200">
+                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full overflow-hidden flex-shrink-0 border border-white shadow-[0_4px_14px_-6px_rgba(0,0,0,0.3)] bg-slate-200 ring-2 ring-white ring-offset-2 ring-offset-slate-100">
                   <img
                     src={AVATAR_SRC}
                     alt={msg.userName}
@@ -114,8 +117,8 @@ const Team = () => {
                         <span className="text-[10px] text-slate-400">{formatTime(msg.timestamp)}</span>
                      </div>
                      
-                     <div className={`p-3 lg:p-4 rounded-2xl shadow-sm text-sm leading-relaxed relative group ${
-                       isMe ? 'bg-brand-50 text-brand-900 rounded-tr-none' : 'bg-white border border-slate-100 text-slate-700 rounded-tl-none'
+                     <div className={`p-3 lg:p-4 rounded-2xl shadow-lg text-sm leading-relaxed relative group ${
+                       isMe ? 'bg-gradient-to-br from-brand-50 to-white text-brand-900 rounded-tr-none border border-brand-100' : 'bg-white/90 border border-slate-100 text-slate-700 rounded-tl-none'
                      }`}>
                         {msg.isTask && (
                           <div className="flex items-center gap-2 mb-2 pb-2 border-b border-black/5">

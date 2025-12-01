@@ -553,9 +553,9 @@ const Planning = () => {
       {/* Benni Assistant */}
       {benniOpen ? (
         <div className="fixed bottom-6 right-4 md:right-8 z-40">
-          <div className="w-[320px] max-w-[90vw] bg-white shadow-2xl border border-slate-200 rounded-2xl p-4 flex flex-col gap-3 max-h-[75vh] overflow-hidden">
+          <div className="w-[320px] max-w-[90vw] bg-white/90 backdrop-blur-xl shadow-2xl border border-slate-200 rounded-2xl p-4 flex flex-col gap-3 max-h-[75vh] overflow-hidden">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-lg">🤖</div>
+              <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-lg shadow-inner border border-brand-200">🤖</div>
               <div className="flex-1">
                 <div className="text-sm font-semibold text-slate-700">Benni (KI)</div>
                 <div className="text-xs text-slate-500">Frag nach Touren, Planung, Aufgaben…</div>
@@ -569,10 +569,10 @@ const Planning = () => {
                 className="text-slate-400 hover:text-slate-600"
                 title="Schließen"
                 type="button"
-            >
-              ✕
-            </button>
-          </div>
+              >
+                ✕
+              </button>
+            </div>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-2">

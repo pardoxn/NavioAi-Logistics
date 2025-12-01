@@ -23,8 +23,10 @@ const Sidebar = () => {
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `relative flex items-center gap-3 px-4 py-3.5 text-sm font-medium transition-all duration-300 rounded-r-xl mr-2 mb-1 group overflow-hidden ${
       isActive
-        ? 'text-white bg-white/10 shadow-[inset_1px_0_0_0_rgba(255,255,255,0.2)] border-l-[3px] border-cyan-400'
+        ? 'text-white bg-white/10 shadow-[inset_1px_0_0_0_rgba(255,255,255,0.25)] border-l-[3px] border-cyan-400'
         : 'text-slate-400 hover:text-white hover:bg-white/5 border-l-[3px] border-transparent'
+    } before:content-[''] before:absolute before:left-1 before:top-1/2 before:-translate-y-1/2 before:w-2 before:h-2 before:rounded-full before:transition-all before:duration-200 ${
+      isActive ? 'before:bg-cyan-400' : 'before:bg-transparent group-hover:before:bg-cyan-200/70'
     }`;
 
   return (
