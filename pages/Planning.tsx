@@ -115,31 +115,42 @@ const Planning = () => {
 
   const submitFeedback = async (tourId: string, rating: 'UP' | 'DOWN', comment?: string) => {
     if (!tourId) return;
-    if (!supabase) return;
-    const { error } = await supabase.from('tour_feedback').insert({
-      id: uuidv4(),
-      tour_id: tourId,
-      rating,
-      comment: comment || '',
-      user_name: user?.username || 'unknown',
-      created_at: new Date().toISOString()
-    });
-    if (error) {
-      console.error('Feedback insert failed', error);
-      window.alert('Feedback konnte nicht gespeichert werden.');
+    if (!supabase) {
+      setFeedbackToast({ message: 'Feedback konnte nicht gespeichert werden (kein Supabase).', type: 'error' });
+      setTimeout(() => setFeedbackToast(null), 2000);
       return;
     }
-    setFeedbackToast({ message: 'Danke! Navio AI lernt durch dein Feedback.', type: 'success' });
-    setTimeout(() => setFeedbackToast(null), 2000);
-    // Refresh feedback summary
-    const { data } = await supabase
-      .from('tour_feedback')
-      .select('rating,comment')
-      .order('created_at', { ascending: false })
-      .limit(5);
-    if (data) {
-      const notes = data.map((f: any) => `${f.rating === 'UP' ? '👍' : '👎'} ${f.comment || ''}`.trim()).join('\n');
-      setFeedbackNotes(notes);
+    try {
+      const { error } = await supabase.from('tour_feedback').insert({
+        id: uuidv4(),
+        tour_id: tourId,
+        rating,
+        comment: comment || '',
+        user_name: user?.username || 'unknown',
+        created_at: new Date().toISOString()
+      });
+      if (error) {
+        console.error('Feedback insert failed', error);
+        setFeedbackToast({ message: 'Feedback konnte nicht gespeichert werden.', type: 'error' });
+        setTimeout(() => setFeedbackToast(null), 2000);
+        return;
+      }
+      setFeedbackToast({ message: 'Danke! Navio AI lernt durch dein Feedback.', type: 'success' });
+      setTimeout(() => setFeedbackToast(null), 2000);
+      // Refresh feedback summary
+      const { data, error: loadErr } = await supabase
+        .from('tour_feedback')
+        .select('rating,comment')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (!loadErr && data) {
+        const notes = data.map((f: any) => `${f.rating === 'UP' ? '👍' : '👎'} ${f.comment || ''}`.trim()).join('\n');
+        setFeedbackNotes(notes);
+      }
+    } catch (e) {
+      console.error('Feedback insert exception', e);
+      setFeedbackToast({ message: 'Feedback konnte nicht gespeichert werden.', type: 'error' });
+      setTimeout(() => setFeedbackToast(null), 2000);
     }
   };
 
