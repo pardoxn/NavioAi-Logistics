@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import { Save, Settings as SettingsIcon, Eye, EyeOff, Move, Copy, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 import { CmrConfig, CmrFieldConfig } from '../types';
@@ -13,6 +13,8 @@ const Settings = () => {
   const [saved, setSaved] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [bgLoading, setBgLoading] = useState(false);
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<{ key: string; startX: number; startY: number; origX: number; origY: number } | null>(null);
 
   // Update local state when context changes (initial load)
   useEffect(() => {
@@ -106,6 +108,42 @@ const Settings = () => {
     setSaved(false);
   };
 
+  const startDrag = (key: string, e: React.MouseEvent) => {
+    const rect = previewRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const field = (config as any)[key] || (key.startsWith('custom-') ? (config.customFields || [])[parseInt(key.split('-')[1])] : null);
+    if (!field) return;
+    dragRef.current = {
+      key,
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: field.x,
+      origY: field.y
+    };
+  };
+
+  const handleDragMove = (e: React.MouseEvent) => {
+    if (!dragRef.current) return;
+    const rect = previewRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const { key, startX, startY, origX, origY } = dragRef.current;
+    const deltaXmm = ((e.clientX - startX) / rect.width) * 210;
+    const deltaYmm = ((e.clientY - startY) / rect.height) * 297;
+    const newX = Math.round(origX + deltaXmm);
+    const newY = Math.round(origY + deltaYmm);
+    if (key.startsWith('custom-')) {
+      const idx = parseInt(key.split('-')[1]);
+      updateCustomField(idx, { x: newX, y: newY });
+    } else {
+      handleFieldChange(key as keyof CmrConfig, 'x', newX);
+      handleFieldChange(key as keyof CmrConfig, 'y', newY);
+    }
+  };
+
+  const endDrag = () => {
+    dragRef.current = null;
+  };
+
   const duplicateCustomField = (idx: number) => {
     setConfig(prev => {
       const list = [...(prev.customFields || [])];
@@ -139,7 +177,7 @@ const Settings = () => {
           </button>
        </div>
        
-       <div className="grid grid-cols-2 gap-4">
+       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
              <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1 mb-1">
                <Move size={10}/> X (mm)
@@ -159,6 +197,17 @@ const Settings = () => {
                type="number" 
                value={field.y}
                onChange={(e) => handleFieldChange(key as keyof CmrConfig, 'y', parseInt(e.target.value))}
+               className="w-full px-2 py-1.5 rounded border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-slate-50 focus:bg-white text-slate-900"
+             />
+          </div>
+          <div>
+             <label className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">
+               Schriftgröße (pt)
+             </label>
+             <input
+               type="number"
+               value={field.fontSize || 10}
+               onChange={(e) => handleFieldChange(key as keyof CmrConfig, 'fontSize', parseInt(e.target.value))}
                className="w-full px-2 py-1.5 rounded border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-slate-50 focus:bg-white text-slate-900"
              />
           </div>
@@ -287,6 +336,17 @@ const Settings = () => {
                                 className="w-full px-2 py-1.5 rounded border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-slate-50 focus:bg-white text-slate-900"
                               />
                             </div>
+                            <div>
+                              <label className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">
+                                Schriftgröße (pt)
+                              </label>
+                              <input
+                                type="number"
+                                value={field.fontSize || 10}
+                                onChange={(e)=>updateCustomField(idx,{fontSize:parseInt(e.target.value)})}
+                                className="w-full px-2 py-1.5 rounded border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-slate-50 focus:bg-white text-slate-900"
+                              />
+                            </div>
                           </div>
                           <textarea
                             rows={2}
@@ -311,9 +371,15 @@ const Settings = () => {
                <span>Live Preview</span>
                <span className="text-slate-400">A4 PDF</span>
             </div>
-            <div className="flex-1 bg-slate-500 relative">
+            <div 
+              className="flex-1 bg-slate-500 relative"
+              ref={previewRef}
+              onMouseMove={handleDragMove}
+              onMouseUp={endDrag}
+              onMouseLeave={endDrag}
+            >
                {config.previewBackground && (
-                 <div className="absolute inset-0">
+                 <div className="absolute inset-0 pointer-events-none">
                    <img src={config.previewBackground} alt="bg" className="w-full h-full object-contain opacity-70" />
                  </div>
                )}
@@ -321,11 +387,39 @@ const Settings = () => {
                  <embed 
                    src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
                    type="application/pdf"
-                   className="w-full h-full border-none relative"
+                   className="w-full h-full border-none relative pointer-events-none"
                  />
                ) : (
                  <div className="flex items-center justify-center h-full text-white">Lade Vorschau...</div>
                )}
+
+               {/* Drag Overlay */}
+               <div className="absolute inset-0 pointer-events-none">
+                 {[
+                   ...Object.entries(config).filter(([k]) => !['customFields','previewBackground'].includes(k)),
+                   ...(config.customFields || []).map((f, idx) => [`custom-${idx}`, f] as [string, any])
+                 ].map(([key, field]) => {
+                   if (!field?.visible) return null;
+                   const left = (field.x / 210) * 100;
+                   const top = (field.y / 297) * 100;
+                   return (
+                     <div
+                       key={key}
+                       className="absolute flex items-center gap-2"
+                       style={{ left: `${left}%`, top: `${top}%`, transform: 'translate(-50%, -50%)' }}
+                     >
+                       <button
+                         type="button"
+                         className="pointer-events-auto px-2 py-1 rounded-full bg-white/80 border border-slate-300 text-[10px] text-slate-700 shadow-sm hover:border-brand-400 active:scale-95 transition"
+                         onMouseDown={(e) => { e.preventDefault(); startDrag(key, e); }}
+                         title="Ziehen zum Justieren"
+                       >
+                         {field.label || key}
+                       </button>
+                     </div>
+                   );
+                 })}
+               </div>
             </div>
          </div>
       </div>

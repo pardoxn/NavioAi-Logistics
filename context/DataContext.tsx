@@ -54,6 +54,28 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const STATE_ID = 'werny-state';
   const STATE_TABLE = 'navio_state';
   
+  const getDefaultCmrConfig = (): CmrConfig => ({
+    sender: { x: 15, y: 28, visible: true, label: 'Feld 1: Absender', value: 'Werny-Handel GmbH & Co. KG\nOstring 3\n33181 Bad Wünnenberg-Fürstenberg', fontSize: 10 },
+    consignee: { x: 15, y: 60, visible: true, label: 'Feld 2: Empfänger', value: '', fontSize: 10 },
+    deliveryPlace: { x: 15, y: 88, visible: true, label: 'Feld 3: Auslieferungsort', value: '', fontSize: 10 },
+    loadingPlaceCity: { x: 15, y: 105, visible: true, label: 'Feld 4: Ort/PLZ', value: '33181 Bad Wünnenberg', fontSize: 10 },
+    loadingPlaceCountry: { x: 15, y: 115, visible: true, label: 'Feld 4: Land', value: 'Deutschland', fontSize: 10 },
+    loadingPlaceDate: { x: 15, y: 125, visible: true, label: 'Feld 4: Datum', value: '', fontSize: 10 },
+    documents: { x: 15, y: 140, visible: true, label: 'Feld 5: Beigefügte Dokumente', value: '', fontSize: 10 },
+    marks: { x: 15, y: 135, visible: true, label: 'Feld 6: Kennzeichen', value: '', fontSize: 10 },
+    packCount: { x: 35, y: 135, visible: true, label: 'Feld 7: Anzahl Packstücke', value: '1', fontSize: 10 },
+    packaging: { x: 50, y: 135, visible: true, label: 'Feld 8: Art der Verpackung', value: 'Einweg', fontSize: 10 },
+    goodsDesc: { x: 75, y: 135, visible: true, label: 'Feld 9: Bezeichnung', value: 'Stalleinrichtung', fontSize: 10 },
+    weight: { x: 150, y: 135, visible: true, label: 'Feld 11: Bruttogewicht', value: '', fontSize: 10 },
+    remarks: { x: 15, y: 160, visible: true, label: 'Feld 13: Anweisungen', value: 'Telefonnummer:', fontSize: 10 },
+    carrier: { x: 110, y: 28, visible: false, label: 'Feld 16: Frachtführer', value: '', fontSize: 10 }, // Hidden by request
+    footerPlace: { x: 15, y: 235, visible: true, label: 'Feld 21: Ort', value: '33181 Bad Wünnenberg', fontSize: 10 },
+    footerDate: { x: 145, y: 235, visible: true, label: 'Feld 21: Datum', value: '', fontSize: 10 },
+    footerSignature: { x: 145, y: 250, visible: true, label: 'Feld 24: Palettentausch (X)', value: 'X', fontSize: 10 },
+    customFields: [],
+    previewBackground: '/Musterschreiben.png'
+  });
+
   // Initialize State from LocalStorage
   const [orders, setOrders] = useState<Order[]>(() => {
     const saved = localStorage.getItem('navio_orders');
@@ -82,31 +104,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [cmrConfig, setCmrConfig] = useState<CmrConfig>(() => {
     const saved = localStorage.getItem('navio_cmr_config');
-    // Init with detailed structure if not found or if old structure detected
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed.sender && typeof parsed.sender === 'object') return parsed;
+      if (parsed.sender && typeof parsed.sender === 'object') {
+        return { ...getDefaultCmrConfig(), ...parsed };
+      }
     }
-    
-    // Default CMR Standard Coordinates (Approximate mm)
-    return {
-      sender: { x: 15, y: 28, visible: true, label: 'Feld 1: Absender', value: 'Werny-Handel GmbH & Co. KG\nOstring 3\n33181 Bad Wünnenberg-Fürstenberg' },
-      consignee: { x: 15, y: 60, visible: true, label: 'Feld 2: Empfänger', value: '' },
-      deliveryPlace: { x: 15, y: 88, visible: true, label: 'Feld 3: Auslieferungsort', value: '' },
-      loadingPlace: { x: 15, y: 105, visible: true, label: 'Feld 4: Ort/Tag Übernahme', value: '33181 Bad Wünnenberg\nDeutschland' },
-      documents: { x: 15, y: 115, visible: true, label: 'Feld 5: Beigefügte Dokumente', value: '' },
-      marks: { x: 15, y: 135, visible: true, label: 'Feld 6: Kennzeichen', value: '' },
-      packCount: { x: 35, y: 135, visible: true, label: 'Feld 7: Anzahl Packstücke', value: '1' },
-      packaging: { x: 50, y: 135, visible: true, label: 'Feld 8: Art der Verpackung', value: 'Einweg' },
-      goodsDesc: { x: 75, y: 135, visible: true, label: 'Feld 9: Bezeichnung', value: 'Stalleinrichtung' },
-      weight: { x: 150, y: 135, visible: true, label: 'Feld 11: Bruttogewicht', value: '' },
-      remarks: { x: 15, y: 160, visible: true, label: 'Feld 13: Anweisungen', value: 'Telefonnummer:' },
-      carrier: { x: 110, y: 28, visible: false, label: 'Feld 16: Frachtführer', value: '' }, // Hidden by request
-      footerPlace: { x: 15, y: 235, visible: true, label: 'Feld 21: Ausgestellt in', value: '33181 Bad Wünnenberg' },
-      footerSignature: { x: 145, y: 250, visible: true, label: 'Feld 24: Palettentausch (X)', value: 'X' },
-      customFields: [],
-      previewBackground: '/Musterschreiben.png'
-    };
+    return getDefaultCmrConfig();
   });
 
   // --- Supabase State Sync (orders, tours, activities, notifications) ---
@@ -118,7 +122,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (rt) setToursState(rt);
       if (ra) setActivities(ra);
       if (rn) setNotifications(rn);
-      if (rc) setCmrConfig(rc);
+      if (rc) setCmrConfig({ ...getDefaultCmrConfig(), ...rc });
       lastRemoteUpdate.current = payload.updated_at || new Date().toISOString();
     } catch (err) {
       console.warn('Remote state apply failed', err);

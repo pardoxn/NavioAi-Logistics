@@ -89,6 +89,7 @@ export interface CmrFieldConfig {
   visible: boolean;
   label: string;  // For the Settings UI
   value?: string; // Static text content (if applicable)
+  fontSize?: number; // Optional font size override (pt)
 }
 
 export interface CmrConfig {
@@ -96,7 +97,9 @@ export interface CmrConfig {
   sender: CmrFieldConfig;       // Feld 1
   consignee: CmrFieldConfig;    // Feld 2
   deliveryPlace: CmrFieldConfig;// Feld 3
-  loadingPlace: CmrFieldConfig; // Feld 4
+  loadingPlaceCity: CmrFieldConfig;    // Feld 4: Ort/PLZ
+  loadingPlaceCountry: CmrFieldConfig; // Feld 4: Land
+  loadingPlaceDate: CmrFieldConfig;    // Feld 4: Datum
   documents: CmrFieldConfig;    // Feld 5
   marks: CmrFieldConfig;        // Feld 6
   packCount: CmrFieldConfig;    // Feld 7
@@ -105,7 +108,8 @@ export interface CmrConfig {
   weight: CmrFieldConfig;       // Feld 11
   remarks: CmrFieldConfig;      // Feld 13
   carrier: CmrFieldConfig;      // Feld 16
-  footerPlace: CmrFieldConfig;  // Feld 21 (Ort/Datum)
+  footerPlace: CmrFieldConfig;  // Feld 21: Ort
+  footerDate: CmrFieldConfig;   // Feld 21: Datum
   footerSignature: CmrFieldConfig; // Feld 22/23 (Unterschriften/Kreuze)
   customFields?: CmrFieldConfig[];
   previewBackground?: string; // DataURL nur für Editor-Preview, nicht für Export

@@ -5,12 +5,14 @@ import { Tour, Order, CmrConfig } from '../types';
 // Shared drawing logic for both real CMRs and the Preview
 const createCmrDocument = (doc: jsPDF, config: CmrConfig, order: any, tour: any) => {
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+  const baseFontSize = 10;
+  doc.setFontSize(baseFontSize);
 
   // Helper to draw text if visible
   const drawField = (fieldKey: keyof CmrConfig, text: string | undefined) => {
     const field = config[fieldKey];
     if (field && field.visible && text) {
+      doc.setFontSize(field.fontSize || baseFontSize);
       const lines = text.split('\n');
       lines.forEach((line, i) => {
         doc.text(line, field.x, field.y + (i * 5));
@@ -27,17 +29,19 @@ const createCmrDocument = (doc: jsPDF, config: CmrConfig, order: any, tour: any)
   let consigneeText = order.customerName1;
   if (order.customerName2) consigneeText += `\n${order.customerName2}`;
   consigneeText += `\n${order.shippingPostcode} ${order.shippingCity}`;
-  consigneeText += `\n${order.shippingCountryName || "Deutschland"}`;
   drawField('consignee', consigneeText);
 
   // Feld 3: Auslieferungsort
   drawField('deliveryPlace', `${order.shippingPostcode} ${order.shippingCity}\n${order.shippingCountryCode || "DE"}`);
 
-  // Feld 4: Ladeort
-  let loadingText = config.loadingPlace.value || '';
-  // Append date if it's the real deal, or dummy date for preview
-  loadingText += `\nDatum: ${new Date().toLocaleDateString('de-DE')}`;
-  drawField('loadingPlace', loadingText);
+  // Feld 4: Ladeort (getrennt)
+  const loadingCityField = (config as any).loadingPlaceCity || (config as any).loadingPlace;
+  const loadingCountryField = (config as any).loadingPlaceCountry;
+  const loadingDateField = (config as any).loadingPlaceDate;
+  drawField('loadingPlaceCity', loadingCityField?.value);
+  drawField('loadingPlaceCountry', loadingCountryField?.value);
+  const loadingDateText = (loadingDateField?.value as string) || new Date().toLocaleDateString('de-DE');
+  drawField('loadingPlaceDate', loadingDateText);
 
   // Feld 5: Dokumente (Format: Lieferschein: YEAR-NUMBER)
   // "Lieferschein: " prefix is hardcoded per request logic, but position is dynamic
@@ -68,9 +72,10 @@ const createCmrDocument = (doc: jsPDF, config: CmrConfig, order: any, tour: any)
   if (tour.vehiclePlate) carrierText += `\nKz: ${tour.vehiclePlate}`;
   drawField('carrier', carrierText);
 
-  // Feld 21: Footer Ort/Datum
-  const footerText = `${config.footerPlace.value || ''}   ${new Date().toLocaleDateString('de-DE')}`;
-  drawField('footerPlace', footerText);
+  // Feld 21: Footer Ort/Datum (getrennt)
+  drawField('footerPlace', config.footerPlace?.value);
+  const footerDateText = (config as any)?.footerDate?.value || new Date().toLocaleDateString('de-DE');
+  drawField('footerDate', footerDateText);
 
   // Feld 24: Palettentausch (X)
   if (config.footerSignature.visible) {
@@ -85,6 +90,7 @@ const createCmrDocument = (doc: jsPDF, config: CmrConfig, order: any, tour: any)
   if (config.customFields && Array.isArray(config.customFields)) {
     config.customFields.forEach((field, idx) => {
       if (field.visible && field.value) {
+        doc.setFontSize(field.fontSize || baseFontSize);
         const lines = (field.value || '').split('\n');
         lines.forEach((line, i) => {
           doc.text(line, field.x, field.y + (i * 5));
