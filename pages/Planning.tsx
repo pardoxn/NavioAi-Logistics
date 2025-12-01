@@ -42,6 +42,7 @@ const Planning = () => {
   const [benniReply, setBenniReply] = useState<string>('');
   const [benniLoading, setBenniLoading] = useState(false);
   const [benniActionPending, setBenniActionPending] = useState(false);
+  const [benniIntent, setBenniIntent] = useState<'auto' | 'replan' | null>(null);
   const [feedbackNotes, setFeedbackNotes] = useState<string>('');
   const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [feedbackModal, setFeedbackModal] = useState<{ open: boolean; tourId?: string; rating?: 'UP' | 'DOWN'; comment?: string }>({ open: false, comment: '' });
@@ -81,13 +82,19 @@ const Planning = () => {
     setBenniLoading(true);
     setBenniReply('');
     setBenniActionPending(false);
+    setBenniIntent(null);
     try {
       const reply = await askBenni(benniInput, allUnplannedOrders, feedbackNotes);
       setBenniReply(reply || 'Keine Antwort erhalten.');
-      // Simple intent check: if user asks to plan/auto-plan, offer action
       const lower = benniInput.toLowerCase();
-      if (lower.includes('plan') || lower.includes('tour') || lower.includes('auto')) {
+      if (lower.includes('replan') || lower.includes('neu') || lower.includes('umbau')) {
         setBenniActionPending(true);
+        setBenniIntent('replan');
+      } else if (lower.includes('plan') || lower.includes('tour') || lower.includes('auto')) {
+        setBenniActionPending(true);
+        setBenniIntent('auto');
+      } else {
+        setBenniIntent(null);
       }
     } catch (e: any) {
       setBenniReply('Benni hat gerade ein Problem.');
@@ -99,6 +106,7 @@ const Planning = () => {
   const handleBenniAutoPlan = () => {
     handleAutoPlan();
     setBenniActionPending(false);
+    setBenniIntent(null);
   };
 
   const handleBenniReplanAll = () => {
@@ -130,6 +138,7 @@ const Planning = () => {
     setActiveTab('tours');
     setBenniReply('Neuplanung abgeschlossen. Gesperrte Touren wurden nicht verändert.');
     setBenniActionPending(false);
+    setBenniIntent(null);
   };
 
   const submitFeedback = async (tourId: string, rating: 'UP' | 'DOWN', comment?: string) => {
@@ -567,30 +576,39 @@ const Planning = () => {
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setBenniInput('Plane die offenen Aufträge für 1.3t in zwei logische Touren.')}
-              className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold hover:bg-slate-200"
-            >
-              Tour (1.3t) planen
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  setBenniInput('Plane alle offenen Aufträge automatisch (1.3t/3.0t mix).');
+                  setBenniIntent('auto');
+                  setBenniActionPending(true);
+                }}
+                className="px-3 py-2 bg-brand-50 text-brand-700 rounded-xl text-xs font-semibold hover:bg-brand-100 text-left"
+              >
+                🚀 Auto-Plan
               </button>
               <button
-                onClick={() => setBenniInput('Optimiere Verladung/Stapeln für den Polensprinter.')}
-                className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold hover:bg-slate-200"
+                onClick={() => {
+                  setBenniInput('Plane alles neu, aber gesperrte Touren nicht anfassen.');
+                  setBenniIntent('replan');
+                  setBenniActionPending(true);
+                }}
+                className="px-3 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-200 text-left"
               >
-                Verladung optimieren
+                🔄 Neu planen (ohne LOCKED)
               </button>
               <button
-                onClick={() => setBenniInput('Kombiniere Aufträge entlang A44/A2 ohne Zick-Zack.')}
-                className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold hover:bg-slate-200"
+                onClick={() => setBenniInput('Optimier die aktuelle Planung nach kürzeren Wegen und Auslastung.')}
+                className="px-3 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-200 text-left"
               >
-                Autobahn-Linie
+                ✨ Optimieren
               </button>
               <button
-                onClick={() => setBenniInput('Prüfe Auslastung und schlage Anpassungen vor.')}
-                className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold hover:bg-slate-200"
+                onClick={() => setBenniInput('Erstelle eine Idee entlang der A44/A2 ohne Zick-Zack.')}
+                className="px-3 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-200 text-left"
               >
-                Auslastung prüfen
+                🛣️ Korridor-Idee
               </button>
             </div>
 
@@ -598,23 +616,27 @@ const Planning = () => {
               <textarea
                 value={benniInput}
                 onChange={(e) => setBenniInput(e.target.value)}
-                placeholder="Frag Benni z.B. nach einer Touren-Idee..."
+                placeholder="Optional: Zusatzwunsch (z.B. 'Stop 123 in Tour 5 tauschen')"
                 className="w-full bg-transparent border-none focus:outline-none text-sm text-slate-800 resize-none"
                 rows={3}
               />
             </div>
+            <div className="flex items-center justify-between text-[11px] text-slate-500">
+              <span>1) Aktion wählen · 2) Wunsch ergänzen · 3) Starten</span>
+              <span>Feedback: {feedbackNotes ? 'aktiv' : 'keine Daten'}</span>
+            </div>
             <button
               onClick={handleAskBenni}
               disabled={benniLoading || !benniInput.trim()}
-            className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 hover:bg-brand-700"
-          >
-            {benniLoading ? 'Denkt...' : 'Senden'}
-          </button>
+              className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 hover:bg-brand-700"
+            >
+              {benniLoading ? 'Denkt...' : benniIntent === 'replan' ? 'Neu planen' : benniIntent === 'auto' ? 'Auto-Plan' : 'Benni starten'}
+            </button>
           {benniReply && (
             <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2 space-y-2 flex-1 overflow-y-auto pr-1">
               <div className="min-h-[60px]">{benniReply}</div>
               <div className="space-y-2">
-                {benniActionPending && filteredPool.length > 0 && (
+                {benniActionPending && filteredPool.length > 0 && benniIntent === 'auto' && (
                   <button
                     onClick={handleBenniAutoPlan}
                     className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-brand-700"
@@ -622,12 +644,14 @@ const Planning = () => {
                     Offene Aufträge automatisch planen
                   </button>
                 )}
-                <button
-                  onClick={handleBenniReplanAll}
-                  className="w-full bg-slate-900 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-800"
-                >
-                  Alles neu planen (gesperrte Touren bleiben)
-                </button>
+                {benniActionPending && benniIntent === 'replan' && (
+                  <button
+                    onClick={handleBenniReplanAll}
+                    className="w-full bg-slate-900 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-800"
+                  >
+                    Neu planen (LOCKED bleibt)
+                  </button>
+                )}
               </div>
             </div>
           )}
