@@ -64,7 +64,7 @@ export const parseCSV = (file: File): Promise<Order[]> => {
               shippingCountryCode: pick(row, ['Land Lieferanschrift_Wert'], 'DE'),
               shippingCountryName: pick(row, ['Land Lieferanschrift_Bezeichnung'], 'Deutschland'),
               shippingPostcode: pick(row, ['PLZ Lieferanschrift', 'PLZ', 'Postleitzahl'], ''),
-              shippingCity: pick(row, ['Ort Lieferanschrift', 'Ort', 'Stadt'], ''),
+              shippingCity: pick(row, ['Ort Lieferanschrift', 'Ort Lieferanschrift_Bezeichnung', 'Ort', 'Stadt'], ''),
               shippingStreet: pick(row, ['Strasse Lieferanschrift', 'Straße', 'Strasse'], ''), // inferred
 
               totalWeightKg: isNaN(weight) ? 0 : weight,
