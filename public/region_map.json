@@ -1,0 +1,1622 @@
+{
+  "Unbekannt": [
+    {
+      "postcode": "98530",
+      "name": "G\u00f6hring, Dillst\u00e4dt"
+    },
+    {
+      "postcode": "94369",
+      "name": "Kiefl, Rain"
+    },
+    {
+      "postcode": "94571",
+      "name": "Schuhbaum, Schaufling"
+    },
+    {
+      "postcode": "AT-5412",
+      "name": "H\u00f6lbacher, Puch"
+    },
+    {
+      "postcode": "AT-5440",
+      "name": "Meisl, Scheffau"
+    },
+    {
+      "postcode": "37586",
+      "name": "Volger, Dassel"
+    },
+    {
+      "postcode": "31737",
+      "name": "Krebs, Rinteln"
+    },
+    {
+      "postcode": "26605",
+      "name": "Meinen, Aurich"
+    },
+    {
+      "postcode": "26736",
+      "name": "Marten, Eilsum"
+    }
+  ],
+  "D\u00fcsseldorf": [
+    {
+      "postcode": "40764",
+      "name": "M\u00fcnster, Langenfeld"
+    },
+    {
+      "postcode": "50181",
+      "name": "Bernd Sudmann, Bedburg"
+    }
+  ],
+  "Heinsberg": [
+    {
+      "postcode": "52538",
+      "name": "Robertz, Selfkant"
+    }
+  ],
+  "Koblenz": [
+    {
+      "postcode": "56170",
+      "name": "Deurer, Bendorf"
+    },
+    {
+      "postcode": "65321",
+      "name": "Christoph Gemmer, Heidenrod"
+    },
+    {
+      "postcode": "56566",
+      "name": "Paula Weingarten, Neuwied"
+    }
+  ],
+  "Trier": [
+    {
+      "postcode": "54426",
+      "name": "Liewald, Malborn"
+    },
+    {
+      "postcode": "55606",
+      "name": "Stefan Selzer, Kellenbach"
+    }
+  ],
+  "Kaiserslautern": [
+    {
+      "postcode": "66989",
+      "name": "Veith, N\u00fcnschweiler"
+    }
+  ],
+  "Marburg": [
+    {
+      "postcode": "35457",
+      "name": "Schnepp, Lollar"
+    },
+    {
+      "postcode": "35753",
+      "name": "Leux-Fl\u00f6ter, Greifenstein"
+    },
+    {
+      "postcode": "91077",
+      "name": "Elsinger, Neunkirchen"
+    },
+    {
+      "postcode": "84097",
+      "name": "Pausinger, Herrngiersdorf"
+    },
+    {
+      "postcode": "84416",
+      "name": "Mundigl, Taufkirchen"
+    },
+    {
+      "postcode": "35075",
+      "name": "Eckhard Naumann, Gladenbach"
+    },
+    {
+      "postcode": "91220",
+      "name": "Christian W\u00f6lfel, Schnaittach"
+    },
+    {
+      "postcode": "91235",
+      "name": "Matthias Wolf, Hartenstein"
+    },
+    {
+      "postcode": "94265",
+      "name": "Christian Liedl, Patersdorf"
+    }
+  ],
+  "M\u00fcnchen": [
+    {
+      "postcode": "83527",
+      "name": "Neudecker, Haag"
+    },
+    {
+      "postcode": "82362",
+      "name": "Christina Ott, Weilheim"
+    },
+    {
+      "postcode": "82216",
+      "name": "Hildegard Steber, Maisach"
+    }
+  ],
+  "Ulm": [
+    {
+      "postcode": "88454",
+      "name": "Knupfer, Hochdorf"
+    },
+    {
+      "postcode": "72525",
+      "name": "Manz, M\u00fcnsingen"
+    },
+    {
+      "postcode": "89192",
+      "name": "Klaiber, Rammingen"
+    },
+    {
+      "postcode": "72534",
+      "name": "Kathreinenhof GbR, Hayingen"
+    },
+    {
+      "postcode": "79859",
+      "name": "Ulli Fehrenbach, Schluchsee ( Fritsche)"
+    }
+  ],
+  "F\u00fcssen": [
+    {
+      "postcode": "87662",
+      "name": "Zettl, Osterzell"
+    }
+  ],
+  "Innsbruck": [
+    {
+      "postcode": "AT-6460",
+      "name": "Gritsch, Imst"
+    }
+  ],
+  "Bad Sassendorf": [
+    {
+      "postcode": "59505",
+      "name": "Blumendeller Bad Sassendorf"
+    }
+  ],
+  "Meschede": [
+    {
+      "postcode": "59872",
+      "name": "Pieper-G\u00f6rdes, Meschede"
+    }
+  ],
+  "Richtung Bodensee": [
+    {
+      "postcode": "72474",
+      "name": "Rapp, Winterlingen"
+    }
+  ],
+  "Stuttgart": [
+    {
+      "postcode": "72477",
+      "name": "Indra, Schwenningen"
+    },
+    {
+      "postcode": "74626",
+      "name": "Nico Bauer, Bretzfeld"
+    }
+  ],
+  "Leipzig": [
+    {
+      "postcode": "04654",
+      "name": "Eisert, Frohburg"
+    },
+    {
+      "postcode": "04523",
+      "name": "Landgraf, Pegau"
+    }
+  ],
+  "Berlin": [
+    {
+      "postcode": "14656",
+      "name": "Brux, Brieselang"
+    },
+    {
+      "postcode": "14822",
+      "name": "Br\u00fccker Agrar GbR, Br\u00fcck"
+    },
+    {
+      "postcode": "16845",
+      "name": "Rindermast Schmock, Gro\u00dfderschau"
+    }
+  ],
+  "Kassel": [
+    {
+      "postcode": "36205",
+      "name": "Horber, Sontra"
+    }
+  ],
+  "Fulda": [
+    {
+      "postcode": "36157",
+      "name": "Biohof-Feldfuchse, Ebersburg"
+    },
+    {
+      "postcode": "36093",
+      "name": "Maria Leinweber, K\u00fcnzell"
+    }
+  ],
+  "Frankfurt": [
+    {
+      "postcode": "97488",
+      "name": "Re\u00df, Stadtlauringen"
+    }
+  ],
+  "Augsburg": [
+    {
+      "postcode": "86637",
+      "name": "Stegmiller, Villenbach"
+    },
+    {
+      "postcode": "86641",
+      "name": "Stemmer, Rain/Etting"
+    }
+  ],
+  "Aachen": [
+    {
+      "postcode": "52441",
+      "name": "Lambertus Br\u00e4u, Linnich-Welz"
+    },
+    {
+      "postcode": "53343",
+      "name": "Schimmel, Wachtberg"
+    }
+  ],
+  "Saarland": [
+    {
+      "postcode": "66919",
+      "name": "Sommer, Hermersberg"
+    }
+  ],
+  "Dresden": [
+    {
+      "postcode": "09603",
+      "name": "G\u00f6bel, Gro\u00dfschirma"
+    },
+    {
+      "postcode": "01814",
+      "name": "Agrargen. Ob. Elbtal, Reinhardtsdorf"
+    },
+    {
+      "postcode": "02708",
+      "name": "LWB Hartmann, Kottmar-Obercunnersdorf"
+    },
+    {
+      "postcode": "02906",
+      "name": "Thomas Buhler, Hohendubrau"
+    },
+    {
+      "postcode": "01561",
+      "name": "Steffen Haase, Ebersbach-Bieberach"
+    }
+  ],
+  "Nordhorn": [
+    {
+      "postcode": "49828",
+      "name": "Egbers, Osterwald"
+    },
+    {
+      "postcode": "48683",
+      "name": "G+B Energieholz, Ahaus"
+    }
+  ],
+  "Emden/Aurich": [
+    {
+      "postcode": "26759",
+      "name": "Kramp, Hinte"
+    }
+  ],
+  "Hamburg": [
+    {
+      "postcode": "21400",
+      "name": "Rabeler, Reinstorf"
+    },
+    {
+      "postcode": "AT-9972",
+      "name": "Stadler, Virgen"
+    },
+    {
+      "postcode": "AT-9911",
+      "name": "Warscher, Assling"
+    },
+    {
+      "postcode": "79865",
+      "name": "D\u00fcrrenb\u00fchl GbR, Grafenhausen"
+    },
+    {
+      "postcode": "88636",
+      "name": "Thum, Illmensee"
+    },
+    {
+      "postcode": "88477",
+      "name": "Bunz Agrar, Schwendi"
+    },
+    {
+      "postcode": "AT-6460",
+      "name": "Frisch, Imst"
+    },
+    {
+      "postcode": "AT-6444",
+      "name": "Maurer, L\u00e4ngenfeld"
+    },
+    {
+      "postcode": "25541",
+      "name": "Peter Staak, Brunsb\u00fcttel"
+    },
+    {
+      "postcode": "21640",
+      "name": "Hans-Georg Holst, Nottensdorf"
+    },
+    {
+      "postcode": "21109",
+      "name": "ISK B\u00fcrosysteme, Hamburg"
+    }
+  ],
+  "Duisburg/Niederrhein": [
+    {
+      "postcode": "47647",
+      "name": "Weymans, Kerken"
+    },
+    {
+      "postcode": "91602",
+      "name": "Hertlein, D\u00fcrrwangen"
+    },
+    {
+      "postcode": "86850",
+      "name": "Spengler, Reitenbuch"
+    },
+    {
+      "postcode": "89584",
+      "name": "Bachhofer, Ehingen"
+    },
+    {
+      "postcode": "88636",
+      "name": "Thum, Illmensee"
+    },
+    {
+      "postcode": "87724",
+      "name": "Paulus, Haselbach"
+    },
+    {
+      "postcode": "AT-6800",
+      "name": "Hartmann, Feldkirch"
+    },
+    {
+      "postcode": "99102",
+      "name": "Apel, Klettbach"
+    },
+    {
+      "postcode": "39343",
+      "name": "Krakow, Hohe B\u00f6rde"
+    },
+    {
+      "postcode": "36205",
+      "name": "Horber, Sontra"
+    },
+    {
+      "postcode": "93080",
+      "name": "Nadler, Pentling"
+    }
+  ],
+  "Passau": [
+    {
+      "postcode": "94152",
+      "name": "Agrotel, Neuhaus/Inn"
+    },
+    {
+      "postcode": "32289",
+      "name": "Seckfort, R\u00f6dinghausen"
+    },
+    {
+      "postcode": "49635",
+      "name": "LBD, Badbergen"
+    },
+    {
+      "postcode": "98617",
+      "name": "Hartmann, Helmershausen"
+    },
+    {
+      "postcode": "94256",
+      "name": "Brunner, Drachselsried"
+    },
+    {
+      "postcode": "94104",
+      "name": "Schlattl, Tittling"
+    },
+    {
+      "postcode": "94575",
+      "name": "Kr\u00fcgl, Windorf"
+    },
+    {
+      "postcode": "AT-5112",
+      "name": "Kaltenegger, Lamprechtshausen"
+    },
+    {
+      "postcode": "37235",
+      "name": "Reu\u00df Gbr, Hessisch Lichtenau"
+    },
+    {
+      "postcode": "30900",
+      "name": "Kussin, Wedemark"
+    },
+    {
+      "postcode": "27383",
+      "name": "Frick, Schee\u00dfel"
+    },
+    {
+      "postcode": "25813",
+      "name": "Hansen, Schwesing"
+    },
+    {
+      "postcode": "59510",
+      "name": "Stratb\u00fccker, Lippetal"
+    },
+    {
+      "postcode": "58540",
+      "name": "Wittkop, Meinerzhagen"
+    },
+    {
+      "postcode": "52156",
+      "name": "M\u00fcller, Monschau"
+    },
+    {
+      "postcode": "96167",
+      "name": "Rupprecht, K\u00f6nigsfeld"
+    },
+    {
+      "postcode": "92681",
+      "name": "Schraml-H\u00f6sl, Erbendorf"
+    },
+    {
+      "postcode": "92709",
+      "name": "Fr\u00f6hler, Moosbach"
+    },
+    {
+      "postcode": "93492",
+      "name": "Meier, Treffelstein"
+    },
+    {
+      "postcode": "93413",
+      "name": "Heigl, Cham"
+    },
+    {
+      "postcode": "64823",
+      "name": "Schubert, Gro\u00df-Umstadt"
+    },
+    {
+      "postcode": "89613",
+      "name": "Riegger, Oberstadion"
+    },
+    {
+      "postcode": "82398",
+      "name": "Kocher, Polling"
+    },
+    {
+      "postcode": "04519",
+      "name": "HofGut Kreuma, Rackwitz"
+    },
+    {
+      "postcode": "14656",
+      "name": "Brux, Brieselang"
+    },
+    {
+      "postcode": "57520",
+      "name": "Hutter, Steinebach"
+    },
+    {
+      "postcode": "79865",
+      "name": "D\u00fcrrenb\u00fchl, Grafenhausen"
+    },
+    {
+      "postcode": "97785",
+      "name": "Sachs, Mittelsinn"
+    },
+    {
+      "postcode": "37412",
+      "name": "Gropengie\u00dfer, Herzberg"
+    },
+    {
+      "postcode": "38527",
+      "name": "Timpe, Meine"
+    },
+    {
+      "postcode": "25436",
+      "name": "Heidemann, Tornesch"
+    },
+    {
+      "postcode": "91620",
+      "name": "Schwarz, Ohrenbach"
+    },
+    {
+      "postcode": "91799",
+      "name": "H\u00fcttinger, Langenaltheim"
+    },
+    {
+      "postcode": "85114",
+      "name": "Grienberger, Buxheim"
+    },
+    {
+      "postcode": "89407",
+      "name": "Gruber, Dillingen"
+    },
+    {
+      "postcode": "84175",
+      "name": "H\u00f6rl, Gerzen"
+    },
+    {
+      "postcode": "94152",
+      "name": "Agrotel, Neuhaus/ Inn"
+    },
+    {
+      "postcode": "AT-9451",
+      "name": "Pachatz, Preitenegg"
+    },
+    {
+      "postcode": "AT-8551",
+      "name": "Schwab, Wies"
+    },
+    {
+      "postcode": "54668",
+      "name": "Urbany, Holsthum"
+    },
+    {
+      "postcode": "66706",
+      "name": "Bettinger, Perl-Wochern"
+    },
+    {
+      "postcode": "61279",
+      "name": "Rinker, Gr\u00e4venwiesbach"
+    },
+    {
+      "postcode": "97509",
+      "name": "Seuferling, Kolitzheim"
+    },
+    {
+      "postcode": "27726",
+      "name": "Kaemena, Worpswede"
+    },
+    {
+      "postcode": "26427",
+      "name": "Thedinga, Esens"
+    },
+    {
+      "postcode": "51399",
+      "name": "Scholten, Burscheid"
+    },
+    {
+      "postcode": "67753",
+      "name": "Kirchmer, Reipoltskirchen"
+    },
+    {
+      "postcode": "79733",
+      "name": "Matt, G\u00f6rwihl"
+    },
+    {
+      "postcode": "79774",
+      "name": "Kaiser, Albbruck"
+    },
+    {
+      "postcode": "85461",
+      "name": "Tierschutzverein, Bockhorn"
+    },
+    {
+      "postcode": "88499",
+      "name": "Fisel, Riedlingen"
+    },
+    {
+      "postcode": "88636",
+      "name": "Thum, Illmensee"
+    },
+    {
+      "postcode": "IT-39050",
+      "name": "Stampfer,V\u00f6ls"
+    },
+    {
+      "postcode": "32758",
+      "name": "Helweg, Detmold"
+    },
+    {
+      "postcode": "37643",
+      "name": "Scheurer, Negenborn"
+    },
+    {
+      "postcode": "02906",
+      "name": "Holtschke, Quitzdorf"
+    },
+    {
+      "postcode": "91352",
+      "name": "Otzelberger, Hallerndorf"
+    },
+    {
+      "postcode": "74670",
+      "name": "K\u00f6hler, Forchtenberg"
+    },
+    {
+      "postcode": "73450",
+      "name": "Schr\u00f6ppel, Neresheim"
+    },
+    {
+      "postcode": "91183",
+      "name": "Abholung Fries"
+    },
+    {
+      "postcode": "07907",
+      "name": "Bro\u00dfmann, Schleiz"
+    },
+    {
+      "postcode": "95339",
+      "name": "Beierlein, Neuenmarkt"
+    },
+    {
+      "postcode": "93173",
+      "name": "Jobst, Wenzenbach"
+    },
+    {
+      "postcode": "93489",
+      "name": "Meier, Schorndorf"
+    },
+    {
+      "postcode": "94369",
+      "name": "Kiefl, Rain/D\u00fcrnhart"
+    },
+    {
+      "postcode": "65321",
+      "name": "Gemmer, Heidenrod"
+    },
+    {
+      "postcode": "79348",
+      "name": "Sulzberger, Freiamt"
+    },
+    {
+      "postcode": "26802",
+      "name": "Groenewold, Moormerland"
+    },
+    {
+      "postcode": "25813",
+      "name": "Hansen, Schwesing"
+    },
+    {
+      "postcode": "91602",
+      "name": "Hertlein, D\u00fcrrwangen"
+    },
+    {
+      "postcode": "72224",
+      "name": "Rockenbauch, Ebhausen"
+    },
+    {
+      "postcode": "52393",
+      "name": "Reitschule Ascheberg, H\u00fcrtgenwald"
+    },
+    {
+      "postcode": "95473",
+      "name": "B\u00f6hner, Creu\u00dfen"
+    },
+    {
+      "postcode": "92681",
+      "name": "Schraml-H\u00f6sl, Erbendorf"
+    },
+    {
+      "postcode": "92552",
+      "name": "Meier, Oberviechtach"
+    },
+    {
+      "postcode": "94152",
+      "name": "Agrotel, Neuhaus/Inn"
+    },
+    {
+      "postcode": "A-5261",
+      "name": "Eder, Helpfau"
+    },
+    {
+      "postcode": "A-4113",
+      "name": "Paleczeck, St. Martin"
+    },
+    {
+      "postcode": "86637",
+      "name": "Stegmiller, Villenbach"
+    },
+    {
+      "postcode": "85123",
+      "name": "Plach, Karlskron"
+    },
+    {
+      "postcode": "84098",
+      "name": "Gumplinger, Hohenthann"
+    },
+    {
+      "postcode": "84082",
+      "name": "Ritschel, Laberweinting"
+    },
+    {
+      "postcode": "83623",
+      "name": "St\u00f6ckl, Dietramszell"
+    },
+    {
+      "postcode": "AT-6170",
+      "name": "Kranebitter, Zirl"
+    },
+    {
+      "postcode": "51688",
+      "name": "SL-Stallbau"
+    },
+    {
+      "postcode": "51709",
+      "name": "R\u00f6ttger, Marienheide"
+    },
+    {
+      "postcode": "55471",
+      "name": "Adams, Sargenroth"
+    },
+    {
+      "postcode": "77746",
+      "name": "Irslinger, Schutterwald"
+    },
+    {
+      "postcode": "78333",
+      "name": "Reiter, Stockach"
+    },
+    {
+      "postcode": "79761",
+      "name": "Lehmann, Waldshut"
+    },
+    {
+      "postcode": "01773",
+      "name": "Biohof Seifert, Altenberg"
+    },
+    {
+      "postcode": "01906",
+      "name": "Fritsche, Burkau"
+    },
+    {
+      "postcode": "09569",
+      "name": "Kr\u00fcger, Gahlenz"
+    },
+    {
+      "postcode": "01906",
+      "name": "Fritsche, Burkau"
+    },
+    {
+      "postcode": "01896",
+      "name": "Lichtenberger agrar, Pulsnitz"
+    },
+    {
+      "postcode": "64-100",
+      "name": "Robinsons, Leszno"
+    },
+    {
+      "postcode": "94051",
+      "name": "Michael Anetzberger, Hauzenberg"
+    },
+    {
+      "postcode": "84359",
+      "name": "Roland Kaser, Simbach"
+    },
+    {
+      "postcode": "AT-9702",
+      "name": "Peter Salentinig, Ferndorf"
+    },
+    {
+      "postcode": "AT-9702",
+      "name": "Peter Salentinig, Ferndorf"
+    },
+    {
+      "postcode": "AT-9702",
+      "name": "Peter Salentinig, Ferndorf"
+    }
+  ],
+  "Regensburg": [
+    {
+      "postcode": "94369",
+      "name": "Kiefl Stalltechnik, Rain-D\u00fcrnhart"
+    },
+    {
+      "postcode": "94369",
+      "name": "Kiefl Stalltechnik, Rain-D\u00fcrnhart"
+    },
+    {
+      "postcode": "93497",
+      "name": "Mathias Hausladen, Willmering"
+    },
+    {
+      "postcode": "94169",
+      "name": "Tack, Thurmansbang"
+    },
+    {
+      "postcode": "94110",
+      "name": "Falkner, Wegscheid"
+    },
+    {
+      "postcode": "92363",
+      "name": "Peter Dechant, Breitenbrunn"
+    },
+    {
+      "postcode": "92709",
+      "name": "Benedikt Fr\u00f6hler, Moosbach"
+    },
+    {
+      "postcode": "94265",
+      "name": "Christian Leidl, Patersdorf"
+    }
+  ],
+  "Kassel / Bad Hersfeld": [
+    {
+      "postcode": "34326",
+      "name": "Uwe Ritthaler, Morschen"
+    }
+  ],
+  "Zwickau/Dresden": [
+    {
+      "postcode": "08543",
+      "name": "Daniel Fuhrmann, P\u00f6hl"
+    },
+    {
+      "postcode": "08321",
+      "name": "Reinhard Teubner, Zschorlau"
+    }
+  ],
+  "Gera": [
+    {
+      "postcode": "02708",
+      "name": "LWB Kottmar"
+    },
+    {
+      "postcode": "33014",
+      "name": "Stefan Weskamp, Bad Driburg"
+    },
+    {
+      "postcode": "04626",
+      "name": "Christian Steinh\u00e4user, Nischwitz"
+    }
+  ],
+  "Solling": [
+    {
+      "postcode": "37586",
+      "name": "Stefan Volger, Dassel"
+    },
+    {
+      "postcode": "39387",
+      "name": "B\u00f6rdemilch KG, Oschersleben"
+    }
+  ],
+  "Hannover": [
+    {
+      "postcode": "29690",
+      "name": "Cord-Henning Henke, Essel"
+    },
+    {
+      "postcode": "29664",
+      "name": "Henning Wiechers, Walsrode"
+    }
+  ],
+  "Ingolstadt": [
+    {
+      "postcode": "85296",
+      "name": "Simon Jokl, Rohrbach"
+    },
+    {
+      "postcode": "85131",
+      "name": "Regineering GmbH, Preith"
+    },
+    {
+      "postcode": "83666",
+      "name": "Andreas Hagleitner, Waakirchen"
+    }
+  ],
+  "Bodensee": [
+    {
+      "postcode": "88069",
+      "name": "Pascal Weyers, Tettnang"
+    },
+    {
+      "postcode": "88178",
+      "name": "Alfred Geyer, Heimenkirch"
+    }
+  ],
+  "Olpe": [
+    {
+      "postcode": "58540",
+      "name": "Frank Wittkop, Meinerzhagen"
+    },
+    {
+      "postcode": "58540",
+      "name": "Frank Wittkop, Meinerzhagen"
+    },
+    {
+      "postcode": "57462",
+      "name": "Charolaiszucht, Olpe"
+    }
+  ],
+  "Eifel": [
+    {
+      "postcode": "53539",
+      "name": "Andreas Stein, Welcherath"
+    },
+    {
+      "postcode": "53539",
+      "name": "Andreas Stein, Welcherath"
+    },
+    {
+      "postcode": "53894",
+      "name": "Gerd Trimborn, Mechernich"
+    },
+    {
+      "postcode": "98646",
+      "name": "H\u00f6hn, Hildburghausen"
+    },
+    {
+      "postcode": "94536",
+      "name": "Kiefl, Eppenschlag"
+    },
+    {
+      "postcode": "94107",
+      "name": "Landwirtschaft Kainz, Untergriesbach"
+    },
+    {
+      "postcode": "86477",
+      "name": "Reitmayer, Adelsried"
+    },
+    {
+      "postcode": "87474",
+      "name": "Mayer, Buchenberg"
+    },
+    {
+      "postcode": "54597",
+      "name": "MuHTec, Pronsfeld"
+    }
+  ],
+  "Saarbr\u00fccken": [
+    {
+      "postcode": "66636",
+      "name": "Markus Theobald, Theley-Sotzweiler"
+    }
+  ],
+  "Trier/B\u00b4Koblenz": [
+    {
+      "postcode": "54597",
+      "name": "MuHTec GmbH, Pronsfeld"
+    }
+  ],
+  "Eifel / Bonn": [
+    {
+      "postcode": "53925",
+      "name": "NieThe KG, Kall"
+    },
+    {
+      "postcode": "51399",
+      "name": "Scholten, Burscheid"
+    }
+  ],
+  "Schwarzwald": [
+    {
+      "postcode": "77709",
+      "name": "Roland Mayer, Oberwolfach-Kirche"
+    },
+    {
+      "postcode": "78597",
+      "name": "Herman & Oliver Fritz, irndorf"
+    }
+  ],
+  "Castrop-Rauxel": [
+    {
+      "postcode": "44575",
+      "name": "Chrstian Knickenberg, Castrop-Rauxel"
+    }
+  ],
+  "Duisburg": [
+    {
+      "postcode": "47647",
+      "name": "Philipp Weymanns, Kerken"
+    }
+  ],
+  "M\u00fcnster": [
+    {
+      "postcode": "48565",
+      "name": "Rainer Westers, Steinfurt"
+    },
+    {
+      "postcode": "48565",
+      "name": "Rainer Westers, Steinfurt"
+    },
+    {
+      "postcode": "48346",
+      "name": "Heinrich Spahn, Ostbevern"
+    }
+  ],
+  "Bremerhavn": [
+    {
+      "postcode": "26936",
+      "name": "Wiese GbR, Schwei"
+    }
+  ],
+  "K&F": [
+    {
+      "postcode": "25364",
+      "name": "Malte M\u00fcnster, Brande-H\u00f6rnerkirchen"
+    },
+    {
+      "postcode": "97346",
+      "name": "Philipp Heubach, Iphofen"
+    },
+    {
+      "postcode": "86576",
+      "name": "Helmut List, Schiltberg"
+    },
+    {
+      "postcode": "84432",
+      "name": "Patrick Huber, Hohenpolding"
+    }
+  ],
+  "Linz (\u00fcber Passau)": [
+    {
+      "postcode": "AT-4372",
+      "name": "Lorenz H\u00f6barth, St. Georgen am Walde"
+    }
+  ],
+  "Kempten/Isny": [
+    {
+      "postcode": "88316",
+      "name": "Lukas Huber, Isny"
+    },
+    {
+      "postcode": "88167",
+      "name": "Martin Eugler, Gr\u00fcnenbach"
+    }
+  ],
+  "Bregenz/Feldkirch": [
+    {
+      "postcode": "AT-6820",
+      "name": "Robert Tiefenthaler, Frastanz"
+    }
+  ],
+  "Frankenberg": [
+    {
+      "postcode": "35066",
+      "name": "Daniel Engel, R\u00f6ddenau"
+    },
+    {
+      "postcode": "35066",
+      "name": "Weidegem. Goldbachtal, Frankenberg"
+    }
+  ],
+  "\u00dcber Passau/M\u00fcnchen": [
+    {
+      "postcode": "AT-4950",
+      "name": "Martin Leitl, Altheim"
+    },
+    {
+      "postcode": "09661",
+      "name": "LWB Mirko Boitz, Striegistal"
+    },
+    {
+      "postcode": "09638",
+      "name": "Andr\u00e9 Grund, Lichtenberg"
+    },
+    {
+      "postcode": "09430",
+      "name": "Rene Hartmann, Drebach"
+    },
+    {
+      "postcode": "PL-18-500",
+      "name": "Topleader, Kolno"
+    },
+    {
+      "postcode": "PL-18-500",
+      "name": "Topleader, Zebry"
+    }
+  ],
+  "Kempten": [
+    {
+      "postcode": "87674",
+      "name": "Florian Haug, Ruderatshofen"
+    },
+    {
+      "postcode": "83365",
+      "name": "Neuhauser, Nussdorf"
+    },
+    {
+      "postcode": "AT-9714",
+      "name": "Steiner, Stockenboi"
+    },
+    {
+      "postcode": "AT-9375",
+      "name": "K\u00f6nig,H\u00fcttenberg"
+    }
+  ],
+  "Rinteln (A2)": [
+    {
+      "postcode": "31840",
+      "name": "Julia Holzgr\u00e4fe, Hessisch Oldendorf"
+    }
+  ],
+  "Osnabr\u00fcck": [
+    {
+      "postcode": "49324",
+      "name": "Nicolas Marahrens, Melle"
+    },
+    {
+      "postcode": "32351",
+      "name": "J\u00f6rg Wittk\u00f6tter, Stemwede"
+    },
+    {
+      "postcode": "49179",
+      "name": "Hardy Kollenberg, Ostercappeln"
+    },
+    {
+      "postcode": "49176",
+      "name": "Sven Holtgreife, Hilter"
+    }
+  ],
+  "Rotterdam": [
+    {
+      "postcode": "4741",
+      "name": "C. Naalden Vleesvee, Hoeven"
+    },
+    {
+      "postcode": "4741",
+      "name": "Corne Naalden Vleesvee, RW Hoeven"
+    }
+  ],
+  "Villingen-Schwenningen": [
+    {
+      "postcode": "78144",
+      "name": "Adrian G\u00fcnter, Schramberg"
+    },
+    {
+      "postcode": "78597",
+      "name": "Hermann & Oliver Fritz GbR, Irndorf"
+    },
+    {
+      "postcode": "78269",
+      "name": "Stemar GmbH, Volkertshausen"
+    },
+    {
+      "postcode": "88637",
+      "name": "J\u00e4ger Agrar, Leibertingen"
+    },
+    {
+      "postcode": "65606",
+      "name": "Stahl&Gasteier, Vilmar"
+    },
+    {
+      "postcode": "79244",
+      "name": "Schneider, M\u00fcnstertal"
+    },
+    {
+      "postcode": "79730",
+      "name": "Oeschger, Murg"
+    }
+  ],
+  "Bonn": [
+    {
+      "postcode": "53639",
+      "name": "Esther Scholl, K\u00f6nigswinter"
+    },
+    {
+      "postcode": "56112",
+      "name": "M\u00fcller, Lahnstein"
+    },
+    {
+      "postcode": "53539",
+      "name": "Stein, Br\u00fccktal"
+    },
+    {
+      "postcode": "53639",
+      "name": "Scholl, K\u00f6nigswinter"
+    }
+  ],
+  "Bitburg": [
+    {
+      "postcode": "54595",
+      "name": "Franz M\u00fcller GmbH, Pr\u00fcm"
+    },
+    {
+      "postcode": "54597",
+      "name": "Muhtec GmbH, Pronsfeld"
+    },
+    {
+      "postcode": "49637",
+      "name": "Siemer, Menslage"
+    },
+    {
+      "postcode": "49762",
+      "name": "Schubert GbR, Sustrum"
+    },
+    {
+      "postcode": "26506",
+      "name": "Ackermann, Norden"
+    },
+    {
+      "postcode": "25436",
+      "name": "Kleinwort, Neuendeich"
+    },
+    {
+      "postcode": "25870",
+      "name": "Malte Massow, Oldenswort"
+    },
+    {
+      "postcode": "24986",
+      "name": "Esperm\u00fcller, Mittelangeln"
+    },
+    {
+      "postcode": "96260",
+      "name": "Frankenberger, Weismain"
+    },
+    {
+      "postcode": "AT-4221",
+      "name": "Osterkorn, Steyregg"
+    },
+    {
+      "postcode": "AT-8483",
+      "name": "Stradner, Goritz"
+    }
+  ],
+  "Rechnung bereits verschickt": [
+    {
+      "postcode": "86483",
+      "name": "Mayer GbR, Balzhausen"
+    },
+    {
+      "postcode": "86479",
+      "name": "Hoftechnik Schuster, Obergessert."
+    },
+    {
+      "postcode": "87477",
+      "name": "Schm\u00f6lz, Sulzberg"
+    },
+    {
+      "postcode": "87671",
+      "name": "Deniffel, Ronsberg"
+    },
+    {
+      "postcode": "88069",
+      "name": "Werner Zapf, Tettnang"
+    }
+  ],
+  "W\u00fcrzburg": [
+    {
+      "postcode": "74731",
+      "name": "Sebastian Peper, Walld\u00fcrn"
+    }
+  ],
+  "Fulda/Frankenheim": [
+    {
+      "postcode": "98617",
+      "name": "Julian Hartmann, Helmershausen"
+    }
+  ],
+  "Coburg": [
+    {
+      "postcode": "98646",
+      "name": "Dietmar H\u00f6hn, Hildburghausen-Leimrieth"
+    },
+    {
+      "postcode": "98673",
+      "name": "Mario Kegel, Eisfeld-Heid"
+    },
+    {
+      "postcode": "98673",
+      "name": "Kim Schnettler, Eisfeld"
+    }
+  ],
+  "Wipperf\u00fcrth": [
+    {
+      "postcode": "51688",
+      "name": "SL-Stallbau, Wipperf\u00fcrth"
+    },
+    {
+      "postcode": "51688",
+      "name": "SL-Stallbau, Wipperf\u00fcrth"
+    },
+    {
+      "postcode": "51688",
+      "name": "SL-Stallbau, Wipperf\u00fcrth"
+    }
+  ],
+  "Montabauer": [
+    {
+      "postcode": "57629",
+      "name": "Sascha Ladewig, Steinebach"
+    }
+  ],
+  "N\u00fcrburg": [
+    {
+      "postcode": "53520",
+      "name": "Bernd Ulrich, Wershofen"
+    },
+    {
+      "postcode": "53539",
+      "name": "Josef Theisen, Br\u00fccktal"
+    }
+  ],
+  "Leibzig": [
+    {
+      "postcode": "07613",
+      "name": "Robert Fichtner Sch\u00fcnke Bauzentrum, Sch\u00f6lken"
+    },
+    {
+      "postcode": "07613",
+      "name": "Markus B\u00fcchner, Gro\u00dfhelmsdorf"
+    },
+    {
+      "postcode": "04610",
+      "name": "Bernd Meinhardt, Meuselwitz"
+    }
+  ],
+  "Zwickau": [
+    {
+      "postcode": "08321",
+      "name": "LWB Melech, Zschorlau"
+    },
+    {
+      "postcode": "09481",
+      "name": "Hans Fries GmbH, Elterlein-Hermannsdorft"
+    }
+  ],
+  "Frankfurt/Oder": [
+    {
+      "postcode": "15328",
+      "name": "Trebbin, Golzow"
+    }
+  ],
+  "Polen": [
+    {
+      "postcode": "18-500",
+      "name": "Topleader, Kolno"
+    }
+  ],
+  "Soest": [
+    {
+      "postcode": "59510",
+      "name": "Hermann Ademmer, Lippetal"
+    }
+  ],
+  "G\u00fctersloh": [
+    {
+      "postcode": "33442",
+      "name": "Hakenkamp Agrartechnik, Herzebrock-Clarholz"
+    }
+  ],
+  "Dortmund": [
+    {
+      "postcode": "44265",
+      "name": "Christian Christensen, Dortmund"
+    }
+  ],
+  "Nettetal": [
+    {
+      "postcode": "41844",
+      "name": "Erika & Friends, Wegberg"
+    }
+  ],
+  "Finnentrop": [
+    {
+      "postcode": "57413",
+      "name": "Josef Korte, Finnentrop"
+    }
+  ],
+  "Sundern": [
+    {
+      "postcode": "59846",
+      "name": "Tobias Vollmers, Sundern"
+    }
+  ],
+  "K\u00f6ln/Bonn": [
+    {
+      "postcode": "53937",
+      "name": "Denis Rosewich, Schleiden"
+    }
+  ],
+  "Pr\u00fcm": [
+    {
+      "postcode": "54595",
+      "name": "Franz M\u00fcller GmbH, Pr\u00fcm"
+    },
+    {
+      "postcode": "54597",
+      "name": "MuHTec GmbH, Prosnfeld"
+    },
+    {
+      "postcode": "58046",
+      "name": "Franz M\u00fcller GmbH"
+    }
+  ],
+  "Bad Oyenhausen": [
+    {
+      "postcode": "32602",
+      "name": "Heike Hempelmann, Vlotho"
+    },
+    {
+      "postcode": "48691",
+      "name": "IVG mbH, Kirchlengern"
+    }
+  ],
+  "Braunschweig": [
+    {
+      "postcode": "31311",
+      "name": "Milchhof Osterwiese GbR, Uetze"
+    }
+  ],
+  "Bad Hersfeld": [
+    {
+      "postcode": "36179",
+      "name": "Martin Hiege-Krapf, Bebra"
+    }
+  ],
+  "Hof": [
+    {
+      "postcode": "07922",
+      "name": "Holger Jahn, Tanna"
+    },
+    {
+      "postcode": "93413",
+      "name": "H\u00f6flinger Milch GbR, Cham"
+    }
+  ],
+  "Ellwangen": [
+    {
+      "postcode": "73467",
+      "name": "Dominik Mattausch, Kirchheim am Ries"
+    }
+  ],
+  "Friedrichshafen": [
+    {
+      "postcode": "88682",
+      "name": "GEM. Therapie & Landbau"
+    }
+  ],
+  "Schaffhausen": [
+    {
+      "postcode": "78176",
+      "name": "Daniel Schreiber, Blumberg"
+    }
+  ],
+  "Freiburg": [
+    {
+      "postcode": "79117",
+      "name": "Mathias Reichenbach, Freiburg"
+    },
+    {
+      "postcode": "79695",
+      "name": "Michael-Josef Beckert, Wieden"
+    }
+  ],
+  "Badbergen": [
+    {
+      "postcode": "49635",
+      "name": "Kirsten Schwenzer, Badbergen"
+    }
+  ],
+  "Rottweil": [
+    {
+      "postcode": "72186",
+      "name": "Gfr\u00f6rer Bau GmbH. Empfingen"
+    }
+  ],
+  "Schleswig": [
+    {
+      "postcode": "24817",
+      "name": "Hauke Jebe, Tetenhusen"
+    }
+  ],
+  "Hilter": [
+    {
+      "postcode": "49176",
+      "name": "Nikolas Waltermann, Hilter"
+    }
+  ],
+  "Emden/Norddeich": [
+    {
+      "postcode": "26506",
+      "name": "Hauke Heuer, Norden"
+    }
+  ],
+  "Erfurt": [
+    {
+      "postcode": "99998",
+      "name": "Maurice Weinrich, K\u00f6rner"
+    },
+    {
+      "postcode": "36205",
+      "name": "Horber Landwirtschaft, Sontra"
+    }
+  ],
+  "Chemnitz": [
+    {
+      "postcode": "08132",
+      "name": "Ulrich Pfeifer, M\u00fclsen"
+    },
+    {
+      "postcode": "04736",
+      "name": "Mirko Boitz, Waldheim"
+    }
+  ],
+  "Freiburg/S\u00fcdschwarzwald": [
+    {
+      "postcode": "79875",
+      "name": "Martin R\u00fcd, Dachsberg"
+    }
+  ],
+  "Memmingen": [
+    {
+      "postcode": "88299",
+      "name": "Spitalhof GbR, Leutkirch Allg\u00e4u"
+    }
+  ],
+  "Gronau \u00fc. M\u00fcnster": [
+    {
+      "postcode": "48683",
+      "name": "G+B Energieholz, Ahaus"
+    }
+  ],
+  "Neubrandenburg": [
+    {
+      "postcode": "17348",
+      "name": "Defi Woldegk GmbH, Woldegk"
+    },
+    {
+      "postcode": "18337",
+      "name": "Christoph Schlomann, Marlow"
+    }
+  ],
+  "Schwerin": [
+    {
+      "postcode": "19079",
+      "name": "AGP mbH, Banzkow"
+    }
+  ],
+  "Bad Berleburg": [
+    {
+      "postcode": "57319",
+      "name": "Max Weber, Bad Berleburg"
+    }
+  ],
+  "Schmallenberg": [
+    {
+      "postcode": "57392",
+      "name": "Benedikt Cordes, Schmallenberg"
+    }
+  ],
+  "Salzburg": [
+    {
+      "postcode": "AT-5071",
+      "name": "Anneliese Ragginger, Wals"
+    }
+  ],
+  "Flensburg": [
+    {
+      "postcode": "24994",
+      "name": "Stefan Christiansen, B\u00f6xlund"
+    },
+    {
+      "postcode": "87-620",
+      "name": "Dawid Lewandowski, Kikol"
+    }
+  ],
+  "Aurich": [
+    {
+      "postcode": "26532",
+      "name": "Werner de Vries, Gro\u00dfheide"
+    }
+  ],
+  "Graz": [
+    {
+      "postcode": "AT-8344",
+      "name": "Hannes R\u00f6ck, Bad Gleichenberg"
+    },
+    {
+      "postcode": "58791",
+      "name": "Lienk\u00e4mper, Werdohl"
+    },
+    {
+      "postcode": "56472",
+      "name": "Werner, Fehl-Ritzhausen"
+    }
+  ],
+  "Sangerhausen": [
+    {
+      "postcode": "06556",
+      "name": "Marcel Helm, Artern-Sch\u00f6nfeld"
+    }
+  ]
+}

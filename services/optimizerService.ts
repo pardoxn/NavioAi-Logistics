@@ -2,9 +2,9 @@
 import { Order, Tour, TourStatus } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { DEPOT_COORDS, PLZ_REGION_COORDS } from '../constants';
+import { REGION_MAP, findRegionForPostcode } from '../lib/regionMap';
 
 const MIN_UTILIZATION_THRESHOLD = 0.4; // 40% Mindestauslastung (weniger strikt, sonst fallen kleine Ladungen raus)
-const MAX_CONE_ANGLE = 40; // Degrees. Maximum spread of a tour sector.
 
 // --- Math Helpers ---
 
@@ -44,83 +44,111 @@ const calcBearing = (lat1: number, lon1: number, lat2: number, lon2: number) => 
 export const optimizeTours = (orders: Order[], maxVehicleCapacity: number = 1300): Tour[] => {
   const generatedTours: Tour[] = [];
   
-  // 1. Filter valid orders (ignore orders > vehicle capacity, though unlikely for single items)
+  // 1. Filter valid orders (ignore orders > vehicle capacity)
   const validOrders = orders.filter(o => o.totalWeightKg <= maxVehicleCapacity);
   
-  // 2. Enrich orders with Geo Data
-  const enrichedOrders = validOrders.map(order => {
-    // Get approximate coords from PLZ first 2 digits
+  // 2. Enrich orders with Geo Data + Region aus Referenz
+  const enriched = validOrders.map(order => {
     const plzRegion = order.shippingPostcode.substring(0, 2);
-    const coords = PLZ_REGION_COORDS[plzRegion] || { lat: 51.0, lng: 10.0 }; // Default center of Germany if unknown
-    
-    const dist = calcDistance(DEPOT_COORDS.lat, DEPOT_COORDS.lng, coords.lat, coords.lng);
-    const bearing = calcBearing(DEPOT_COORDS.lat, DEPOT_COORDS.lng, coords.lat, coords.lng);
-    
-    return {
-      ...order,
-      bearing,
-      distanceFromDepot: dist
-    };
+    const coords = PLZ_REGION_COORDS[plzRegion] || { lat: 51.0, lng: 10.0 };
+    const regionHint = findRegionForPostcode(order.shippingPostcode) || 'Unbekannt';
+    return { ...order, coords, regionHint };
   });
 
-  // 3. Sort by Bearing (Compass Sweep)
-  enrichedOrders.sort((a, b) => (a.bearing || 0) - (b.bearing || 0));
+  // 3. Cluster nach RegionHint (Tabelle1) – gruppiert das, was ihr in Excel habt
+  const byRegion: Record<string, any[]> = {};
+  enriched.forEach(o => {
+    byRegion[o.regionHint] = byRegion[o.regionHint] || [];
+    byRegion[o.regionHint].push(o);
+  });
 
-  // 4. Clustering Loop (Cone Check)
-  let index = 0;
-  while (index < enrichedOrders.length) {
-    let currentTourStops: Order[] = [];
-    let currentWeight = 0;
-    let minBearing = 361;
-    let maxBearing = -1;
-    
-    let i = index;
-    
-    while (i < enrichedOrders.length) {
-      const order = enrichedOrders[i];
-      const bearing = order.bearing || 0;
-      
-      // Check Weight against dynamic Capacity
-      if (currentWeight + order.totalWeightKg > maxVehicleCapacity) {
-        break; 
+  const depot = { lat: DEPOT_COORDS.lat, lng: DEPOT_COORDS.lng };
+  let tourNumber = 1;
+
+  const buildRoute = (stops: any[]) => {
+    // Nearest neighbor + 2-opt innerhalb eines Clusters
+    const unvisited = stops.map((_, i) => i);
+    const route: number[] = [];
+    let cur = depot;
+    while (unvisited.length) {
+      let bestIdx = 0, bestD = Infinity;
+      for (let ix = 0; ix < unvisited.length; ix++) {
+        const i = unvisited[ix];
+        const d = calcDistance(cur.lat, cur.lng, stops[i].coords.lat, stops[i].coords.lng);
+        if (d < bestD) { bestD = d; bestIdx = ix; }
       }
-
-      // Check Angle Cone
-      if (currentTourStops.length > 0) {
-        const newMin = Math.min(minBearing, bearing);
-        const newMax = Math.max(maxBearing, bearing);
-        const coneSize = newMax - newMin;
-        
-        if (coneSize > MAX_CONE_ANGLE) {
-           break;
+      const pick = unvisited.splice(bestIdx, 1)[0];
+      route.push(pick);
+      cur = stops[pick].coords;
+    }
+    // 2-opt
+    const dist = (i: number, j: number) => {
+      const a = stops[route[i]].coords;
+      const b = stops[route[j]].coords;
+      return calcDistance(a.lat, a.lng, b.lat, b.lng);
+    };
+    let improved = true;
+    while (improved) {
+      improved = false;
+      for (let i = 1; i < route.length - 2; i++) {
+        for (let k = i + 1; k < route.length - 1; k++) {
+          const delta = (dist(i - 1, i) + dist(k, k + 1)) - (dist(i - 1, k) + dist(i, k + 1));
+          if (delta > 0.05) {
+            const rev = route.slice(i, k + 1).reverse();
+            route.splice(i, k - i + 1, ...rev);
+            improved = true;
+          }
         }
-        
-        minBearing = newMin;
-        maxBearing = newMax;
-      } else {
-        minBearing = bearing;
-        maxBearing = bearing;
       }
-
-      currentTourStops.push(order);
-      currentWeight += order.totalWeightKg;
-      i++;
     }
+    return route.map(idx => stops[idx]);
+  };
 
-    // Check Efficiency
-    // Minimum load logic: 60% of capacity OR total weight > 60% of standard sprinter (fallback safety)
-    const utilization = currentWeight / maxVehicleCapacity;
-    const isHeavyEnough = currentWeight > (maxVehicleCapacity * 0.6);
+  Object.values(byRegion).forEach(group => {
+    if (!group.length) return;
+    // Bei Bedarf nach Gewicht splitten
+    let remaining = [...group];
+    while (remaining.length) {
+      let bucket: any[] = [];
+      let w = 0;
+      // sortiere grob nach Nähe zum Depot
+      remaining.sort((a, b) => calcDistance(depot.lat, depot.lng, a.coords.lat, a.coords.lng) - calcDistance(depot.lat, depot.lng, b.coords.lat, b.coords.lng));
+      for (const o of [...remaining]) {
+        if (w + o.totalWeightKg <= maxVehicleCapacity || bucket.length === 0) {
+          bucket.push(o);
+          w += o.totalWeightKg;
+        }
+      }
+      // remove bucket from remaining
+      remaining = remaining.filter(o => !bucket.includes(o));
 
-    if (currentTourStops.length > 0 && (utilization >= MIN_UTILIZATION_THRESHOLD || isHeavyEnough)) {
-      generatedTours.push(createTour(generatedTours.length + 1, currentTourStops, currentWeight, maxVehicleCapacity));
-      index = i; // Advance
-    } else {
-      index++; // Skip order
+      const route = buildRoute(bucket);
+      const totalW = route.reduce((s, o) => s + (o.totalWeightKg || 0), 0);
+      const estKm = route.reduce((sum, o, idx) => {
+        const prev = idx === 0 ? depot : route[idx - 1].coords;
+        return sum + calcDistance(prev.lat, prev.lng, o.coords.lat, o.coords.lng);
+      }, 0) * 1.3;
+
+      const last = route[route.length - 1];
+      const regionName = `${last.shippingCity || last.shippingPostcode}`;
+
+      generatedTours.push({
+        id: uuidv4(),
+        name: `${tourNumber}. ${regionName}`,
+        date: new Date().toISOString().split('T')[0],
+        status: TourStatus.PLANNING,
+        stops: route,
+        totalWeight: totalW,
+        maxWeight: maxVehicleCapacity,
+        utilization: Math.round((totalW / maxVehicleCapacity) * 100),
+        estimatedDistanceKm: Math.round(estKm),
+        vehiclePlate: ''
+      });
+      tourNumber++;
     }
-  }
+  });
 
-  // Fallback: wenn nichts generiert wurde, dennoch in Kapazitäts-Buckets packen
+  // Fallback: wenn nichts generiert wurde
   if (generatedTours.length === 0 && validOrders.length > 0) {
     const sortedByWeight = [...validOrders].sort((a, b) => b.totalWeightKg - a.totalWeightKg);
     let bucket: Order[] = [];
