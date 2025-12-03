@@ -124,31 +124,85 @@ export const optimizeTours = (orders: Order[], maxVehicleCapacity: number = 1300
 };
 
 const createTour = (num: number, stops: Order[], weight: number, capacity: number): Tour => {
-  // 5. Final Sorting: Distance from Depot
-  const sortedStops = [...stops].sort((a, b) => (a.distanceFromDepot || 0) - (b.distanceFromDepot || 0));
+  if (!stops.length) {
+    return {
+      id: uuidv4(),
+      name: `${num}. Leer`,
+      date: new Date().toISOString().split('T')[0],
+      status: TourStatus.PLANNING,
+      stops: [],
+      totalWeight: 0,
+      maxWeight: capacity,
+      utilization: 0,
+      estimatedDistanceKm: 0,
+      vehiclePlate: ''
+    };
+  }
 
-  // Calculate Cumulative Distance (Depot -> Stop 1 -> Stop 2 ...)
-  let totalDist = 0;
-  let prevLat = DEPOT_COORDS.lat;
-  let prevLng = DEPOT_COORDS.lng;
-
-  sortedStops.forEach(stop => {
-    const plzRegion = stop.shippingPostcode.substring(0, 2);
+  // Build coords from PLZ regions
+  const withCoords = stops.map(s => {
+    const plzRegion = s.shippingPostcode.substring(0, 2);
     const coords = PLZ_REGION_COORDS[plzRegion] || { lat: 51.0, lng: 10.0 };
-    
-    const segmentDist = calcDistance(prevLat, prevLng, coords.lat, coords.lng);
-    totalDist += segmentDist;
-    
-    prevLat = coords.lat;
-    prevLng = coords.lng;
+    return { stop: s, coords };
   });
 
-  // Apply Road Factor (approx 1.3x for highway/roads vs air distance)
+  // Nearest neighbor order + simple 2-opt
+  const unvisited = withCoords.map((_, i) => i);
+  const route: number[] = [];
+  let curLat = DEPOT_COORDS.lat;
+  let curLng = DEPOT_COORDS.lng;
+  while (unvisited.length) {
+    let bestIdx = 0;
+    let bestD = Infinity;
+    for (let ix = 0; ix < unvisited.length; ix++) {
+      const i = unvisited[ix];
+      const d = calcDistance(curLat, curLng, withCoords[i].coords.lat, withCoords[i].coords.lng);
+      if (d < bestD) { bestD = d; bestIdx = ix; }
+    }
+    const pick = unvisited.splice(bestIdx, 1)[0];
+    route.push(pick);
+    curLat = withCoords[pick].coords.lat;
+    curLng = withCoords[pick].coords.lng;
+  }
+
+  const twoOptRoute = (order: number[]) => {
+    const dist = (i: number, j: number) => {
+      const a = withCoords[order[i]].coords;
+      const b = withCoords[order[j]].coords;
+      return calcDistance(a.lat, a.lng, b.lat, b.lng);
+    };
+    let improved = true;
+    while (improved) {
+      improved = false;
+      for (let i = 1; i < order.length - 2; i++) {
+        for (let k = i + 1; k < order.length - 1; k++) {
+          const delta = (dist(i - 1, i) + dist(k, k + 1)) - (dist(i - 1, k) + dist(i, k + 1));
+          if (delta > 0.05) {
+            const rev = order.slice(i, k + 1).reverse();
+            order = [...order.slice(0, i), ...rev, ...order.slice(k + 1)];
+            improved = true;
+          }
+        }
+      }
+    }
+    return order;
+  };
+
+  const optimizedOrder = twoOptRoute(route);
+  const sortedStops = optimizedOrder.map(idx => withCoords[idx].stop);
+
+  // Distance estimation
+  let totalDist = 0;
+  let prev = { lat: DEPOT_COORDS.lat, lng: DEPOT_COORDS.lng };
+  optimizedOrder.forEach(idx => {
+    const c = withCoords[idx].coords;
+    totalDist += calcDistance(prev.lat, prev.lng, c.lat, c.lng);
+    prev = c;
+  });
   const estimatedRealDistance = Math.round(totalDist * 1.3);
 
   const utilization = Math.round((weight / capacity) * 100);
   const lastStop = sortedStops[sortedStops.length - 1];
-  
   const regionName = `${lastStop.shippingCity} (${lastStop.shippingPostcode.substring(0, 2)}...)`;
 
   return {
@@ -158,8 +212,8 @@ const createTour = (num: number, stops: Order[], weight: number, capacity: numbe
     status: TourStatus.PLANNING,
     stops: sortedStops,
     totalWeight: weight,
-    maxWeight: capacity, // Store the capacity used for planning
-    utilization: utilization,
+    maxWeight: capacity,
+    utilization,
     estimatedDistanceKm: estimatedRealDistance,
     vehiclePlate: '' 
   };

@@ -140,6 +140,21 @@ const Planning = () => {
     setBenniIntent(null);
   };
 
+  const applyBenniAction = () => {
+    if (!benniIntent) return;
+    const msg = benniIntent === 'replan'
+      ? 'Benni wird alle offenen Touren neu planen (LOCKED bleibt). Fortfahren?'
+      : 'Benni plant die offenen Aufträge automatisch. Fortfahren?';
+    if (!window.confirm(msg)) return;
+    if (benniIntent === 'replan') {
+      handleBenniReplanAll();
+    } else {
+      handleAutoPlan();
+    }
+    setBenniActionPending(false);
+    setBenniIntent(null);
+  };
+
   const submitFeedback = async (tourId: string, rating: 'UP' | 'DOWN', comment?: string) => {
     if (!tourId) return;
     if (!supabase) {
@@ -633,24 +648,16 @@ const Planning = () => {
           {benniReply && (
             <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2 space-y-2 flex-1 overflow-y-auto pr-1">
               <div className="min-h-[60px]">{benniReply}</div>
-              <div className="space-y-2">
-                {benniActionPending && filteredPool.length > 0 && benniIntent === 'auto' && (
+              {benniActionPending && benniIntent && (
+                <div className="space-y-2">
                   <button
-                    onClick={handleBenniAutoPlan}
-                    className="w-full bg-brand-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-brand-700"
+                    onClick={applyBenniAction}
+                    className={`w-full py-2 rounded-lg text-sm font-semibold shadow ${benniIntent === 'replan' ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-brand-600 text-white hover:bg-brand-700'}`}
                   >
-                    Offene Aufträge automatisch planen
+                    Vorschlag anwenden ({benniIntent === 'replan' ? 'Neu planen' : 'Auto-Plan'})
                   </button>
-                )}
-                {benniActionPending && benniIntent === 'replan' && (
-                  <button
-                    onClick={handleBenniReplanAll}
-                    className="w-full bg-slate-900 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-800"
-                  >
-                    Neu planen (LOCKED bleibt)
-                  </button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           )}
         </div>
