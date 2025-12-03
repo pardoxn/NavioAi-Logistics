@@ -4,7 +4,7 @@ import { useData } from '../context/DataContext';
 import { optimizeTours } from '../services/optimizerService';
 import { generateCMRBundle } from '../services/pdfService';
 import { TourStatus, Order, Tour, FreightStatus } from '../types';
-import { Map, Truck, Lock, Unlock, FileText, Play, AlertTriangle, MapPin, Layers, Calculator, Trash2, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, X, Search, Filter, CheckCircle2, Pencil, Download, Navigation, Copy, RefreshCw, CheckSquare, Square, ThumbsUp, Globe, ChevronDown } from 'lucide-react';
+import { Map, Truck, Lock, Unlock, FileText, Play, AlertTriangle, MapPin, Layers, Calculator, Trash2, X, Search, Filter, CheckCircle2, Pencil, Download, Navigation, Copy, RefreshCw, CheckSquare, Square, ThumbsUp, Globe, ChevronDown } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import Papa from 'papaparse';
 import TourMap from '../components/TourMap';
@@ -46,6 +46,23 @@ const Planning = () => {
   const [feedbackNotes, setFeedbackNotes] = useState<string>('');
   const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [feedbackModal, setFeedbackModal] = useState<{ open: boolean; tourId?: string; rating?: 'UP' | 'DOWN'; comment?: string }>({ open: false, comment: '' });
+  const [dragItem, setDragItem] = useState<{ id: string; sourceTourId: string | null }>({ id: '', sourceTourId: null });
+
+  const handleAddEmptyTour = () => {
+    const num = tours.length + 1;
+    addTour({
+      id: uuidv4(),
+      name: `${num}. Manuell`,
+      date: new Date().toISOString().split('T')[0],
+      status: TourStatus.PLANNING,
+      stops: [],
+      totalWeight: 0,
+      maxWeight: vehicleCapacity,
+      utilization: 0,
+      estimatedDistanceKm: 0,
+      vehiclePlate: ''
+    });
+  };
 
   // Check for highlight requests from navigation
   useEffect(() => {
@@ -153,6 +170,38 @@ const Planning = () => {
     }
     setBenniActionPending(false);
     setBenniIntent(null);
+  };
+
+  // --- Drag & Drop Helpers ---
+  const handleDragStartStop = (e: React.DragEvent, orderId: string, sourceTourId: string | null) => {
+    setDragItem({ id: orderId, sourceTourId });
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDropOnTour = (e: React.DragEvent, tourId: string, targetIndex?: number) => {
+    e.preventDefault();
+    if (!dragItem.id) return;
+    if (dragItem.sourceTourId === tourId) {
+      // reorder innerhalb derselben Tour
+      const currentTour = tours.find(t => t.id === tourId);
+      if (!currentTour) return;
+      const fromIndex = currentTour.stops.findIndex(s => s.id === dragItem.id);
+      const toIndex = typeof targetIndex === 'number' ? targetIndex : currentTour.stops.length - 1;
+      if (fromIndex > -1 && toIndex > -1 && fromIndex !== toIndex) {
+        reorderTourStops(tourId, fromIndex, toIndex);
+      }
+    } else {
+      // aus Pool oder anderer Tour einfügen
+      moveOrderToTour(dragItem.id, tourId, targetIndex ?? 0);
+    }
+    setDragItem({ id: '', sourceTourId: null });
+  };
+
+  const handleDropOnPool = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!dragItem.id) return;
+    moveOrderToPool(dragItem.id);
+    setDragItem({ id: '', sourceTourId: null });
   };
 
   const submitFeedback = async (tourId: string, rating: 'UP' | 'DOWN', comment?: string) => {
@@ -415,18 +464,6 @@ const Planning = () => {
     moveOrderToPool(orderId);
   };
 
-  const handleMoveStopUp = (tourId: string, index: number) => {
-    if (index > 0) {
-      reorderTourStops(tourId, index, index - 1);
-    }
-  };
-
-  const handleMoveStopDown = (tourId: string, index: number, totalStops: number) => {
-    if (index < totalStops - 1) {
-      reorderTourStops(tourId, index, index + 1);
-    }
-  };
-
   const handleSaveEdit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingOrder) {
@@ -559,6 +596,12 @@ const Planning = () => {
               >
                 <Play size={16} fill="currentColor" />
                 <span className="hidden md:inline">Auto-Plan</span>
+              </button>
+              <button
+                onClick={handleAddEmptyTour}
+                className="justify-center px-4 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-50 text-sm font-semibold flex items-center gap-2 transition-all shadow-sm active:scale-95"
+              >
+                + Leere Tour
               </button>
             </div>
           </div>
@@ -732,7 +775,11 @@ const Planning = () => {
             )}
           </div>
           
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar relative">
+          <div 
+            className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar relative"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDropOnPool}
+          >
             {filteredPool.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-slate-300 p-8 text-center select-none">
                 <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
@@ -745,6 +792,8 @@ const Planning = () => {
               filteredPool.map(order => (
                 <div 
                   key={order.id} 
+                  draggable
+                  onDragStart={(e) => handleDragStartStop(e, order.id, null)}
                   className={`group p-3.5 rounded-xl border shadow-sm relative transition-all duration-200 ${
                     selectedPoolItems.has(order.id) 
                       ? 'bg-brand-50 border-brand-200' 
@@ -971,9 +1020,17 @@ const Planning = () => {
                     </div>
 
                     {/* Stops List */}
-                    <div className={`flex-1 p-0 overflow-hidden ${isLocked ? 'bg-amber-50/10' : 'bg-white'}`}>
+                    <div 
+                      className={`flex-1 p-0 overflow-hidden ${isLocked ? 'bg-amber-50/10' : 'bg-white'}`}
+                      onDragOver={(e) => !isLocked && e.preventDefault()}
+                      onDrop={(e) => !isLocked && handleDropOnTour(e, tour.id, tour.stops.length)}
+                    >
                       <table className="w-full text-sm text-left">
-                        <tbody className="divide-y divide-slate-50">
+                        <tbody 
+                          className="divide-y divide-slate-50"
+                          onDragOver={(e) => !isLocked && e.preventDefault()}
+                          onDrop={(e) => !isLocked && handleDropOnTour(e, tour.id, tour.stops.length)}
+                        >
                            <tr className="bg-slate-50/30 text-xs text-slate-400 select-none">
                               <td className="pl-4 py-2 w-8 text-center"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mx-auto"></div></td>
                               <td className="py-2 font-medium">Bad Wünnenberg (Start)</td>
@@ -983,28 +1040,16 @@ const Planning = () => {
                            {tour.stops.map((stop, i) => (
                              <tr 
                                key={stop.id} 
-                               className="hover:bg-brand-50/10 transition-colors group"
+                               draggable={!isLocked}
+                               onDragStart={(e) => !isLocked && handleDragStartStop(e, stop.id, tour.id)}
+                               onDragOver={(e) => { if (!isLocked) e.preventDefault(); }}
+                               onDrop={(e) => !isLocked && handleDropOnTour(e, tour.id, i)}
+                               className={`hover:bg-brand-50/10 transition-colors group ${isLocked ? 'opacity-70' : ''}`}
                              >
-                                {/* Sorting Controls */}
                                 <td className="pl-3 py-3 w-8 align-middle">
-                                  {!isLocked && (
-                                    <div className="flex flex-col items-center gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
-                                      <button 
-                                        onClick={() => handleMoveStopUp(tour.id, i)}
-                                        disabled={i === 0}
-                                        className="p-0.5 hover:text-brand-600 disabled:opacity-30 disabled:hover:text-inherit"
-                                      >
-                                        <ArrowUp size={12} />
-                                      </button>
-                                      <button 
-                                        onClick={() => handleMoveStopDown(tour.id, i, tour.stops.length)}
-                                        disabled={i === tour.stops.length - 1}
-                                        className="p-0.5 hover:text-brand-600 disabled:opacity-30 disabled:hover:text-inherit"
-                                      >
-                                        <ArrowDown size={12} />
-                                      </button>
-                                    </div>
-                                  )}
+                                  <div className="flex flex-col items-center gap-1 text-[10px] text-slate-400">
+                                    #{i+1}
+                                  </div>
                                 </td>
 
                                 {/* Stop Content */}
@@ -1043,7 +1088,7 @@ const Planning = () => {
                                             className="text-slate-300 hover:text-red-500 hover:bg-red-50 p-1 rounded transition-colors"
                                             title="Zurück in den Pool"
                                           >
-                                            <ArrowLeft size={14} />
+                                            <Trash2 size={14} />
                                           </button>
                                       </div>
                                     )}
@@ -1051,6 +1096,15 @@ const Planning = () => {
                                 </td>
                              </tr>
                            ))}
+                           {!isLocked && (
+                             <tr 
+                               onDragOver={(e) => e.preventDefault()} 
+                               onDrop={(e) => handleDropOnTour(e, tour.id, tour.stops.length)}
+                               className="text-center text-xs text-slate-400"
+                             >
+                               <td colSpan={3} className="py-3 italic">Hierher ziehen, um am Ende einzufügen</td>
+                             </tr>
+                           )}
                         </tbody>
                       </table>
                     </div>
@@ -1298,7 +1352,7 @@ const Planning = () => {
                      onClick={confirmDissolve}
                      className="w-full py-3 px-4 bg-brand-50 text-brand-700 font-bold rounded-xl hover:bg-brand-100 transition-colors flex items-center justify-center gap-2"
                    >
-                     <ArrowLeft size={18} />
+                     <RefreshCw size={18} />
                      Nur Auflösen (Pool)
                    </button>
                    <button 
