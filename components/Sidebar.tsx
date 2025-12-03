@@ -3,7 +3,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { LayoutDashboard, Truck, Package, Users, LogOut, FileSpreadsheet, Archive, Disc, History, MessageSquare, Settings as SettingsIcon, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Truck, Package, Users, LogOut, FileSpreadsheet, Archive, Disc, History, MessageSquare, Settings as SettingsIcon, BookOpen, Route } from 'lucide-react';
 import Logo from './Logo';
 import NotificationBell from './NotificationBell';
 import { UserRole } from '../types';
@@ -103,6 +103,14 @@ const Sidebar = () => {
                 <>
                   <Disc size={18} className={isActive ? "text-cyan-400 animate-spin-slow" : ""} />
                   Tourenplanung
+                </>
+              )}
+            </NavLink>
+            <NavLink to="/planning-v2" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Route size={18} className={isActive ? "text-emerald-400" : ""} />
+                  Tourenplanung V2
                 </>
               )}
             </NavLink>

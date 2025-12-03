@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Truck, Package, Archive, LogOut, MessageSquare, Settings, BookOpen, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Truck, Package, Archive, LogOut, MessageSquare, Settings, BookOpen, Menu, X, Route } from 'lucide-react';
 import Logo from './Logo';
 
 const MobileNav = () => {
@@ -89,6 +89,14 @@ const MobileNav = () => {
                       <>
                         <Truck size={18} className={isActive ? "text-brand-600" : ""} />
                         Tourenplanung
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/planning-v2" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Route size={18} className={isActive ? "text-emerald-500" : ""} />
+                        Tourenplanung V2
                       </>
                     )}
                   </NavLink>

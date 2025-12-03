@@ -14,6 +14,7 @@ import Archive from './pages/Archive';
 import Activities from './pages/Activities';
 import Team from './pages/Team';
 import Settings from './pages/Settings';
+import PlanningV2 from './pages/PlanningV2';
 import Signup from './pages/Signup';
 import Terms from './pages/Terms';
 import AdminPage from './pages/Admin';
@@ -57,6 +58,7 @@ const App = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/import" element={<Import />} />
               <Route path="/planning" element={<Planning />} />
+              <Route path="/planning-v2" element={<PlanningV2 />} />
               <Route path="/warehouse" element={<Warehouse />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/archive" element={<Archive />} />
