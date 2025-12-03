@@ -53,8 +53,9 @@ export const parseCSV = (file: File): Promise<Order[]> => {
               customerReferenceNumber: pick(row, ['Ihre Belegnummer', 'Kundenreferenz'], ''),
               documentDate: isoDate,
               
-              customerNumber: pick(row, ['Auftraggeber', 'Kunde', 'Kundennummer']),
-              customerName1: pick(row, ['Name 1 Auftraggeber', 'Auftraggeber', 'Matchcode Auftraggeber'], 'Kunde'),
+              customerNumber: pick(row, ['Kundennummer', 'Kunde', 'Auftraggeber']),
+              // Reihenfolge: Falls vorhanden, richtiger Name; sonst Matchcode; als Fallback die Nummer
+              customerName1: pick(row, ['Name 1 Auftraggeber', 'Matchcode Auftraggeber', 'Auftraggeber'], 'Kunde'),
               customerName2: pick(row, ['Name 2 Auftraggeber'], ''),
               customerMatchcode: pick(row, ['Matchcode Auftraggeber'], ''),
               customerGroupCode: pick(row, ['Kundengruppe_Wert'], ''),
