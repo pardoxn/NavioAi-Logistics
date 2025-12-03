@@ -4,7 +4,7 @@ import { useData } from '../context/DataContext';
 import { optimizeTours } from '../services/optimizerService';
 import { generateCMRBundle } from '../services/pdfService';
 import { TourStatus, Order, Tour, FreightStatus } from '../types';
-import { Map, Truck, Lock, Unlock, FileText, Play, AlertTriangle, MapPin, Layers, Calculator, Trash2, X, Search, Filter, CheckCircle2, Pencil, Download, Navigation, Copy, RefreshCw, CheckSquare, Square, ThumbsUp, Globe, ChevronDown } from 'lucide-react';
+import { Map, Truck, Lock, Unlock, FileText, Play, AlertTriangle, MapPin, Layers, Calculator, Trash2, X, Search, Filter, CheckCircle2, Pencil, Download, Navigation, Copy, RefreshCw, CheckSquare, Square, ThumbsUp, Globe, ChevronDown, ArrowRight } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import Papa from 'papaparse';
 import TourMap from '../components/TourMap';
