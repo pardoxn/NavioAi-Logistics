@@ -118,16 +118,28 @@ const Planning = () => {
 
       // Parse suggestions from JSON in reply
       try {
-        const jsonMatch = reply.match(/```json([\\s\\S]*?)```/i) || reply.match(/\\{[\\s\\S]*\\}/);
-        if (jsonMatch) {
-          const raw = jsonMatch[1] || jsonMatch[0];
+        let raw: string | null = null;
+        const matchCode = reply.match(/```json([\s\S]*?)```/i);
+        if (matchCode && matchCode[1]) {
+          raw = matchCode[1];
+        } else {
+          const first = reply.indexOf('{');
+          const last = reply.lastIndexOf('}');
+          if (first > -1 && last > first) {
+            raw = reply.slice(first, last + 1);
+          }
+        }
+        if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed?.suggestions && Array.isArray(parsed.suggestions)) {
             setBenniSuggestions(parsed.suggestions);
+          } else {
+            setBenniSuggestions([]);
           }
         }
       } catch (e) {
         console.warn('Konnte Benni-Vorschläge nicht parsen', e);
+        setBenniSuggestions([]);
       }
     } catch (e: any) {
       setBenniReply('Benni hat gerade ein Problem.');
