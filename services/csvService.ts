@@ -11,51 +11,64 @@ export const parseCSV = (file: File): Promise<Order[]> => {
       complete: (results) => {
         const parsedOrders: Order[] = [];
         
+        const pick = (row: any, keys: string[], fallback: string = '') => {
+          for (const k of keys) {
+            if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') {
+              return row[k];
+            }
+          }
+          return fallback;
+        };
+
         results.data.forEach((row: any) => {
           // 1. Filter Logic: Only 'Lieferschein' (Delivery Note)
-          const docType = row['Belegart'] || '';
-          if (!docType.toLowerCase().includes('lieferschein')) {
+          const docType = (row['Belegart'] || '').toString().toLowerCase();
+          if (!docType.includes('lieferschein')) {
             return;
           }
 
           // 2. Map Fields
           try {
-            const weightRaw = row['Gesamtgewicht in kg'] || '0';
+            const weightRaw = pick(row, ['Gesamtgewicht in kg', 'Gewicht', 'Gewicht in kg'], '0');
             const weight = parseFloat(weightRaw.toString().replace(',', '.'));
 
-            const dateRaw = row['Belegdatum'] || '';
+            const dateRaw = pick(row, ['Belegdatum', 'Datum'], '');
             // Simple date parsing assuming DD.MM.YYYY which is common in DACH CSVs
             let isoDate = dateRaw;
+            let derivedYear = '';
             if (dateRaw.includes('.')) {
               const [d, m, y] = dateRaw.split('.');
               isoDate = `${y}-${m}-${d}`;
+              derivedYear = y;
+            } else if (dateRaw.includes('-')) {
+              derivedYear = dateRaw.split('-')[0];
             }
 
             const order: Order = {
               id: uuidv4(),
-              orderId: row['Vorgang'],
-              documentNumber: row['Belegnummer'],
-              documentYear: row['Jahr'],
+              orderId: pick(row, ['Vorgang', 'Auftragsnummer', 'Belegnummer'], uuidv4()),
+              documentNumber: pick(row, ['Belegnummer', 'Vorgang'], uuidv4()),
+              documentYear: pick(row, ['Jahr'], derivedYear || new Date().getFullYear().toString()),
               documentType: row['Belegart'],
-              customerReferenceNumber: row['Ihre Belegnummer'],
+              customerReferenceNumber: pick(row, ['Ihre Belegnummer', 'Kundenreferenz'], ''),
               documentDate: isoDate,
               
-              customerNumber: row['Auftraggeber'],
-              customerName1: row['Name 1 Auftraggeber'],
-              customerName2: row['Name 2 Auftraggeber'],
-              customerMatchcode: row['Matchcode Auftraggeber'],
-              customerGroupCode: row['Kundengruppe_Wert'],
-              customerGroupName: row['Kundengruppe_Bezeichnung'],
+              customerNumber: pick(row, ['Auftraggeber', 'Kunde', 'Kundennummer']),
+              customerName1: pick(row, ['Name 1 Auftraggeber', 'Auftraggeber', 'Matchcode Auftraggeber'], 'Kunde'),
+              customerName2: pick(row, ['Name 2 Auftraggeber'], ''),
+              customerMatchcode: pick(row, ['Matchcode Auftraggeber'], ''),
+              customerGroupCode: pick(row, ['Kundengruppe_Wert'], ''),
+              customerGroupName: pick(row, ['Kundengruppe_Bezeichnung'], ''),
 
-              shippingCountryCode: row['Land Lieferanschrift_Wert'],
-              shippingCountryName: row['Land Lieferanschrift_Bezeichnung'],
-              shippingPostcode: row['PLZ Lieferanschrift'],
-              shippingCity: row['Ort Lieferanschrift'],
-              shippingStreet: row['Strasse Lieferanschrift'] || '', // inferred
+              shippingCountryCode: pick(row, ['Land Lieferanschrift_Wert'], 'DE'),
+              shippingCountryName: pick(row, ['Land Lieferanschrift_Bezeichnung'], 'Deutschland'),
+              shippingPostcode: pick(row, ['PLZ Lieferanschrift', 'PLZ', 'Postleitzahl'], ''),
+              shippingCity: pick(row, ['Ort Lieferanschrift', 'Ort', 'Stadt'], ''),
+              shippingStreet: pick(row, ['Strasse Lieferanschrift', 'Straße', 'Strasse'], ''), // inferred
 
               totalWeightKg: isNaN(weight) ? 0 : weight,
-              shippingMethodCode: row['Versandart_Wert'],
-              shippingMethodName: row['Versandart_Bezeichnung'],
+              shippingMethodCode: pick(row, ['Versandart_Wert'], ''),
+              shippingMethodName: pick(row, ['Versandart_Bezeichnung'], ''),
 
               isPlanned: false,
               
