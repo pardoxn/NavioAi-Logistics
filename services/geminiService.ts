@@ -65,8 +65,24 @@ export const askBenni = async (prompt: string, orders: Order[] = [], feedbackNot
 
   const contents = `
     Du bist Benni, ein freundlicher Logistik-Assistent. Antworte kurz und prägnant.
-    Falls der Nutzer Tourenplanung möchte, schlage 1-2 sinnvolle Touren vor oder beschreibe Umbauten.
     LOCKED-Touren dürfen NICHT verändert werden, nur offene.
+    Gib bitte genau EIN Review und mehrere einzel-anwendbare Vorschläge als JSON.
+    JSON-Format:
+    {
+      "summary": "kurze Bewertung",
+      "suggestions": [
+        {
+          "id": "v1",
+          "title": "kurzer Titel",
+          "actions": [
+            { "type": "moveStop", "city": "Münstertal", "postcode": "79244", "fromTour": "Münstertal", "toTour": "Schwarzwald" },
+            { "type": "mergeTours", "from": "Riegel", "to": "Schwarzwald" }
+          ]
+        }
+      ]
+    }
+    Zulässige Action-Typen: moveStop (Stop von Tour A nach Tour B), mergeTours (Stops von Tour A in Tour B übernehmen), moveToPool (Stop zurück in Pool).
+    Wenn du dir unsicher bist, setze nur summary und eine leere suggestions-Liste.
     Beachte sämtliches vorhandenes Feedback (positiv/negativ) aus vergangenen Touren:
     ${feedbackNotes || 'Kein Feedback übergeben.'}
 

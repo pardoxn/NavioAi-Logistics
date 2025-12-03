@@ -43,6 +43,7 @@ const Planning = () => {
   const [benniLoading, setBenniLoading] = useState(false);
   const [benniActionPending, setBenniActionPending] = useState(false);
   const [benniIntent, setBenniIntent] = useState<'auto' | 'replan' | null>(null);
+  const [benniSuggestions, setBenniSuggestions] = useState<Array<{id:string; title:string; actions:any[]}>>([]);
   const [feedbackNotes, setFeedbackNotes] = useState<string>('');
   const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [feedbackModal, setFeedbackModal] = useState<{ open: boolean; tourId?: string; rating?: 'UP' | 'DOWN'; comment?: string }>({ open: false, comment: '' });
@@ -100,6 +101,7 @@ const Planning = () => {
     setBenniReply('');
     setBenniActionPending(false);
     setBenniIntent(null);
+    setBenniSuggestions([]);
     try {
       const reply = await askBenni(benniInput, allUnplannedOrders, feedbackNotes, tours);
       setBenniReply(reply || 'Keine Antwort erhalten.');
@@ -112,6 +114,20 @@ const Planning = () => {
         setBenniIntent('auto');
       } else {
         setBenniIntent(null);
+      }
+
+      // Parse suggestions from JSON in reply
+      try {
+        const jsonMatch = reply.match(/```json([\\s\\S]*?)```/i) || reply.match(/\\{[\\s\\S]*\\}/);
+        if (jsonMatch) {
+          const raw = jsonMatch[1] || jsonMatch[0];
+          const parsed = JSON.parse(raw);
+          if (parsed?.suggestions && Array.isArray(parsed.suggestions)) {
+            setBenniSuggestions(parsed.suggestions);
+          }
+        }
+      } catch (e) {
+        console.warn('Konnte Benni-Vorschläge nicht parsen', e);
       }
     } catch (e: any) {
       setBenniReply('Benni hat gerade ein Problem.');
@@ -171,6 +187,34 @@ const Planning = () => {
     }
     setBenniActionPending(false);
     setBenniIntent(null);
+  };
+
+  const applyBenniSuggestion = (suggestionId: string) => {
+    const suggestion = benniSuggestions.find(s => s.id === suggestionId);
+    if (!suggestion) return;
+    suggestion.actions?.forEach((act: any) => {
+      const type = (act.type || '').toLowerCase();
+      if (type === 'merge' || type === 'mergetours') {
+        // merge: move all stops from source to target, then delete source
+        const target = tours.find(t => t.name.toLowerCase().includes((act.to || '').toLowerCase()));
+        const source = tours.find(t => t.name.toLowerCase().includes((act.from || '').toLowerCase()));
+        if (target && source && source.id !== target.id) {
+          source.stops.forEach((s) => moveOrderToTour(s.id, target.id, target.stops.length));
+          deleteTour(source.id);
+        }
+      } else if (type === 'movestop' || type === 'move') {
+        const city = (act.city || '').toLowerCase();
+        const pc = (act.postcode || '').replace(/\\s/g, '');
+        const stop = tours.flatMap(t => t.stops).find(s => (s.shippingCity || '').toLowerCase().includes(city) || s.shippingPostcode.replace(/\\s/g,'') === pc);
+        const target = tours.find(t => t.name.toLowerCase().includes((act.totour || act.to || '').toLowerCase()));
+        if (stop && target) moveOrderToTour(stop.id, target.id, target.stops.length);
+      } else if (type === 'movetopool') {
+        const city = (act.city || '').toLowerCase();
+        const pc = (act.postcode || '').replace(/\\s/g, '');
+        const stop = tours.flatMap(t => t.stops).find(s => (s.shippingCity || '').toLowerCase().includes(city) || s.shippingPostcode.replace(/\\s/g,'') === pc);
+        if (stop) moveOrderToPool(stop.id);
+      }
+    });
   };
 
   // --- Drag & Drop Helpers ---
@@ -693,9 +737,25 @@ const Planning = () => {
             >
               {benniLoading ? 'Denkt...' : benniIntent === 'replan' ? 'Neu planen' : benniIntent === 'auto' ? 'Auto-Plan' : 'Benni starten'}
             </button>
-          {benniReply && (
-            <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2 space-y-2 flex-1 overflow-y-auto pr-1">
+            {benniReply && (
+            <div className="text-sm text-slate-700 whitespace-pre-line border-t border-slate-100 pt-2 space-y-3 flex-1 overflow-y-auto pr-1">
               <div className="min-h-[60px]">{benniReply}</div>
+              {benniSuggestions.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold text-slate-500">Benni-Empfehlungen (einzeln anwendbar)</div>
+                  {benniSuggestions.map(s => (
+                    <div key={s.id} className="border border-slate-200 rounded-lg p-2 bg-slate-50 flex items-center justify-between gap-2">
+                      <div className="text-sm font-semibold text-slate-700">{s.title || s.id}</div>
+                      <button
+                        onClick={() => applyBenniSuggestion(s.id)}
+                        className="px-3 py-1 bg-brand-600 text-white text-xs font-bold rounded-lg hover:bg-brand-700 active:scale-95"
+                      >
+                        Anwenden
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               {benniActionPending && benniIntent && (
                 <div className="space-y-2">
                   <button
