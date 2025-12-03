@@ -3,7 +3,7 @@ import { Order, Tour, TourStatus } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { DEPOT_COORDS, PLZ_REGION_COORDS } from '../constants';
 
-const MIN_UTILIZATION_THRESHOLD = 0.6; // 60%
+const MIN_UTILIZATION_THRESHOLD = 0.4; // 40% Mindestauslastung (weniger strikt, sonst fallen kleine Ladungen raus)
 const MAX_CONE_ANGLE = 40; // Degrees. Maximum spread of a tour sector.
 
 // --- Math Helpers ---
@@ -112,12 +112,34 @@ export const optimizeTours = (orders: Order[], maxVehicleCapacity: number = 1300
     const utilization = currentWeight / maxVehicleCapacity;
     const isHeavyEnough = currentWeight > (maxVehicleCapacity * 0.6);
 
-    if (utilization >= MIN_UTILIZATION_THRESHOLD || isHeavyEnough) {
+    if (currentTourStops.length > 0 && (utilization >= MIN_UTILIZATION_THRESHOLD || isHeavyEnough)) {
       generatedTours.push(createTour(generatedTours.length + 1, currentTourStops, currentWeight, maxVehicleCapacity));
       index = i; // Advance
     } else {
       index++; // Skip order
     }
+  }
+
+  // Fallback: wenn nichts generiert wurde, dennoch in Kapazitäts-Buckets packen
+  if (generatedTours.length === 0 && validOrders.length > 0) {
+    const sortedByWeight = [...validOrders].sort((a, b) => b.totalWeightKg - a.totalWeightKg);
+    let bucket: Order[] = [];
+    let w = 0;
+    let tourNum = 1;
+    const flush = () => {
+      if (!bucket.length) return;
+      generatedTours.push(createTour(tourNum++, bucket, w, maxVehicleCapacity));
+      bucket = [];
+      w = 0;
+    };
+    sortedByWeight.forEach(o => {
+      if (w + o.totalWeightKg > maxVehicleCapacity) {
+        flush();
+      }
+      bucket.push(o);
+      w += o.totalWeightKg;
+    });
+    flush();
   }
 
   return generatedTours;
