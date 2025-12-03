@@ -47,6 +47,7 @@ const Planning = () => {
   const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [feedbackModal, setFeedbackModal] = useState<{ open: boolean; tourId?: string; rating?: 'UP' | 'DOWN'; comment?: string }>({ open: false, comment: '' });
   const [dragItem, setDragItem] = useState<{ id: string; sourceTourId: string | null }>({ id: '', sourceTourId: null });
+  const [dragOverTour, setDragOverTour] = useState<string | null>(null);
 
   const handleAddEmptyTour = () => {
     const num = tours.length + 1;
@@ -181,6 +182,7 @@ const Planning = () => {
   const handleDropOnTour = (e: React.DragEvent, tourId: string, targetIndex?: number) => {
     e.preventDefault();
     if (!dragItem.id) return;
+    setDragOverTour(null);
     if (dragItem.sourceTourId === tourId) {
       // reorder innerhalb derselben Tour
       const currentTour = tours.find(t => t.id === tourId);
@@ -192,7 +194,9 @@ const Planning = () => {
       }
     } else {
       // aus Pool oder anderer Tour einfügen
-      moveOrderToTour(dragItem.id, tourId, targetIndex ?? 0);
+      const currentTour = tours.find(t => t.id === tourId);
+      const insertAt = typeof targetIndex === 'number' ? targetIndex : (currentTour ? currentTour.stops.length : 0);
+      moveOrderToTour(dragItem.id, tourId, insertAt);
     }
     setDragItem({ id: '', sourceTourId: null });
   };
@@ -202,6 +206,7 @@ const Planning = () => {
     if (!dragItem.id) return;
     moveOrderToPool(dragItem.id);
     setDragItem({ id: '', sourceTourId: null });
+    setDragOverTour(null);
   };
 
   const submitFeedback = async (tourId: string, rating: 'UP' | 'DOWN', comment?: string) => {
@@ -898,8 +903,14 @@ const Planning = () => {
                       isHighlighted ? 'ring-4 ring-amber-300 scale-[1.02] shadow-xl z-20' : 
                       isLocked 
                         ? 'bg-amber-50/20 border-amber-300 ring-1 ring-amber-300/50' 
-                        : 'bg-white border-slate-200'
+                        : dragOverTour === tour.id
+                          ? 'border-brand-300 ring-2 ring-brand-200 bg-brand-50/30'
+                          : 'bg-white border-slate-200'
                     }`}
+                    onDragOver={(e) => { if (!isLocked) { e.preventDefault(); setDragOverTour(tour.id); } }}
+                    onDragEnter={(e) => { if (!isLocked) { e.preventDefault(); setDragOverTour(tour.id); } }}
+                    onDragLeave={() => setDragOverTour(null)}
+                    onDrop={(e) => !isLocked && handleDropOnTour(e, tour.id, tour.stops.length)}
                   >
                     
                     {/* Tour Header */}
@@ -1026,11 +1037,7 @@ const Planning = () => {
                       onDrop={(e) => !isLocked && handleDropOnTour(e, tour.id, tour.stops.length)}
                     >
                       <table className="w-full text-sm text-left">
-                        <tbody 
-                          className="divide-y divide-slate-50"
-                          onDragOver={(e) => !isLocked && e.preventDefault()}
-                          onDrop={(e) => !isLocked && handleDropOnTour(e, tour.id, tour.stops.length)}
-                        >
+                        <tbody className="divide-y divide-slate-50">
                            <tr className="bg-slate-50/30 text-xs text-slate-400 select-none">
                               <td className="pl-4 py-2 w-8 text-center"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mx-auto"></div></td>
                               <td className="py-2 font-medium">Bad Wünnenberg (Start)</td>
