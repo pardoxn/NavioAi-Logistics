@@ -907,11 +907,10 @@ const Planning = () => {
                           ? 'border-brand-300 ring-2 ring-brand-200 bg-brand-50/30'
                           : 'bg-white border-slate-200'
                     }`}
-                    onDragOver={(e) => { if (!isLocked) { e.preventDefault(); setDragOverTour(tour.id); } }}
-                    onDragEnter={(e) => { if (!isLocked) { e.preventDefault(); setDragOverTour(tour.id); } }}
-                    onDragLeave={() => setDragOverTour(null)}
-                    onDrop={(e) => !isLocked && handleDropOnTour(e, tour.id, tour.stops.length)}
-                  >
+                      onDragOver={(e) => { if (!isLocked) { e.preventDefault(); setDragOverTour(tour.id); } }}
+                      onDragEnter={(e) => { if (!isLocked) { e.preventDefault(); setDragOverTour(tour.id); } }}
+                      onDragLeave={() => setDragOverTour(null)}
+                    >
                     
                     {/* Tour Header */}
                     <div className={`p-5 border-b border-dashed relative rounded-t-2xl ${
@@ -1034,7 +1033,6 @@ const Planning = () => {
                     <div 
                       className={`flex-1 p-0 overflow-hidden ${isLocked ? 'bg-amber-50/10' : 'bg-white'}`}
                       onDragOver={(e) => !isLocked && e.preventDefault()}
-                      onDrop={(e) => !isLocked && handleDropOnTour(e, tour.id, tour.stops.length)}
                     >
                       <table className="w-full text-sm text-left">
                         <tbody className="divide-y divide-slate-50">
@@ -1050,7 +1048,7 @@ const Planning = () => {
                                draggable={!isLocked}
                                onDragStart={(e) => !isLocked && handleDragStartStop(e, stop.id, tour.id)}
                                onDragOver={(e) => { if (!isLocked) e.preventDefault(); }}
-                               onDrop={(e) => !isLocked && handleDropOnTour(e, tour.id, i)}
+                               onDrop={(e) => { if (!isLocked) { e.preventDefault(); e.stopPropagation(); handleDropOnTour(e, tour.id, i); } }}
                                className={`hover:bg-brand-50/10 transition-colors group ${isLocked ? 'opacity-70' : ''}`}
                              >
                                 <td className="pl-3 py-3 w-8 align-middle">
@@ -1106,7 +1104,7 @@ const Planning = () => {
                            {!isLocked && (
                              <tr 
                                onDragOver={(e) => e.preventDefault()} 
-                               onDrop={(e) => handleDropOnTour(e, tour.id, tour.stops.length)}
+                               onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropOnTour(e, tour.id, tour.stops.length); }}
                                className="text-center text-xs text-slate-400"
                              >
                                <td colSpan={3} className="py-3 italic">Hierher ziehen, um am Ende einzufügen</td>
