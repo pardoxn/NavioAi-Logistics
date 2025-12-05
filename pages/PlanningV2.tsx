@@ -1,179 +1,214 @@
-import React, { useMemo, useState } from 'react';
-import { Route as RouteIcon, Zap, Info, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Route as RouteIcon, Info } from 'lucide-react';
 import { OrderInputV2 } from '../components/routemaster/OrderInputV2';
 import { TourResultV2 } from '../components/routemaster/TourResultV2';
-import { RMOrder, RMPlanningResult } from '../types/routemaster';
+import { RMOrder, RMPlanningResult, RMTour, RMStop } from '../types/routemaster';
 import { planToursV2 } from '../services/routemasterService';
-import { useData } from '../context/DataContext';
-import { Order } from '../types';
 
 const PlanningV2: React.FC = () => {
-  const { orders: ctxOrders } = useData();
-  const [manualOrders, setManualOrders] = useState<RMOrder[]>([]);
-  const [ignoredOrderIds, setIgnoredOrderIds] = useState<Set<string>>(new Set());
+  const [orders, setOrders] = useState<RMOrder[]>([]);
   const [results, setResults] = useState<RMPlanningResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const mappedContextOrders = useMemo(() => {
-    const mapAddress = (o: Order) => {
-      const street = o.shippingStreet ? `${o.shippingStreet}, ` : '';
-      const cityLine = `${o.shippingPostcode} ${o.shippingCity}`.trim();
-      const country = o.shippingCountryName && o.shippingCountryName !== 'Deutschland' ? `, ${o.shippingCountryName}` : '';
-      return `${street}${cityLine}${country}`.trim();
-    };
-
-    return ctxOrders
-      .filter((o) => !o.isPlanned)
-      .map((o) => ({
-        id: o.id,
-        address: mapAddress(o),
-        weight: Math.round(Number(o.totalWeightKg) || 0)
-      })) as RMOrder[];
-  }, [ctxOrders]);
-
-  const orders: RMOrder[] = useMemo(() => {
-    const ctx = mappedContextOrders.filter(o => !ignoredOrderIds.has(o.id));
-    return [...ctx, ...manualOrders];
-  }, [mappedContextOrders, ignoredOrderIds, manualOrders]);
-
   const handlePlanTours = async () => {
-    if (!orders.length) return;
+    const lockedTours = results?.tours.filter(t => t.isLocked) || [];
+    const unlockedTours = results?.tours.filter(t => !t.isLocked) || [];
+    
+    const existingOrdersFromUnlockedTours: RMOrder[] = [];
+    unlockedTours.forEach(tour => {
+        tour.stops.forEach(stop => {
+            existingOrdersFromUnlockedTours.push({
+                id: crypto.randomUUID(),
+                customerName: stop.customerName || 'Unbekannt',
+                address: stop.address,
+                weight: stop.weightToUnload,
+                referenceNumber: stop.referenceNumber
+            });
+        });
+    });
+
+    const allOrdersToPlan = [...orders, ...existingOrdersFromUnlockedTours];
+    if (allOrdersToPlan.length === 0 && lockedTours.length === 0) return;
+    
     setLoading(true);
     setError(null);
-    setResults(null);
+
     try {
-      const data = await planToursV2(orders);
-      setResults(data);
+      let newTours: RMTour[] = [];
+
+      if (allOrdersToPlan.length > 0) {
+        const data = await planToursV2(allOrdersToPlan);
+        newTours = data.tours;
+      }
+
+      const finalTours = [...lockedTours, ...newTours];
+      setResults({ tours: finalTours });
+      setOrders([]);
     } catch (err: any) {
-      setError(err?.message || "Fehler bei der Planung. Bitte Eingaben prüfen.");
+      setError(err?.message || "Fehler bei der Planung. Bitte überprüfen Sie Ihre Eingaben oder versuchen Sie es erneut.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleReset = () => {
+    if (results) {
+      const restoredOrders: RMOrder[] = [];
+      
+      results.tours.forEach(tour => {
+        tour.stops.forEach(stop => {
+          restoredOrders.push({
+            id: crypto.randomUUID(),
+            customerName: stop.customerName || 'Unbekannt',
+            address: stop.address,
+            weight: stop.weightToUnload,
+            referenceNumber: stop.referenceNumber
+          });
+        });
+      });
+
+      setOrders(prev => [...prev, ...restoredOrders]);
+    }
+
     setResults(null);
     setError(null);
   };
 
-  const handleAddManualOrder = (order: RMOrder) => {
-    setManualOrders((prev) => [...prev, order]);
-  };
-
-  const handleRemoveOrder = (orderId: string) => {
-    const manualExists = manualOrders.some((o) => o.id === orderId);
-    if (manualExists) {
-      setManualOrders((prev) => prev.filter((o) => o.id !== orderId));
-    } else {
-      setIgnoredOrderIds((prev) => {
-        const next = new Set(prev);
-        next.add(orderId);
-        return next;
+  const handleToursUpdate = (updatedTours: RMTour[]) => {
+    if (results) {
+      setResults({
+        ...results,
+        tours: updatedTours
       });
     }
   };
 
+  const handleToggleLock = (tourIndex: number) => {
+    if (!results) return;
+    
+    const newTours = [...results.tours];
+    newTours[tourIndex] = {
+        ...newTours[tourIndex],
+        isLocked: !newTours[tourIndex].isLocked
+    };
+    
+    setResults({ ...results, tours: newTours });
+  };
+
+  const handleMoveOrderToTour = (orderId: string, targetTourIndex: number) => {
+    if (!results) return;
+    if (results.tours[targetTourIndex].isLocked) return;
+
+    const orderIndex = orders.findIndex(o => o.id === orderId);
+    if (orderIndex === -1) return;
+    const order = orders[orderIndex];
+
+    const newStop: RMStop = {
+      stopNumber: 0,
+      customerName: order.customerName,
+      address: order.address,
+      weightToUnload: order.weight,
+      referenceNumber: order.referenceNumber,
+      description: "Manuell hinzugefügt"
+    };
+
+    const newOrders = [...orders];
+    newOrders.splice(orderIndex, 1);
+    setOrders(newOrders);
+
+    const newTours = [...results.tours];
+    const targetTour = newTours[targetTourIndex];
+    targetTour.stops.push(newStop);
+    
+    targetTour.stops.forEach((s, idx) => s.stopNumber = idx + 1);
+    targetTour.totalWeight = targetTour.stops.reduce((sum, s) => sum + s.weightToUnload, 0);
+
+    setResults({ ...results, tours: newTours });
+  };
+
+  const handleMoveStopToTour = (sourceTourIndex: number, stopIndex: number, targetTourIndex: number) => {
+    if (!results) return;
+    if (sourceTourIndex === targetTourIndex) return;
+    if (results.tours[sourceTourIndex].isLocked) return;
+    if (results.tours[targetTourIndex].isLocked) return;
+
+    const newTours = [...results.tours];
+    const sourceTour = newTours[sourceTourIndex];
+    const targetTour = newTours[targetTourIndex];
+
+    const [movedStop] = sourceTour.stops.splice(stopIndex, 1);
+    targetTour.stops.push(movedStop);
+
+    [sourceTour, targetTour].forEach(tour => {
+      tour.stops.forEach((s, idx) => s.stopNumber = idx + 1);
+      tour.totalWeight = tour.stops.reduce((sum, s) => sum + s.weightToUnload, 0);
+    });
+
+    const cleanTours = newTours.filter(t => t.stops.length > 0);
+
+    setResults({ ...results, tours: cleanTours });
+  };
+
+  const handleRemoveStop = (tourIndex: number, stopIndex: number, action: 'restore' | 'delete') => {
+    if (!results) return;
+    if (results.tours[tourIndex].isLocked) return;
+
+    const newTours = [...results.tours];
+    const sourceTour = newTours[tourIndex];
+    
+    const [removedStop] = sourceTour.stops.splice(stopIndex, 1);
+
+    if (action === 'restore') {
+      const restoredOrder: RMOrder = {
+        id: crypto.randomUUID(),
+        customerName: removedStop.customerName || 'Unbekannt',
+        address: removedStop.address,
+        weight: removedStop.weightToUnload,
+        referenceNumber: removedStop.referenceNumber
+      };
+      setOrders([...orders, restoredOrder]);
+    }
+
+    sourceTour.stops.forEach((s, idx) => s.stopNumber = idx + 1);
+    sourceTour.totalWeight = sourceTour.stops.reduce((sum, s) => sum + s.weightToUnload, 0);
+
+    const cleanTours = newTours.filter(t => t.stops.length > 0);
+
+    setResults({ ...results, tours: cleanTours });
+  };
+
   return (
-    <div className="p-6 md:p-8">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full w-fit mb-2">
-            <RefreshCw className="w-3 h-3" />
-            Beta: KI-Planung
+    <div className="h-screen w-full bg-slate-100 flex flex-col overflow-hidden font-sans">
+      <main className="flex-1 overflow-hidden p-4 sm:p-6 lg:p-8 w-full">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-full">
+          
+          <div className="xl:col-span-4 h-full flex flex-col min-h-0">
+            <OrderInputV2 
+              orders={orders} 
+              setOrders={setOrders} 
+              onPlan={handlePlanTours}
+              onReset={handleReset}
+              isLoading={loading}
+              hasResults={!!results}
+              error={error}
+            />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
-            <RouteIcon className="w-7 h-7 text-emerald-500" />
-            Tourenplanung V2
-          </h1>
-          <p className="text-slate-600 mt-1">
-            RouteMaster AI plant One-Way-Touren ab Ostring 3, 33181 Bad Wünnenberg (max. 1300kg pro Tour).
-          </p>
+
+          <div className="xl:col-span-8 h-full flex flex-col min-h-0">
+             <TourResultV2
+                tours={results?.tours || []} 
+                isLoading={loading} 
+                onToursUpdate={handleToursUpdate}
+                onMoveOrderToTour={handleMoveOrderToTour}
+                onMoveStopToTour={handleMoveStopToTour}
+                onRemoveStop={handleRemoveStop}
+                onToggleLock={handleToggleLock}
+             />
+          </div>
+
         </div>
-        <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm">
-          <Info className="w-5 h-5 text-slate-500" />
-          <div className="text-sm text-slate-700">
-            <div className="font-semibold text-slate-900">One-Way · Depot → letzter Kunde</div>
-            <div className="text-slate-500">Stopps werden in Fahrtrichtung sortiert.</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-4 lg:sticky lg:top-20 h-fit">
-          <OrderInputV2 orders={orders} onAdd={handleAddManualOrder} onRemove={handleRemoveOrder} />
-          <div className="mt-3 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-3">
-            <div className="font-semibold text-slate-800 mb-1">Importierte Aufträge</div>
-            <div>Ungeplante Aufträge aus der CSV erscheinen hier automatisch: {mappedContextOrders.length} gefunden.</div>
-            {ignoredOrderIds.size > 0 && (
-              <div className="mt-2 flex items-center justify-between gap-2">
-                <span className="text-amber-700">
-                  {ignoredOrderIds.size} Auftrag/Aufträge ausgeblendet.
-                </span>
-                <button
-                  onClick={() => setIgnoredOrderIds(new Set())}
-                  className="text-xs font-semibold text-blue-700 hover:text-blue-900"
-                >
-                  Alle wieder einblenden
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-4 grid gap-3">
-            <button
-              onClick={handlePlanTours}
-              disabled={loading || orders.length === 0}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl shadow-md font-semibold text-lg transition-all flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Optimiere Route...
-                </>
-              ) : (
-                <>
-                  <Zap className="w-5 h-5" />
-                  Touren planen
-                </>
-              )}
-            </button>
-            
-            {results && (
-              <button
-                onClick={handleReset}
-                className="w-full py-2 bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-xl font-medium transition-colors"
-              >
-                Ergebnisse zurücksetzen
-              </button>
-            )}
-          </div>
-
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl text-sm">
-              {error}
-            </div>
-          )}
-        </div>
-
-        <div className="lg:col-span-8">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">Tourenplan</h2>
-            <p className="text-slate-500">
-              {results
-                ? `Die KI hat ${results.tours.length} Tour(en) für ${orders.length} Auftrag/Aufträge berechnet.`
-                : 'Erstellen Sie einen optimalen Fahrplan für Ihre LKW-Flotte.'}
-            </p>
-            {results?.unassignedOrders?.length ? (
-              <p className="mt-2 text-sm text-amber-600">
-                {results.unassignedOrders.length} Auftrag/Aufträge konnten nicht zugeordnet werden (zu schwer allein?).
-              </p>
-            ) : null}
-          </div>
-
-          <TourResultV2 tours={results?.tours || []} />
-        </div>
-      </div>
+      </main>
     </div>
   );
 };
