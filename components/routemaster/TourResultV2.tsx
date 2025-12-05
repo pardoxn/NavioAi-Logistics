@@ -10,6 +10,7 @@ interface TourResultProps {
   onMoveStopToTour?: (sourceTourIndex: number, stopIndex: number, targetTourIndex: number) => void;
   onRemoveStop?: (tourIndex: number, stopIndex: number, action: 'restore' | 'delete') => void;
   onToggleLock?: (tourIndex: number) => void;
+  onPrintCMR?: (tour: RMTour) => void;
 }
 
 export const TourResultV2: React.FC<TourResultProps> = ({ 
@@ -19,7 +20,8 @@ export const TourResultV2: React.FC<TourResultProps> = ({
   onMoveOrderToTour,
   onMoveStopToTour,
   onRemoveStop,
-  onToggleLock
+  onToggleLock,
+  onPrintCMR
 }) => {
   const [draggedStop, setDraggedStop] = useState<{ tourIndex: number; stopIndex: number } | null>(null);
   const [dragOverTourIndex, setDragOverTourIndex] = useState<number | null>(null);
@@ -252,8 +254,10 @@ export const TourResultV2: React.FC<TourResultProps> = ({
 
                       <div className="flex items-center gap-2">
                          <button 
-                          className="px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 rounded-lg flex items-center gap-1.5 transition-colors"
+                          onClick={() => onPrintCMR && onPrintCMR(tour)}
+                          className="px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 rounded-lg flex items-center gap-1.5 transition-colors disabled:opacity-50"
                           title="Frachtbrief erstellen"
+                          disabled={!onPrintCMR}
                         >
                           <FileText className="w-3.5 h-3.5" />
                           CMR

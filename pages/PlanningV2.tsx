@@ -4,8 +4,11 @@ import { OrderInputV2 } from '../components/routemaster/OrderInputV2';
 import { TourResultV2 } from '../components/routemaster/TourResultV2';
 import { RMOrder, RMPlanningResult, RMTour, RMStop } from '../types/routemaster';
 import { planToursV2 } from '../services/routemasterService';
+import { useData } from '../context/DataContext';
+import { generateCMRBundle } from '../services/pdfService';
 
 const PlanningV2: React.FC = () => {
+  const { cmrConfig } = useData();
   const [orders, setOrders] = useState<RMOrder[]>([]);
   const [results, setResults] = useState<RMPlanningResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -178,6 +181,32 @@ const PlanningV2: React.FC = () => {
     setResults({ ...results, tours: cleanTours });
   };
 
+  const handlePrintCMR = (tour: RMTour) => {
+    if (!cmrConfig) return;
+    const mappedStops: any[] = tour.stops.map((s) => {
+      const postcodeMatch = (s.address || '').match(/\b\d{4,5}\b/);
+      const postcode = postcodeMatch ? postcodeMatch[0] : '';
+      const city = (s.address || '').replace(postcode, '').trim();
+      return {
+        id: s.referenceNumber || s.address || s.stopNumber?.toString() || crypto.randomUUID(),
+        customerName1: s.customerName || 'Kunde',
+        shippingStreet: '',
+        shippingPostcode: postcode,
+        shippingCity: city || s.address,
+        shippingCountryName: 'Deutschland',
+        shippingCountryCode: 'DE',
+        documentYear: new Date().getFullYear().toString(),
+        documentNumber: s.referenceNumber || '',
+        totalWeightKg: s.weightToUnload || 0,
+      };
+    });
+    const mappedTour: any = {
+      name: tour.truckName,
+      vehiclePlate: tour.truckName,
+    };
+    generateCMRBundle(mappedTour as any, mappedStops as any, cmrConfig);
+  };
+
   return (
     <div className="h-screen w-full bg-slate-100 flex flex-col overflow-hidden font-sans">
       <main className="flex-1 overflow-hidden p-4 sm:p-6 lg:p-8 w-full">
@@ -204,6 +233,7 @@ const PlanningV2: React.FC = () => {
                 onMoveStopToTour={handleMoveStopToTour}
                 onRemoveStop={handleRemoveStop}
                 onToggleLock={handleToggleLock}
+                onPrintCMR={handlePrintCMR}
              />
           </div>
 
