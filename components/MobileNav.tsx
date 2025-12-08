@@ -122,6 +122,14 @@ const MobileNav = () => {
                   </>
                 )}
               </NavLink>
+              <NavLink to="/archive-v2" className={linkClass} onClick={() => setOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    <Archive size={18} className={isActive ? "text-amber-500" : ""} />
+                    Archiv V2
+                  </>
+                )}
+              </NavLink>
 
               {isAdmin && (
                 <NavLink to="/settings" className={linkClass} onClick={() => setOpen(false)}>

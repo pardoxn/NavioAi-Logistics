@@ -11,6 +11,7 @@ import Import from './pages/Import';
 import Planning from './pages/Planning';
 import Warehouse from './pages/Warehouse';
 import Archive from './pages/Archive';
+import ArchiveV2 from './pages/ArchiveV2';
 import Activities from './pages/Activities';
 import Team from './pages/Team';
 import Settings from './pages/Settings';
@@ -62,6 +63,7 @@ const App = () => {
               <Route path="/warehouse" element={<Warehouse />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/archive" element={<Archive />} />
+              <Route path="/archive-v2" element={<ArchiveV2 />} />
               <Route path="/activities" element={<Activities />} />
               <Route path="/team" element={<Team />} />
               <Route path="/handbook" element={<Handbook />} />

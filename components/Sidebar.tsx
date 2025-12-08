@@ -144,6 +144,14 @@ const Sidebar = () => {
                 </>
               )}
             </NavLink>
+            <NavLink to="/archive-v2" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Archive size={18} className={isActive ? "text-amber-400" : ""} />
+                  Archiv V2
+                </>
+              )}
+            </NavLink>
           </>
         )}
 
@@ -159,6 +167,14 @@ const Sidebar = () => {
                 <>
                   <Archive size={18} className={isActive ? "text-amber-400" : ""} />
                   Archiv
+                </>
+              )}
+            </NavLink>
+            <NavLink to="/archive-v2" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Archive size={18} className={isActive ? "text-amber-400" : ""} />
+                  Archiv V2
                 </>
               )}
             </NavLink>
