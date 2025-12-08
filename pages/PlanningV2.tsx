@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Route as RouteIcon, Info } from 'lucide-react';
 import { OrderInputV2 } from '../components/routemaster/OrderInputV2';
 import { TourResultV2 } from '../components/routemaster/TourResultV2';
@@ -13,6 +13,22 @@ const PlanningV2: React.FC = () => {
   const [results, setResults] = useState<RMPlanningResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Persist local orders across reloads/tab changes (separate von DataContext)
+  useEffect(() => {
+    const saved = localStorage.getItem('planningV2_orders');
+    if (saved) {
+      try {
+        const parsed: RMOrder[] = JSON.parse(saved);
+        setOrders(parsed);
+      } catch (e) {
+        console.warn('Konnte gespeicherte PlanningV2 Orders nicht lesen', e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('planningV2_orders', JSON.stringify(orders));
+  }, [orders]);
 
   const handlePlanTours = async () => {
     const lockedTours = results?.tours.filter(t => t.isLocked) || [];
