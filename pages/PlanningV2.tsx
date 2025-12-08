@@ -23,6 +23,7 @@ const PlanningV2: React.FC = () => {
       }));
   }, [globalOrders]);
 
+  const [feedbackNotes, setFeedbackNotes] = useState<string>('');
   const addRmOrders = (newOrders: RMOrder[]) => {
     if (!newOrders.length) return;
     const toAdd = newOrders.map(o => {
@@ -63,6 +64,23 @@ const PlanningV2: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [feedbackModal, setFeedbackModal] = useState<{ open: boolean; tour?: RMTour; rating?: 'UP' | 'DOWN'; comment?: string }>({ open: false, comment: '' });
   const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  useEffect(() => {
+    const loadFeedback = async () => {
+      if (!supabase) return;
+      const { data, error } = await supabase
+        .from('tour_feedback')
+        .select('rating,comment')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error || !data) {
+        setFeedbackNotes('');
+        return;
+      }
+      const notes = data.map((f: any) => `${f.rating === 'UP' ? '👍' : '👎'} ${f.comment || ''}`.trim()).join('\n');
+      setFeedbackNotes(notes);
+    };
+    loadFeedback();
+  }, []);
   const stateLoaded = useRef(false);
 
   // --- Persist V2 Tours global via Supabase ---
@@ -132,7 +150,7 @@ const PlanningV2: React.FC = () => {
       let newTours: RMTour[] = [];
 
       if (allOrdersToPlan.length > 0) {
-        const data = await planToursV2(allOrdersToPlan);
+        const data = await planToursV2(allOrdersToPlan, feedbackNotes);
         newTours = data.tours;
       }
 
@@ -392,7 +410,7 @@ const PlanningV2: React.FC = () => {
               <textarea
                 value={feedbackModal.comment}
                 onChange={(e) => setFeedbackModal(prev => ({ ...prev, comment: e.target.value }))}
-                placeholder="Was war gut/schlecht? (optional)"
+                placeholder="Was war gut/schlecht? (z.B. zu schwer, falsche Richtung, Stopp-Reihenfolge unlogisch, fehlender Kunde)"
                 className="w-full border border-slate-200 rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-200"
                 rows={3}
               />

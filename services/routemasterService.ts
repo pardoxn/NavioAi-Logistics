@@ -57,7 +57,7 @@ const tourSchema: Schema = {
   required: ["tours"]
 };
 
-export const planToursV2 = async (orders: RMOrder[]): Promise<RMPlanningResult> => {
+export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Promise<RMPlanningResult> => {
   if (orders.length === 0) {
     return { tours: [] };
   }
@@ -101,6 +101,9 @@ export const planToursV2 = async (orders: RMOrder[]): Promise<RMPlanningResult> 
       weight: o.weight,
       referenceNumber: o.referenceNumber
     })))}
+
+    FEEDBACK AUS VERGANGENEN TOUREN (kurz):
+    ${feedbackNotes || 'Keine Hinweise.'}
 
     DENKPROZESS (Chain of Thought):
     1. Analysiere die Himmelsrichtung aller Adressen relativ zu Bad Wünnenberg.
