@@ -11,6 +11,7 @@ type V2FormState = {
   previewUrl: string | null;
   isProcessing: boolean;
   done: boolean;
+  note: string;
 };
 
 const defaultV2FormState: V2FormState = {
@@ -18,6 +19,7 @@ const defaultV2FormState: V2FormState = {
   previewUrl: null,
   isProcessing: false,
   done: false,
+  note: '',
 };
 
 interface WarehouseMobileV2CardProps {
@@ -25,9 +27,10 @@ interface WarehouseMobileV2CardProps {
   formState: V2FormState;
   onFileChange: (file: File) => void;
   onSubmit: () => void;
+  onNoteChange: (note: string) => void;
 }
 
-const WarehouseMobileV2Card: React.FC<WarehouseMobileV2CardProps> = ({ tour, formState, onFileChange, onSubmit }) => {
+const WarehouseMobileV2Card: React.FC<WarehouseMobileV2CardProps> = ({ tour, formState, onFileChange, onSubmit, onNoteChange }) => {
   const progress = tour.maxWeight
     ? Math.min((tour.totalWeight / tour.maxWeight) * 100, 100)
     : Math.min(tour.utilization || 0, 100);
@@ -41,6 +44,19 @@ const WarehouseMobileV2Card: React.FC<WarehouseMobileV2CardProps> = ({ tour, for
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/20">
               <Truck className="w-6 h-6" />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                Notiz (Optional)
+              </label>
+              <textarea
+                value={formState.note}
+                onChange={(e) => onNoteChange(e.target.value)}
+                placeholder="Besonderheiten..."
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white text-slate-900"
+                rows={2}
+              />
             </div>
             <div>
               <div className="text-lg font-bold text-slate-900 leading-tight">{tour.name}</div>
@@ -180,9 +196,10 @@ interface WarehouseMobileV2ViewProps {
   forms: Record<string, V2FormState>;
   onFileChange: (tourId: string, file: File) => void;
   onSubmit: (tourId: string) => void;
+  onNoteChange: (tourId: string, note: string) => void;
 }
 
-const WarehouseMobileV2View: React.FC<WarehouseMobileV2ViewProps> = ({ tours, forms, onFileChange, onSubmit }) => {
+const WarehouseMobileV2View: React.FC<WarehouseMobileV2ViewProps> = ({ tours, forms, onFileChange, onSubmit, onNoteChange }) => {
   const activeTours = tours.filter((t) => t.status === TourStatus.PLANNING || t.status === TourStatus.LOCKED);
 
   if (activeTours.length === 0) {
@@ -214,6 +231,7 @@ const WarehouseMobileV2View: React.FC<WarehouseMobileV2ViewProps> = ({ tours, fo
             formState={forms[tour.id] || defaultV2FormState}
             onFileChange={(file) => onFileChange(tour.id, file)}
             onSubmit={() => onSubmit(tour.id)}
+            onNoteChange={(note) => onNoteChange(tour.id, note)}
           />
         ))}
       </div>
@@ -303,6 +321,17 @@ const Warehouse = () => {
     });
   };
 
+  const handleV2NoteChange = (tourId: string, note: string) => {
+    setV2Forms((prev) => ({
+      ...prev,
+      [tourId]: {
+        ...defaultV2FormState,
+        ...prev[tourId],
+        note,
+      },
+    }));
+  };
+
   const handleSetLoadedV2 = async (tourId: string) => {
     const form = getV2Form(tourId);
     if (!form.file) {
@@ -313,7 +342,7 @@ const Warehouse = () => {
     setV2Forms((prev) => ({ ...prev, [tourId]: { ...form, isProcessing: true } }));
 
     try {
-      await completeTourLoading(tourId, form.file, '');
+      await completeTourLoading(tourId, form.file, form.note);
       setV2Tours((prev) =>
         prev.map((t) =>
           t.id === tourId ? { ...t, status: TourStatus.LOADED, loadedImageUrl: form.previewUrl || t.loadedImageUrl } : t
@@ -335,6 +364,7 @@ const Warehouse = () => {
           forms={v2Forms}
           onFileChange={handleV2ImageChange}
           onSubmit={handleSetLoadedV2}
+          onNoteChange={handleV2NoteChange}
         />
       </div>
     </div>
