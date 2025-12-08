@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArchiveTour } from './types';
 import {
   Archive,
@@ -14,18 +14,36 @@ import {
   Search,
   Truck,
 } from './Icons';
-
-const MOCK_ARCHIVED_TOURS: ArchiveTour[] = [];
+import { supabase } from '../../lib/supabaseClient';
 
 export const ArchiveView: React.FC = () => {
+  const [tours, setTours] = useState<ArchiveTour[]>([]);
   const [selectedTourId, setSelectedTourId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [informedStops, setInformedStops] = useState<Set<string>>(new Set());
   const [localStopPhotos, setLocalStopPhotos] = useState<Record<string, string>>({});
 
-  const selectedTour = MOCK_ARCHIVED_TOURS.find((t) => t.id === selectedTourId) || null;
+  useEffect(() => {
+    const loadArchive = async () => {
+      if (!supabase) return;
+      const { data, error } = await supabase
+        .from('navio_state')
+        .select('state')
+        .eq('id', 'planning_v2_archive')
+        .eq('org', 'werny')
+        .single();
+      if (error) {
+        console.warn('Archive V2 laden fehlgeschlagen', error.message);
+        return;
+      }
+      setTours((data?.state?.tours as ArchiveTour[]) || []);
+    };
+    loadArchive();
+  }, []);
 
-  const filteredTours = MOCK_ARCHIVED_TOURS.filter(
+  const selectedTour = tours.find((t) => t.id === selectedTourId) || null;
+
+  const filteredTours = tours.filter(
     (tour) =>
       tour.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tour.stops.some((stop) => stop.customerName.toLowerCase().includes(searchQuery.toLowerCase())),

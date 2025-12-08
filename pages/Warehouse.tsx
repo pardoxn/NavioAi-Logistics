@@ -5,6 +5,7 @@ import { useData } from '../context/DataContext';
 import { TourStatus, Tour, Order } from '../types';
 import { Truck, Camera, CheckCircle2, AlertTriangle, Image as ImageIcon, MapPin, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { ArchiveTour } from '../components/archiveV2/types';
 
 type V2FormState = {
   file: File | null;
@@ -21,6 +22,43 @@ const defaultV2FormState: V2FormState = {
   done: false,
   note: '',
 };
+
+const serializePlanningTour = (tour: Tour) => ({
+  id: tour.id,
+  truckName: tour.name,
+  date: tour.date,
+  status: tour.status,
+  estimatedDistanceKm: tour.estimatedDistanceKm,
+  stops: (tour.stops || []).map((s) => ({
+    id: s.id,
+    referenceNumber: s.documentNumber,
+    customerName: s.customerName1 || s.shippingCity,
+    address: `${s.shippingPostcode} ${s.shippingCity}`.trim(),
+    weightToUnload: s.totalWeightKg || 0,
+  })),
+});
+
+const serializeArchiveTour = (tour: Tour, imageUrl: string | null, note: string): ArchiveTour => ({
+  id: tour.id,
+  date: tour.date,
+  status: 'loaded',
+  driver: tour.driverName,
+  vehicle: tour.vehiclePlate,
+  totalWeight: tour.totalWeight,
+  totalDistance: tour.estimatedDistanceKm ? `${tour.estimatedDistanceKm} km` : '—',
+  startLocation: 'Depot',
+  loadingPhotoUrl: imageUrl || undefined,
+  stops: tour.stops.map((s, idx) => ({
+    id: s.id,
+    customerName: s.customerName1 || s.shippingCity,
+    zip: s.shippingPostcode,
+    city: s.shippingCity,
+    weight: s.totalWeightKg || 0,
+    orderNumber: s.documentNumber,
+    note: note || undefined,
+    sequence: idx + 1,
+  })),
+});
 
 interface WarehouseMobileV2CardProps {
   tour: Tour;
@@ -268,59 +306,86 @@ const WarehouseMobileV2View: React.FC<WarehouseMobileV2ViewProps> = ({ tours, fo
 const Warehouse = () => {
   const { completeTourLoading } = useData();
   const [v2Tours, setV2Tours] = useState<Tour[]>([]);
+  const [archivedV2Tours, setArchivedV2Tours] = useState<ArchiveTour[]>([]);
   const [v2Forms, setV2Forms] = useState<Record<string, V2FormState>>({});
 
+  const uploadV2Image = async (tourId: string, file: File): Promise<string | null> => {
+    if (!supabase) return null;
+    const filePath = `planning_v2/${tourId}-${Date.now()}.jpg`;
+    const { error } = await supabase.storage
+      .from('tour_uploads')
+      .upload(filePath, file, { upsert: true, cacheControl: '3600', contentType: 'image/jpeg' });
+    if (error) {
+      console.warn('Upload failed', error.message);
+      return null;
+    }
+    const { data: publicData } = supabase.storage.from('tour_uploads').getPublicUrl(filePath);
+    return publicData?.publicUrl || null;
+  };
+
   useEffect(() => {
+    const mapRawToTour = (t: any): Tour => {
+      const stops: Order[] = (t.stops || []).map((s: any) => {
+        const postcodeMatch = (s.address || '').match(/\b\d{4,5}\b/);
+        const postcode = postcodeMatch ? postcodeMatch[0] : '';
+        const city = (s.address || '').replace(postcode, '').trim();
+        return {
+          id: s.id || s.referenceNumber || crypto.randomUUID(),
+          orderId: s.referenceNumber || s.id || '',
+          documentNumber: s.referenceNumber || s.id || '',
+          documentYear: new Date().getFullYear().toString(),
+          documentType: 'Tourenplanung V2',
+          customerReferenceNumber: '',
+          documentDate: new Date().toISOString().split('T')[0],
+          customerNumber: 'RM',
+          customerName1: s.customerName || 'Kunde',
+          shippingCountryCode: 'DE',
+          shippingCountryName: 'Deutschland',
+          shippingPostcode: postcode,
+          shippingCity: city || s.address || '',
+          shippingStreet: '',
+          totalWeightKg: s.weightToUnload || 0,
+          isPlanned: true,
+          bearing: 0,
+          distanceFromDepot: 0,
+        };
+      });
+      const totalWeight = stops.reduce((sum, s) => sum + (s.totalWeightKg || 0), 0);
+      return {
+        id: t.id || crypto.randomUUID(),
+        name: t.truckName || 'Tour V2',
+        date: t.date || new Date().toISOString().split('T')[0],
+        status: t.status || TourStatus.PLANNING,
+        stops,
+        totalWeight,
+        maxWeight: 1300,
+        utilization: Math.round((totalWeight / 1300) * 100),
+        estimatedDistanceKm: t.estimatedDistanceKm || 0,
+        vehiclePlate: t.truckName || '',
+        loadedImageUrl: t.loadedImageUrl,
+        loadedNote: t.loadedNote,
+      };
+    };
+
     const loadV2 = async () => {
       if (!supabase) return;
-      const { data, error } = await supabase
+      const { data: activeData } = await supabase
         .from('navio_state')
         .select('state')
         .eq('id', 'planning_v2')
         .eq('org', 'werny')
         .single();
-      if (error || !data?.state?.tours) return;
-      const mapped: Tour[] = (data.state.tours as any[]).map((t: any) => {
-        const stops: Order[] = (t.stops || []).map((s: any) => {
-          const postcodeMatch = (s.address || '').match(/\b\d{4,5}\b/);
-          const postcode = postcodeMatch ? postcodeMatch[0] : '';
-          const city = (s.address || '').replace(postcode, '').trim();
-          return {
-            id: s.id || s.referenceNumber || crypto.randomUUID(),
-            orderId: s.referenceNumber || s.id || '',
-            documentNumber: s.referenceNumber || s.id || '',
-            documentYear: new Date().getFullYear().toString(),
-            documentType: 'Tourenplanung V2',
-            customerReferenceNumber: '',
-            documentDate: new Date().toISOString().split('T')[0],
-            customerNumber: 'RM',
-            customerName1: s.customerName || 'Kunde',
-            shippingCountryCode: 'DE',
-            shippingCountryName: 'Deutschland',
-            shippingPostcode: postcode,
-            shippingCity: city || s.address || '',
-            shippingStreet: '',
-            totalWeightKg: s.weightToUnload || 0,
-            isPlanned: true,
-            bearing: 0,
-            distanceFromDepot: 0,
-          };
-        });
-        const totalWeight = stops.reduce((sum, s) => sum + (s.totalWeightKg || 0), 0);
-        return {
-          id: t.id || crypto.randomUUID(),
-          name: t.truckName || 'Tour V2',
-          date: new Date().toISOString().split('T')[0],
-          status: TourStatus.PLANNING,
-          stops,
-          totalWeight,
-          maxWeight: 1300,
-          utilization: Math.round((totalWeight / 1300) * 100),
-          estimatedDistanceKm: 0,
-          vehiclePlate: t.truckName || '',
-        };
-      });
+      const mapped = (activeData?.state?.tours || []).map(mapRawToTour);
       setV2Tours(mapped);
+
+      const { data: archivedData } = await supabase
+        .from('navio_state')
+        .select('state')
+        .eq('id', 'planning_v2_archive')
+        .eq('org', 'werny')
+        .single();
+      const archivedMapped: ArchiveTour[] = (archivedData?.state?.tours || []) as ArchiveTour[];
+      setArchivedV2Tours(archivedMapped);
     };
     loadV2();
   }, []);
@@ -368,12 +433,28 @@ const Warehouse = () => {
     setV2Forms((prev) => ({ ...prev, [tourId]: { ...form, isProcessing: true } }));
 
     try {
-      await completeTourLoading(tourId, form.file, form.note);
-      setV2Tours((prev) =>
-        prev.map((t) =>
-          t.id === tourId ? { ...t, status: TourStatus.LOADED, loadedImageUrl: form.previewUrl || t.loadedImageUrl } : t
-        )
-      );
+      const tour = v2Tours.find((t) => t.id === tourId);
+      if (!tour) throw new Error('Tour nicht gefunden');
+
+      const imageUrl = (await uploadV2Image(tourId, form.file)) || form.previewUrl || null;
+      const archivedEntry = serializeArchiveTour(tour, imageUrl, form.note);
+      const remainingTours = v2Tours.filter((t) => t.id !== tourId);
+
+      if (supabase) {
+        await supabase.from('navio_state').upsert({
+          id: 'planning_v2',
+          org: 'werny',
+          state: { tours: remainingTours.map(serializePlanningTour) },
+        });
+        await supabase.from('navio_state').upsert({
+          id: 'planning_v2_archive',
+          org: 'werny',
+          state: { tours: [...archivedV2Tours, archivedEntry] },
+        });
+      }
+
+      setV2Tours(remainingTours);
+      setArchivedV2Tours((prev) => [...prev, archivedEntry]);
       setV2Forms((prev) => ({ ...prev, [tourId]: { ...form, file: null, isProcessing: false, done: true } }));
     } catch (err) {
       console.error(err);
