@@ -28,41 +28,46 @@ interface WarehouseMobileV2CardProps {
   onFileChange: (file: File) => void;
   onSubmit: () => void;
   onNoteChange: (note: string) => void;
+  isExpanded: boolean;
+  onToggle: () => void;
 }
 
-const WarehouseMobileV2Card: React.FC<WarehouseMobileV2CardProps> = ({ tour, formState, onFileChange, onSubmit, onNoteChange }) => {
+const WarehouseMobileV2Card: React.FC<WarehouseMobileV2CardProps> = ({
+  tour,
+  formState,
+  onFileChange,
+  onSubmit,
+  onNoteChange,
+  isExpanded,
+  onToggle,
+}) => {
   const progress = tour.maxWeight
     ? Math.min((tour.totalWeight / tour.maxWeight) * 100, 100)
     : Math.min(tour.utilization || 0, 100);
   const isOverloaded = tour.maxWeight ? tour.totalWeight > tour.maxWeight : false;
   const isDone = formState.done || tour.status === TourStatus.LOADED;
+  const dateLabel = tour.date
+    ? new Date(tour.date).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
+    : '';
 
   return (
     <div className="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden">
-      <div className="p-4 border-b border-slate-100">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/20">
-              <Truck className="w-6 h-6" />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-2">
-                Notiz (Optional)
-              </label>
-              <textarea
-                value={formState.note}
-                onChange={(e) => onNoteChange(e.target.value)}
-                placeholder="Besonderheiten..."
-                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white text-slate-900"
-                rows={2}
-              />
-            </div>
-            <div>
-              <div className="text-lg font-bold text-slate-900 leading-tight">{tour.name}</div>
-              <div className="text-sm text-slate-500">{tour.stops.length} Stopps</div>
-            </div>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full text-left p-4 border-b border-slate-100 flex items-start justify-between gap-3 active:bg-slate-50"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/20">
+            <Truck className="w-6 h-6" />
           </div>
+          <div className="flex flex-col">
+            <div className="text-lg font-bold text-slate-900 leading-tight">{tour.name}</div>
+            <div className="text-sm text-slate-500">{tour.stops.length} Stopps</div>
+            {dateLabel && <div className="text-xs text-slate-400 mt-0.5">{dateLabel}</div>}
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
           <div
             className={`text-xs font-bold px-3 py-1.5 rounded-lg border ${
               isOverloaded ? 'bg-red-50 text-red-700 border-red-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'
@@ -70,123 +75,141 @@ const WarehouseMobileV2Card: React.FC<WarehouseMobileV2CardProps> = ({ tour, for
           >
             {tour.totalWeight} kg
           </div>
-        </div>
-        <div className="w-full bg-slate-200 rounded-full h-2 mt-3 overflow-hidden">
-          <div className={`${isOverloaded ? 'bg-red-500' : 'bg-blue-500'} h-full`} style={{ width: `${progress}%` }} />
-        </div>
-      </div>
-
-      <div className="divide-y divide-slate-100">
-        {tour.stops.map((stop, idx) => (
-          <div key={stop.id} className="p-4 flex gap-3">
-            <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0">
-              {idx + 1}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="font-bold text-slate-900 text-base leading-tight truncate">
-                    {stop.customerName1 || stop.customerName2 || stop.shippingCity}
-                  </div>
-                  <div className="flex items-start gap-1.5 text-sm text-slate-500 mt-1 leading-snug">
-                    <MapPin className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
-                    <span className="break-words">{[stop.shippingPostcode, stop.shippingCity].filter(Boolean).join(' ')}</span>
-                  </div>
-                </div>
-                <span className="font-mono text-xs font-bold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg text-slate-700 whitespace-nowrap">
-                  {stop.totalWeightKg || 0} kg
-                </span>
-              </div>
-              {stop.documentNumber && (
-                <div className="mt-2 inline-flex items-center gap-2 text-[11px] text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1">
-                  <span className="uppercase font-semibold text-slate-400">Beleg</span>
-                  <span className="font-mono text-xs text-slate-700">{stop.documentNumber}</span>
-                </div>
-              )}
-            </div>
+          <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden min-w-[120px]">
+            <div className={`${isOverloaded ? 'bg-red-500' : 'bg-blue-500'} h-full`} style={{ width: `${progress}%` }} />
           </div>
-        ))}
-      </div>
+          <span className="text-[11px] font-semibold text-slate-500">{isExpanded ? 'Einklappen' : 'Ausklappen'}</span>
+        </div>
+      </button>
 
-      <div className="bg-slate-50 p-4 border-t border-slate-100 space-y-4">
-        {isDone ? (
-          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3 text-emerald-800">
-            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-              <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-            </div>
-            <div>
-              <p className="font-bold">Tour verladen</p>
-              <p className="text-xs text-emerald-700 opacity-80">Dokumentation gespeichert.</p>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="bg-white p-4 rounded-xl border border-dashed border-slate-300">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                  <Camera className="w-4 h-4" />
-                  Ladungssicherung dokumentieren
-                </span>
-                {!formState.previewUrl && (
-                  <span className="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded font-medium">Foto erforderlich</span>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 items-stretch">
-                <label
-                  htmlFor={`camera-${tour.id}`}
-                  className="flex flex-col items-center justify-center gap-2 py-4 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg cursor-pointer border border-slate-200 transition-colors min-h-[96px]"
-                >
-                  <Camera className="w-6 h-6" />
-                  <span className="text-xs font-bold">Kamera öffnen</span>
-                </label>
-                <div className="w-full bg-slate-100 rounded-lg border border-slate-200 overflow-hidden flex items-center justify-center">
-                  {formState.previewUrl ? (
-                    <img src={formState.previewUrl} alt="Ladung" className="w-full h-full object-cover" />
-                  ) : (
-                    <ImageIcon className="w-7 h-7 text-slate-300" />
+      {isExpanded && (
+        <>
+          <div className="divide-y divide-slate-100">
+            {tour.stops.map((stop, idx) => (
+              <div key={stop.id} className="p-4 flex gap-3">
+                <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                  {idx + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-bold text-slate-900 text-base leading-tight truncate">
+                        {stop.customerName1 || stop.customerName2 || stop.shippingCity}
+                      </div>
+                      <div className="flex items-start gap-1.5 text-sm text-slate-500 mt-1 leading-snug">
+                        <MapPin className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                        <span className="break-words">{[stop.shippingPostcode, stop.shippingCity].filter(Boolean).join(' ')}</span>
+                      </div>
+                    </div>
+                    <span className="font-mono text-xs font-bold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg text-slate-700 whitespace-nowrap">
+                      {stop.totalWeightKg || 0} kg
+                    </span>
+                  </div>
+                  {stop.documentNumber && (
+                    <div className="mt-2 inline-flex items-center gap-2 text-[11px] text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1">
+                      <span className="uppercase font-semibold text-slate-400">Beleg</span>
+                      <span className="font-mono text-xs text-slate-700">{stop.documentNumber}</span>
+                    </div>
                   )}
                 </div>
-                <input
-                  id={`camera-${tour.id}`}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) onFileChange(file);
-                  }}
-                />
               </div>
-            </div>
+            ))}
+          </div>
 
-            <button
-              onClick={onSubmit}
-              disabled={!formState.previewUrl || formState.isProcessing}
-              className={`w-full py-4 rounded-xl font-bold text-base shadow-sm transition-all flex items-center justify-center gap-2 ${
-                formState.previewUrl
-                  ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20 active:scale-[0.98]'
-                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-              }`}
-            >
-              {formState.isProcessing ? (
-                'Speichere...'
-              ) : formState.previewUrl ? (
-                <>
-                  <CheckCircle2 className="w-5 h-5" />
-                  Ladung bestätigen
-                </>
-              ) : (
-                <>
-                  <AlertTriangle className="w-5 h-5" />
-                  Erst Foto machen
-                </>
-              )}
-            </button>
-          </>
-        )}
-      </div>
+          <div className="bg-slate-50 p-4 border-t border-slate-100 space-y-4">
+            {isDone ? (
+              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3 text-emerald-800">
+                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="font-bold">Tour verladen</p>
+                  <p className="text-xs text-emerald-700 opacity-80">Dokumentation gespeichert.</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="bg-white p-4 rounded-xl border border-dashed border-slate-300">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                      <Camera className="w-4 h-4" />
+                      Ladungssicherung dokumentieren
+                    </span>
+                    {!formState.previewUrl && (
+                      <span className="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded font-medium">Foto erforderlich</span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 items-stretch">
+                    <label
+                      htmlFor={`camera-${tour.id}`}
+                      className="flex flex-col items-center justify-center gap-2 py-4 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg cursor-pointer border border-slate-200 transition-colors min-h-[96px]"
+                    >
+                      <Camera className="w-6 h-6" />
+                      <span className="text-xs font-bold">Kamera öffnen</span>
+                    </label>
+                    <div className="w-full bg-slate-100 rounded-lg border border-slate-200 overflow-hidden flex items-center justify-center">
+                      {formState.previewUrl ? (
+                        <img src={formState.previewUrl} alt="Ladung" className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="w-7 h-7 text-slate-300" />
+                      )}
+                    </div>
+                    <input
+                      id={`camera-${tour.id}`}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) onFileChange(file);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    Notiz (Optional)
+                  </label>
+                  <textarea
+                    value={formState.note}
+                    onChange={(e) => onNoteChange(e.target.value)}
+                    placeholder="Besonderheiten..."
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white text-slate-900"
+                    rows={2}
+                  />
+                </div>
+
+                <button
+                  onClick={onSubmit}
+                  disabled={!formState.previewUrl || formState.isProcessing}
+                  className={`w-full py-4 rounded-xl font-bold text-base shadow-sm transition-all flex items-center justify-center gap-2 ${
+                    formState.previewUrl
+                      ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20 active:scale-[0.98]'
+                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
+                >
+                  {formState.isProcessing ? (
+                    'Speichere...'
+                  ) : formState.previewUrl ? (
+                    <>
+                      <CheckCircle2 className="w-5 h-5" />
+                      Ladung bestätigen
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="w-5 h-5" />
+                      Erst Foto machen
+                    </>
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -201,6 +224,7 @@ interface WarehouseMobileV2ViewProps {
 
 const WarehouseMobileV2View: React.FC<WarehouseMobileV2ViewProps> = ({ tours, forms, onFileChange, onSubmit, onNoteChange }) => {
   const activeTours = tours.filter((t) => t.status === TourStatus.PLANNING || t.status === TourStatus.LOCKED);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   if (activeTours.length === 0) {
     return (
@@ -232,6 +256,8 @@ const WarehouseMobileV2View: React.FC<WarehouseMobileV2ViewProps> = ({ tours, fo
             onFileChange={(file) => onFileChange(tour.id, file)}
             onSubmit={() => onSubmit(tour.id)}
             onNoteChange={(note) => onNoteChange(tour.id, note)}
+            isExpanded={expandedId === tour.id}
+            onToggle={() => setExpandedId(expandedId === tour.id ? null : tour.id)}
           />
         ))}
       </div>
