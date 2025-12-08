@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Truck, Navigation, Map, ExternalLink, FileText, GripVertical, Trash2, X, RotateCcw, Lock, Unlock, MapPin } from 'lucide-react';
+import { Truck, Navigation, Map, ExternalLink, FileText, GripVertical, Trash2, X, RotateCcw, Lock, Unlock, MapPin, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { RMTour, RMStop } from '../../types/routemaster';
 
 interface TourResultProps {
@@ -11,6 +11,7 @@ interface TourResultProps {
   onRemoveStop?: (tourIndex: number, stopIndex: number, action: 'restore' | 'delete') => void;
   onToggleLock?: (tourIndex: number) => void;
   onPrintCMR?: (tour: RMTour) => void;
+  onFeedback?: (tour: RMTour, rating: 'UP' | 'DOWN') => void;
 }
 
 export const TourResultV2: React.FC<TourResultProps> = ({ 
@@ -21,7 +22,8 @@ export const TourResultV2: React.FC<TourResultProps> = ({
   onMoveStopToTour,
   onRemoveStop,
   onToggleLock,
-  onPrintCMR
+  onPrintCMR,
+  onFeedback
 }) => {
   const [draggedStop, setDraggedStop] = useState<{ tourIndex: number; stopIndex: number } | null>(null);
   const [dragOverTourIndex, setDragOverTourIndex] = useState<number | null>(null);
@@ -285,6 +287,22 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                         >
                           {tour.isLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
                           {tour.isLocked ? 'Locked' : 'Lock'}
+                        </button>
+                        <button
+                          onClick={() => onFeedback && onFeedback(tour, 'UP')}
+                          className="px-2.5 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                          title="Positive Rückmeldung"
+                          disabled={!onFeedback}
+                        >
+                          <ThumbsUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => onFeedback && onFeedback(tour, 'DOWN')}
+                          className="px-2.5 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50"
+                          title="Negative Rückmeldung"
+                          disabled={!onFeedback}
+                        >
+                          <ThumbsDown className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
