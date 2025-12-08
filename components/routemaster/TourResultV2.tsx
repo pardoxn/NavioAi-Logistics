@@ -349,10 +349,8 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                             )}
 
                             <div className="flex-none flex flex-col items-center gap-1 min-w-[24px] mt-0.5">
-                                <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
-                                {stop.stopNumber}
-                                </div>
-                                <div className="w-0.5 h-full bg-slate-100 min-h-[10px] last:hidden" />
+                              <span className="text-xs font-bold text-slate-600">{stop.stopNumber}</span>
+                              <div className="w-0.5 h-full bg-slate-100 min-h-[10px] last:hidden" />
                             </div>
 
                             <div className="flex-1 min-w-0 pb-1">
