@@ -56,8 +56,7 @@ export const TourResultV2: React.FC<TourResultProps> = ({
 
   const getWeightColor = (weight: number) => {
     if (weight > 1300) return 'bg-red-500';
-    if (weight > 650) return 'bg-emerald-500';
-    return 'bg-amber-400';
+    return 'bg-emerald-500';
   };
 
   const getWeightPercentage = (weight: number) => {
@@ -81,11 +80,14 @@ export const TourResultV2: React.FC<TourResultProps> = ({
     let totalDist = 0;
     let currentPos = START_GEO;
 
-    stops.forEach(stop => {
-      if (stop.geo) {
+    stops.forEach((stop, idx) => {
+      if (stop.geo && typeof stop.geo.lat === 'number' && typeof stop.geo.lng === 'number') {
         const dist = getDistanceFromLatLonInKm(currentPos.lat, currentPos.lng, stop.geo.lat, stop.geo.lng);
         totalDist += dist * 1.3;
         currentPos = stop.geo;
+      } else {
+        // Fallback: grob 15km für ersten Sprung, danach 10km je weiterer Stopp
+        totalDist += idx === 0 ? 15 : 10;
       }
     });
 
