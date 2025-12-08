@@ -1,34 +1,58 @@
-import React, { useEffect, useState } from 'react';
-import { Route as RouteIcon, Info } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import { OrderInputV2 } from '../components/routemaster/OrderInputV2';
 import { TourResultV2 } from '../components/routemaster/TourResultV2';
 import { RMOrder, RMPlanningResult, RMTour, RMStop } from '../types/routemaster';
 import { planToursV2 } from '../services/routemasterService';
 import { useData } from '../context/DataContext';
 import { generateCMRBundle } from '../services/pdfService';
+import { v4 as uuidv4 } from 'uuid';
 
 const PlanningV2: React.FC = () => {
-  const { cmrConfig } = useData();
-  const [orders, setOrders] = useState<RMOrder[]>([]);
+  const { cmrConfig, orders: globalOrders, addOrders, removeOrders } = useData();
+  const orders: RMOrder[] = useMemo(() => {
+    return globalOrders
+      .filter(o => !o.isPlanned)
+      .map(o => ({
+        id: o.id,
+        customerName: o.customerName1 || 'Kunde',
+        address: `${o.shippingStreet ? o.shippingStreet + ', ' : ''}${o.shippingPostcode || ''} ${o.shippingCity || ''}`.trim(),
+        weight: Math.round(Number(o.totalWeightKg) || 0),
+        referenceNumber: o.documentNumber || o.orderId || undefined,
+      }));
+  }, [globalOrders]);
+
+  const addRmOrders = (newOrders: RMOrder[]) => {
+    if (!newOrders.length) return;
+    const toAdd = newOrders.map(o => {
+      const postcodeMatch = (o.address || '').match(/\b\d{4,5}\b/);
+      const postcode = postcodeMatch ? postcodeMatch[0] : '';
+      const city = (o.address || '').replace(postcode, '').replace(',', '').trim();
+      return {
+        id: o.id || uuidv4(),
+        orderId: o.referenceNumber || o.id || uuidv4(),
+        documentNumber: o.referenceNumber || o.id || uuidv4(),
+        documentYear: new Date().getFullYear().toString(),
+        documentType: 'Tourenplanung V2',
+        customerReferenceNumber: '',
+        documentDate: new Date().toISOString().split('T')[0],
+        customerNumber: 'RM',
+        customerName1: o.customerName || 'Kunde',
+        shippingCountryCode: 'DE',
+        shippingCountryName: 'Deutschland',
+        shippingPostcode: postcode,
+        shippingCity: city || o.address,
+        shippingStreet: '',
+        totalWeightKg: o.weight,
+        isPlanned: false,
+        bearing: 0,
+        distanceFromDepot: 0,
+      };
+    });
+    addOrders(toAdd);
+  };
   const [results, setResults] = useState<RMPlanningResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Persist local orders across reloads/tab changes (separate von DataContext)
-  useEffect(() => {
-    const saved = localStorage.getItem('planningV2_orders');
-    if (saved) {
-      try {
-        const parsed: RMOrder[] = JSON.parse(saved);
-        setOrders(parsed);
-      } catch (e) {
-        console.warn('Konnte gespeicherte PlanningV2 Orders nicht lesen', e);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('planningV2_orders', JSON.stringify(orders));
-  }, [orders]);
 
   const handlePlanTours = async () => {
     const lockedTours = results?.tours.filter(t => t.isLocked) || [];
@@ -63,7 +87,9 @@ const PlanningV2: React.FC = () => {
 
       const finalTours = [...lockedTours, ...newTours];
       setResults({ tours: finalTours });
-      setOrders([]);
+      // Remove geplante Orders aus globaler Liste, damit sie nicht doppelt auftauchen
+      const usedIds = allOrdersToPlan.map(o => o.id).filter(Boolean) as string[];
+      if (usedIds.length) removeOrders(usedIds);
     } catch (err: any) {
       setError(err?.message || "Fehler bei der Planung. Bitte überprüfen Sie Ihre Eingaben oder versuchen Sie es erneut.");
     } finally {
@@ -74,7 +100,6 @@ const PlanningV2: React.FC = () => {
   const handleReset = () => {
     if (results) {
       const restoredOrders: RMOrder[] = [];
-      
       results.tours.forEach(tour => {
         tour.stops.forEach(stop => {
           restoredOrders.push({
@@ -86,10 +111,8 @@ const PlanningV2: React.FC = () => {
           });
         });
       });
-
-      setOrders(prev => [...prev, ...restoredOrders]);
+      if (restoredOrders.length) addRmOrders(restoredOrders);
     }
-
     setResults(null);
     setError(null);
   };
@@ -119,9 +142,8 @@ const PlanningV2: React.FC = () => {
     if (!results) return;
     if (results.tours[targetTourIndex].isLocked) return;
 
-    const orderIndex = orders.findIndex(o => o.id === orderId);
-    if (orderIndex === -1) return;
-    const order = orders[orderIndex];
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
 
     const newStop: RMStop = {
       stopNumber: 0,
@@ -132,9 +154,7 @@ const PlanningV2: React.FC = () => {
       description: "Manuell hinzugefügt"
     };
 
-    const newOrders = [...orders];
-    newOrders.splice(orderIndex, 1);
-    setOrders(newOrders);
+    removeOrders([orderId]);
 
     const newTours = [...results.tours];
     const targetTour = newTours[targetTourIndex];
@@ -144,6 +164,16 @@ const PlanningV2: React.FC = () => {
     targetTour.totalWeight = targetTour.stops.reduce((sum, s) => sum + s.weightToUnload, 0);
 
     setResults({ ...results, tours: newTours });
+  };
+
+  const handleRemoveOrderFromList = (orderId: string) => {
+    removeOrders([orderId]);
+  };
+
+  const handleClearOrders = () => {
+    if (!orders.length) return;
+    const ids = orders.map(o => o.id);
+    removeOrders(ids);
   };
 
   const handleMoveStopToTour = (sourceTourIndex: number, stopIndex: number, targetTourIndex: number) => {
@@ -186,7 +216,7 @@ const PlanningV2: React.FC = () => {
         weight: removedStop.weightToUnload,
         referenceNumber: removedStop.referenceNumber
       };
-      setOrders([...orders, restoredOrder]);
+      addRmOrders([restoredOrder]);
     }
 
     sourceTour.stops.forEach((s, idx) => s.stopNumber = idx + 1);
@@ -231,7 +261,9 @@ const PlanningV2: React.FC = () => {
           <div className="xl:col-span-4 h-full flex flex-col min-h-0">
             <OrderInputV2 
               orders={orders} 
-              setOrders={setOrders} 
+              onAddOrders={addRmOrders}
+              onRemoveOrder={handleRemoveOrderFromList}
+              onClearOrders={handleClearOrders}
               onPlan={handlePlanTours}
               onReset={handleReset}
               isLoading={loading}

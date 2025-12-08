@@ -7,7 +7,9 @@ import { parseCSV } from '../../services/csvService';
 
 interface OrderInputProps {
   orders: RMOrder[];
-  setOrders: React.Dispatch<React.SetStateAction<RMOrder[]>>;
+  onAddOrders: (orders: RMOrder[]) => void;
+  onRemoveOrder: (orderId: string) => void;
+  onClearOrders: () => void;
   onPlan: () => void;
   onReset: () => void;
   isLoading: boolean;
@@ -17,7 +19,9 @@ interface OrderInputProps {
 
 export const OrderInputV2: React.FC<OrderInputProps> = ({ 
   orders, 
-  setOrders, 
+  onAddOrders,
+  onRemoveOrder,
+  onClearOrders,
   onPlan, 
   onReset,
   isLoading,
@@ -29,9 +33,10 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
   const [importPreview, setImportPreview] = useState<RMOrder[]>([]);
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [localOrders, setLocalOrders] = useState<RMOrder[]>(orders);
   const handleClearOrders = () => {
     if (isLoading) return;
-    if (!orders.length) return;
+    if (!localOrders.length) return;
     setShowClearModal(true);
   };
   const [showClearModal, setShowClearModal] = useState(false);
@@ -45,6 +50,10 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [duplicateIds, setDuplicateIds] = useState<Set<string>>(new Set());
 
+  useEffect(() => {
+    setLocalOrders(orders);
+  }, [orders]);
+
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!address || !weight || !customerName) return;
@@ -57,7 +66,7 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
       referenceNumber: referenceNumber || undefined
     };
 
-    setOrders([...orders, newOrder]);
+    onAddOrders([newOrder]);
     
     setCustomerName('');
     setAddress('');
@@ -67,13 +76,14 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
   };
 
   useEffect(() => {
-    if (orders.length > 0 && !draggedItemIndex) {
+    if (localOrders.length > 0 && !draggedItemIndex) {
       listEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [orders.length]); 
+  }, [localOrders.length]); 
 
   const handleRemove = (id: string) => {
-    setOrders(orders.filter(o => o.id !== id));
+    setLocalOrders(localOrders.filter(o => o.id !== id));
+    onRemoveOrder(id);
   };
   
   const handleDragStart = (e: React.DragEvent, index: number, order: RMOrder) => {
@@ -89,12 +99,12 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
     e.preventDefault();
     if (draggedItemIndex === null || draggedItemIndex === index) return;
 
-    const newOrders = [...orders];
+    const newOrders = [...localOrders];
     const draggedItem = newOrders[draggedItemIndex];
     newOrders.splice(draggedItemIndex, 1);
     newOrders.splice(index, 0, draggedItem);
 
-    setOrders(newOrders);
+    setLocalOrders(newOrders);
     setDraggedItemIndex(index);
   };
 
@@ -102,7 +112,7 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
     setDraggedItemIndex(null);
   };
 
-  const totalWeight = orders.reduce((sum, order) => sum + order.weight, 0);
+  const totalWeight = localOrders.reduce((sum, order) => sum + order.weight, 0);
 
   // --- CSV Import ---
   const handleImportClick = () => {
@@ -183,7 +193,7 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
       return;
     }
     const filtered = importPreview.filter(o => !duplicateIds.has(o.id));
-    setOrders([...orders, ...filtered]);
+    onAddOrders(filtered);
     setImportPreview([]);
     setDuplicateIds(new Set());
     setIsImportModalOpen(false);
@@ -234,7 +244,7 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
             </button>
             <button
               onClick={handleClearOrders}
-              disabled={isLoading || orders.length === 0}
+              disabled={isLoading || localOrders.length === 0}
               className="p-2 text-white rounded-lg shadow-lg transition-all active:scale-95 disabled:cursor-not-allowed bg-[#ff0000] hover:bg-[#e00000]"
               style={{ boxShadow: '0 10px 25px -12px rgba(255,0,0,0.45)' }}
               title="Auftragsliste leeren"
@@ -245,7 +255,7 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0 bg-slate-50/30 relative">
-          {orders.length === 0 ? (
+          {localOrders.length === 0 ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                  <Package className="w-8 h-8 opacity-40" />
@@ -260,7 +270,7 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
             </div>
           ) : (
             <ul className="p-4 space-y-2">
-              {orders.map((order, index) => (
+              {localOrders.map((order, index) => (
                 <li 
                   key={order.id} 
                   draggable={!isLoading}
@@ -318,14 +328,14 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
           )}
 
           <div className="flex justify-between items-center text-xs font-medium text-slate-500 px-1">
-            <span>{orders.length} Positionen</span>
+            <span>{localOrders.length} Positionen</span>
             <span>Gesamt: <span className="text-slate-900 font-bold">{totalWeight} kg</span></span>
           </div>
 
           <div className="flex gap-2">
             <button
               onClick={onPlan}
-              disabled={isLoading || orders.length === 0}
+              disabled={isLoading || localOrders.length === 0}
               className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
             >
               {isLoading ? (
@@ -547,7 +557,7 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
                 Abbrechen
               </button>
               <button
-                onClick={() => { setOrders([]); setShowClearModal(false); }}
+                onClick={() => { onClearOrders(); setShowClearModal(false); }}
                 className="px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
               >
                 Löschen
