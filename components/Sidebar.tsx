@@ -195,6 +195,14 @@ const Sidebar = () => {
                Admin
                <div className="h-[1px] flex-1 bg-white/5 ml-3"></div>
             </div>
+            <NavLink to="/warehouse" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Package size={18} className={isActive ? "text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]" : ""} />
+                  Verladung
+                </>
+              )}
+            </NavLink>
             <NavLink to="/admin" className={linkClass}>
                {({ isActive }) => (
                 <>

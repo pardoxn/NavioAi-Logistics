@@ -103,7 +103,7 @@ const MobileNav = () => {
                 </>
               )}
 
-              {isLager && (
+              {(isLager || isAdmin) && (
                 <NavLink to="/warehouse" className={linkClass} onClick={() => setOpen(false)}>
                   {({ isActive }) => (
                     <>
