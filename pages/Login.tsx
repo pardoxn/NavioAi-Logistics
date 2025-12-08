@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabaseClient';
+import { UserRole } from '../types';
 import { Truck, ArrowRight, Lock, Mail, ShieldCheck, Heart } from 'lucide-react';
 import Logo from '../components/Logo';
 
@@ -19,7 +21,23 @@ const Login = () => {
       setError('Login fehlgeschlagen. Bitte Zugangsdaten prüfen.');
       return;
     }
-    navigate('/dashboard');
+    // Rolle aus Supabase-Session lesen, um Landing-Page je Rolle zu setzen
+    const { data } = await supabase?.auth.getSession() || {};
+    const rawUser = data?.session?.user;
+    const metaRole = (rawUser?.user_metadata?.role || '').toString().toUpperCase() as UserRole;
+    let role: UserRole = Object.values(UserRole).includes(metaRole) ? metaRole : UserRole.DISPO;
+    const adminEmails = ['benedikt.niewels@werny.de', 'benedikt.niewels@gmail.com'];
+    if (adminEmails.includes((rawUser?.email || '').toLowerCase())) {
+      role = UserRole.ADMIN;
+    }
+
+    if (role === UserRole.LAGER) {
+      navigate('/warehouse');
+    } else if (role === UserRole.DISPO) {
+      navigate('/planning-v2');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   return (
