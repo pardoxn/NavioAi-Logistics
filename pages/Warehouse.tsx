@@ -274,8 +274,8 @@ const WarehouseMobileV2View: React.FC<WarehouseMobileV2ViewProps> = ({ tours, fo
         <div className="w-20 h-20 bg-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Truck className="w-10 h-10 opacity-30" />
         </div>
-        <h3 className="text-lg font-semibold text-slate-600">Keine Touren in V2 geplant</h3>
-        <p className="text-sm mt-2">Bitte erst in der Planung V2 aufbauen.</p>
+        <h3 className="text-lg font-semibold text-slate-600">Aktuell gibt es keine Touren</h3>
+        <p className="text-sm mt-2">Sobald neue Touren geplant sind, werden sie hier angezeigt.</p>
       </div>
     );
   }
