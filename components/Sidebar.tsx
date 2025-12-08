@@ -117,7 +117,7 @@ const Sidebar = () => {
           </>
         )}
 
-        {/* Lager-Ansicht: Verladung + Archiv + Team & Chat (oben schon) */}
+        {/* Lager-Ansicht: Geplante Touren + Archiv + Team & Chat (oben schon) */}
         {isLagerOnly && (
           <>
             <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between group cursor-default">
@@ -128,7 +128,7 @@ const Sidebar = () => {
               {({ isActive }) => (
                 <>
                   <Package size={18} className={isActive ? "text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]" : ""} />
-                  Verladung
+                  Geplante Touren
                 </>
               )}
             </NavLink>
@@ -199,7 +199,7 @@ const Sidebar = () => {
               {({ isActive }) => (
                 <>
                   <Package size={18} className={isActive ? "text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]" : ""} />
-                  Verladung
+                  Geplante Touren
                 </>
               )}
             </NavLink>

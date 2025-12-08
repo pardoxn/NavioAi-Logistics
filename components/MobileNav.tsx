@@ -108,7 +108,7 @@ const MobileNav = () => {
                   {({ isActive }) => (
                     <>
                       <Package size={18} className={isActive ? "text-green-500" : ""} />
-                      Verladung
+                      Geplante Touren
                     </>
                   )}
                 </NavLink>
