@@ -1,9 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { TourStatus, Tour, Order } from '../types';
-import { Package, Truck, Camera, ArrowLeft, Calendar, CheckCircle2, AlertTriangle, Image as ImageIcon, MapPin } from 'lucide-react';
+import { Truck, Camera, CheckCircle2, AlertTriangle, Image as ImageIcon, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
 type V2FormState = {
@@ -184,12 +183,6 @@ interface WarehouseMobileV2ViewProps {
 
 const WarehouseMobileV2View: React.FC<WarehouseMobileV2ViewProps> = ({ tours, forms, onFileChange, onSubmit }) => {
   const activeTours = tours.filter((t) => t.status === TourStatus.PLANNING || t.status === TourStatus.LOCKED);
-  const currentDate = new Date().toLocaleDateString('de-DE', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
 
   if (activeTours.length === 0) {
     return (
@@ -212,29 +205,6 @@ const WarehouseMobileV2View: React.FC<WarehouseMobileV2ViewProps> = ({ tours, fo
 
   return (
     <div className="-mx-4 md:mx-0 bg-slate-100 pb-16 rounded-2xl">
-      <div className="bg-slate-900 text-white p-4 pt-5 pb-5 shadow-lg rounded-b-3xl sticky top-0 z-10">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Package className="w-5 h-5 text-blue-300" />
-            <div>
-              <p className="text-[11px] uppercase tracking-wide text-slate-300">Lager</p>
-              <h1 className="text-xl font-bold leading-tight">Geplante Touren</h1>
-            </div>
-          </div>
-          <Link
-            to="/planning-v2"
-            className="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
-          >
-            <ArrowLeft className="w-3 h-3" />
-            Planung
-          </Link>
-        </div>
-        <div className="flex items-center gap-2 text-slate-400 text-sm">
-          <Calendar className="w-4 h-4" />
-          <span className="capitalize">{currentDate}</span>
-        </div>
-      </div>
-
       <div className="p-4 space-y-5 max-w-xl mx-auto">
         {activeTours.map((tour) => (
           <WarehouseMobileV2Card
