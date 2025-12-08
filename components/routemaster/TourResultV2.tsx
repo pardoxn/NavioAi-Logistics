@@ -330,7 +330,9 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        {tour.stops.map((stop, stopIndex) => (
+                        {tour.stops.map((stop, stopIndex) => {
+                          const number = stop.stopNumber || stopIndex + 1;
+                          return (
                           <div 
                             key={`${tourIndex}-${stopIndex}`}
                             draggable={!tour.isLocked}
@@ -349,7 +351,7 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                             )}
 
                             <div className="flex-none flex flex-col items-center gap-1 min-w-[24px] mt-0.5">
-                              <span className="text-xs font-bold text-slate-600">{stop.stopNumber}</span>
+                              <span className="text-xs font-bold text-slate-600">{number}</span>
                               <div className="w-0.5 h-full bg-slate-100 min-h-[10px] last:hidden" />
                             </div>
 
@@ -394,8 +396,9 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                                 </p>
                               )}
                             </div>
-                          </div>
-                        ))}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
