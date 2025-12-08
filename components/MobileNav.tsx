@@ -13,6 +13,10 @@ const MobileNav = () => {
       isActive ? 'bg-brand-50 text-brand-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'
     }`;
 
+  if (isLager) {
+    return null; // Kein Mobile-Menü für Lager
+  }
+
   return (
     <>
       {/* Burger Button */}
