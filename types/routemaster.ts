@@ -27,6 +27,7 @@ export interface RMTour {
   startLocation: string;
   directionInfo?: string;
   isLocked?: boolean;
+  status?: string;
 }
 
 export interface RMPlanningResult {

@@ -94,7 +94,11 @@ const PlanningV2: React.FC = () => {
             .eq('id', 'planning_v2')
             .single();
           if (!error && data?.state?.tours) {
-            setResults({ tours: data.state.tours });
+            const mapped = (data.state.tours as any[]).map((t: any) => ({
+              ...t,
+              status: t.status || (t.isLocked ? 'LOCKED' : 'PLANNING')
+            }));
+            setResults({ tours: mapped });
             stateLoaded.current = true;
             return;
           }
@@ -151,7 +155,7 @@ const PlanningV2: React.FC = () => {
 
       if (allOrdersToPlan.length > 0) {
         const data = await planToursV2(allOrdersToPlan, feedbackNotes);
-        newTours = data.tours;
+        newTours = data.tours.map(t => ({ ...t, status: 'PLANNING' }));
       }
 
       const finalTours = [...lockedTours, ...newTours];
@@ -201,7 +205,8 @@ const PlanningV2: React.FC = () => {
     const newTours = [...results.tours];
     newTours[tourIndex] = {
         ...newTours[tourIndex],
-        isLocked: !newTours[tourIndex].isLocked
+        isLocked: !newTours[tourIndex].isLocked,
+        status: !newTours[tourIndex].isLocked ? 'LOCKED' : 'PLANNING'
     };
     
     setResults({ ...results, tours: newTours });

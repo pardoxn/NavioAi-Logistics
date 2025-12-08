@@ -261,7 +261,7 @@ interface WarehouseMobileV2ViewProps {
 }
 
 const WarehouseMobileV2View: React.FC<WarehouseMobileV2ViewProps> = ({ tours, forms, onFileChange, onSubmit, onNoteChange }) => {
-  const activeTours = tours.filter((t) => t.status === TourStatus.PLANNING || t.status === TourStatus.LOCKED);
+  const activeTours = tours.filter((t) => t.status === TourStatus.LOCKED);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   if (activeTours.length === 0) {
@@ -355,7 +355,7 @@ const Warehouse = () => {
         id: t.id || crypto.randomUUID(),
         name: t.truckName || 'Tour V2',
         date: t.date || new Date().toISOString().split('T')[0],
-        status: t.status || TourStatus.PLANNING,
+        status: t.status || (t.isLocked ? TourStatus.LOCKED : TourStatus.PLANNING),
         stops,
         totalWeight,
         maxWeight: 1300,
