@@ -68,6 +68,7 @@ export interface Tour {
   name: string;
   date: string; // YYYY-MM-DD
   status: TourStatus;
+  lockedAt?: string;
   freightStatus?: FreightStatus; // Status for Timocom/Freight
   stops: Order[]; // Ordered list of stops
   totalWeight: number;

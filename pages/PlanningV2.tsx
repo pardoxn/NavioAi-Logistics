@@ -96,7 +96,8 @@ const PlanningV2: React.FC = () => {
           if (!error && data?.state?.tours) {
             const mapped = (data.state.tours as any[]).map((t: any) => ({
               ...t,
-              status: t.status || (t.isLocked ? 'LOCKED' : 'PLANNING')
+              status: t.status || (t.isLocked ? 'LOCKED' : 'PLANNING'),
+              lockedAt: t.lockedAt
             }));
             setResults({ tours: mapped });
             stateLoaded.current = true;
@@ -203,10 +204,12 @@ const PlanningV2: React.FC = () => {
     if (!results) return;
     
     const newTours = [...results.tours];
+    const nowIso = new Date().toISOString();
     newTours[tourIndex] = {
         ...newTours[tourIndex],
         isLocked: !newTours[tourIndex].isLocked,
-        status: !newTours[tourIndex].isLocked ? 'LOCKED' : 'PLANNING'
+        status: !newTours[tourIndex].isLocked ? 'LOCKED' : 'PLANNING',
+        lockedAt: !newTours[tourIndex].isLocked ? nowIso : undefined
     };
     
     setResults({ ...results, tours: newTours });
