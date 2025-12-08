@@ -56,7 +56,8 @@ export const TourResultV2: React.FC<TourResultProps> = ({
 
   const getWeightColor = (weight: number) => {
     if (weight > 1300) return 'bg-red-500';
-    return 'bg-emerald-500';
+    if (weight > 650) return 'bg-emerald-500';
+    return 'bg-amber-400';
   };
 
   const getWeightPercentage = (weight: number) => {
