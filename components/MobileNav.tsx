@@ -56,26 +56,32 @@ const MobileNav = () => {
                 )}
               </NavLink>
 
-              <NavLink to="/team" className={linkClass} onClick={() => setOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <MessageSquare size={18} className={isActive ? "text-pink-500" : ""} />
-                    Team & Chat
-                  </>
-                )}
-              </NavLink>
-
-              <NavLink to="/handbook" className={linkClass} onClick={() => setOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <BookOpen size={18} className={isActive ? "text-amber-500" : ""} />
-                    Handbuch
-                  </>
-                )}
-              </NavLink>
-
-              {isDispo && (
+              {isAdmin ? (
                 <>
+                  <NavLink to="/dashboard" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <LayoutDashboard size={18} className={isActive ? "text-brand-600" : ""} />
+                        Dashboard
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/team" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <MessageSquare size={18} className={isActive ? "text-pink-500" : ""} />
+                        Team & Chat
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/handbook" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <BookOpen size={18} className={isActive ? "text-amber-500" : ""} />
+                        Handbuch
+                      </>
+                    )}
+                  </NavLink>
                   <NavLink to="/import" className={linkClass} onClick={() => setOpen(false)}>
                     {({ isActive }) => (
                       <>
@@ -100,10 +106,67 @@ const MobileNav = () => {
                       </>
                     )}
                   </NavLink>
+                  <NavLink to="/warehouse" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Package size={18} className={isActive ? "text-green-500" : ""} />
+                        Geplante Touren
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/archive" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Archive size={18} className={isActive ? "text-amber-500" : ""} />
+                        Archiv
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/archive-v2" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Archive size={18} className={isActive ? "text-amber-500" : ""} />
+                        Archiv V2
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/settings" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Settings size={18} className={isActive ? "text-slate-800" : ""} />
+                        Einstellungen
+                      </>
+                    )}
+                  </NavLink>
                 </>
-              )}
-
-              {(isLager || isAdmin) && (
+              ) : isDispo ? (
+                <>
+                  <NavLink to="/planning-v2" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Route size={18} className={isActive ? "text-emerald-500" : ""} />
+                        Tourenplanung V2
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/archive-v2" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Archive size={18} className={isActive ? "text-amber-500" : ""} />
+                        Archiv V2
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/handbook" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <BookOpen size={18} className={isActive ? "text-amber-500" : ""} />
+                        Handbuch
+                      </>
+                    )}
+                  </NavLink>
+                </>
+              ) : isLager ? (
                 <NavLink to="/warehouse" className={linkClass} onClick={() => setOpen(false)}>
                   {({ isActive }) => (
                     <>
@@ -112,35 +175,7 @@ const MobileNav = () => {
                     </>
                   )}
                 </NavLink>
-              )}
-
-              <NavLink to="/archive" className={linkClass} onClick={() => setOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <Archive size={18} className={isActive ? "text-amber-500" : ""} />
-                    Archiv
-                  </>
-                )}
-              </NavLink>
-              <NavLink to="/archive-v2" className={linkClass} onClick={() => setOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <Archive size={18} className={isActive ? "text-amber-500" : ""} />
-                    Archiv V2
-                  </>
-                )}
-              </NavLink>
-
-              {isAdmin && (
-                <NavLink to="/settings" className={linkClass} onClick={() => setOpen(false)}>
-                  {({ isActive }) => (
-                    <>
-                      <Settings size={18} className={isActive ? "text-slate-800" : ""} />
-                      Einstellungen
-                    </>
-                  )}
-                </NavLink>
-              )}
+              ) : null}
             </nav>
 
             <button

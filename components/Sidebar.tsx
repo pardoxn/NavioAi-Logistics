@@ -57,35 +57,33 @@ const Sidebar = () => {
       {/* Navigation */}
       <nav className="flex-1 px-0 py-6 overflow-y-auto relative z-10 custom-scrollbar">
         <div className="px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Main Menu</div>
-        {!isLagerOnly && (
-          <NavLink to="/dashboard" className={linkClass}>
-            {({ isActive }) => (
-              <>
-                <LayoutDashboard size={18} className={isActive ? "text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]" : ""} />
-                Dashboard
-              </>
-            )}
-          </NavLink>
-        )}
-        <NavLink to="/team" className={linkClass}>
-          {({ isActive }) => (
-            <>
-              <MessageSquare size={18} className={isActive ? "text-pink-400 drop-shadow-[0_0_5px_rgba(244,114,182,0.5)]" : ""} />
-              Team & Chat
-            </>
-          )}
-        </NavLink>
-        <NavLink to="/handbook" className={linkClass}>
-          {({ isActive }) => (
-            <>
-              <BookOpen size={18} className={isActive ? "text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]" : ""} />
-              Handbuch
-            </>
-          )}
-        </NavLink>
-
-        {isDispo && (
+        {/* ADMIN: alles wie bisher */}
+        {isAdmin ? (
           <>
+            <NavLink to="/dashboard" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <LayoutDashboard size={18} className={isActive ? "text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]" : ""} />
+                  Dashboard
+                </>
+              )}
+            </NavLink>
+            <NavLink to="/team" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <MessageSquare size={18} className={isActive ? "text-pink-400 drop-shadow-[0_0_5px_rgba(244,114,182,0.5)]" : ""} />
+                  Team & Chat
+                </>
+              )}
+            </NavLink>
+            <NavLink to="/handbook" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <BookOpen size={18} className={isActive ? "text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]" : ""} />
+                  Handbuch
+                </>
+              )}
+            </NavLink>
             <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between group cursor-default">
               Disposition
               <div className="h-[1px] flex-1 bg-white/5 ml-3 group-hover:bg-white/10 transition-colors"></div>
@@ -114,50 +112,6 @@ const Sidebar = () => {
                 </>
               )}
             </NavLink>
-          </>
-        )}
-
-        {/* Lager-Ansicht: Geplante Touren + Archiv + Team & Chat (oben schon) */}
-        {isLagerOnly && (
-          <>
-            <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between group cursor-default">
-              Lager
-              <div className="h-[1px] flex-1 bg-white/5 ml-3 group-hover:bg-white/10 transition-colors"></div>
-            </div>
-            <NavLink to="/warehouse" className={linkClass}>
-              {({ isActive }) => (
-                <>
-                  <Package size={18} className={isActive ? "text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]" : ""} />
-                  Geplante Touren
-                </>
-              )}
-            </NavLink>
-            <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between">
-              History
-              <div className="h-[1px] flex-1 bg-white/5 ml-3"></div>
-            </div>
-            <NavLink to="/archive" className={linkClass}>
-              {({ isActive }) => (
-                <>
-                  <Archive size={18} className={isActive ? "text-amber-400" : ""} />
-                  Archiv
-                </>
-              )}
-            </NavLink>
-            <NavLink to="/archive-v2" className={linkClass}>
-              {({ isActive }) => (
-                <>
-                  <Archive size={18} className={isActive ? "text-amber-400" : ""} />
-                  Archiv V2
-                </>
-              )}
-            </NavLink>
-          </>
-        )}
-
-        {/* History für Nicht-Lager */}
-        {!isLagerOnly && (
-          <>
             <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between">
               History
               <div className="h-[1px] flex-1 bg-white/5 ml-3"></div>
@@ -186,14 +140,9 @@ const Sidebar = () => {
                 </>
               )}
             </NavLink>
-          </>
-        )}
-
-        {isAdmin && (
-          <>
-             <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between">
-               Admin
-               <div className="h-[1px] flex-1 bg-white/5 ml-3"></div>
+            <div className="mt-8 px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between">
+              Admin
+              <div className="h-[1px] flex-1 bg-white/5 ml-3"></div>
             </div>
             <NavLink to="/warehouse" className={linkClass}>
               {({ isActive }) => (
@@ -220,7 +169,45 @@ const Sidebar = () => {
               )}
             </NavLink>
           </>
-        )}
+        ) : isDispo ? (
+          <>
+            <NavLink to="/planning-v2" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Route size={18} className={isActive ? "text-emerald-400" : ""} />
+                  Tourenplanung V2
+                </>
+              )}
+            </NavLink>
+            <NavLink to="/archive-v2" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Archive size={18} className={isActive ? "text-amber-400" : ""} />
+                  Archiv V2
+                </>
+              )}
+            </NavLink>
+            <NavLink to="/handbook" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <BookOpen size={18} className={isActive ? "text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]" : ""} />
+                  Handbuch
+                </>
+              )}
+            </NavLink>
+          </>
+        ) : isLagerOnly ? (
+          <>
+            <NavLink to="/warehouse" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Package size={18} className={isActive ? "text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]" : ""} />
+                  Geplante Touren
+                </>
+              )}
+            </NavLink>
+          </>
+        ) : null}
       </nav>
 
       {/* Footer */}
