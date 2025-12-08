@@ -7,6 +7,7 @@ import { useData } from '../context/DataContext';
 import { generateCMRBundle } from '../services/pdfService';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '../lib/supabaseClient';
+import { useRef } from 'react';
 
 const PlanningV2: React.FC = () => {
   const { cmrConfig, orders: globalOrders, addOrders, removeOrders } = useData();
@@ -16,7 +17,7 @@ const PlanningV2: React.FC = () => {
       .map(o => ({
         id: o.id,
         customerName: o.customerName1 || 'Kunde',
-        address: `${o.shippingStreet ? o.shippingStreet + ', ' : ''}${o.shippingPostcode || ''} ${o.shippingCity || ''}`.trim(),
+        address: o.address || `${o.shippingStreet ? o.shippingStreet + ', ' : ''}${o.shippingPostcode || ''} ${o.shippingCity || ''}`.trim(),
         weight: Math.round(Number(o.totalWeightKg) || 0),
         referenceNumber: o.documentNumber || o.orderId || undefined,
       }));
@@ -27,7 +28,10 @@ const PlanningV2: React.FC = () => {
     const toAdd = newOrders.map(o => {
       const postcodeMatch = (o.address || '').match(/\b\d{4,5}\b/);
       const postcode = postcodeMatch ? postcodeMatch[0] : '';
-      const city = (o.address || '').replace(postcode, '').replace(',', '').trim();
+      const rawCity = (o.address || '').replace(postcode, '').replace(',', '').trim();
+      const city = rawCity && rawCity !== postcode ? rawCity : '';
+      const street = o.address.includes(',') ? o.address.split(',')[0].trim() : '';
+      const addressLine = `${street ? street + ', ' : ''}${postcode}${city ? ' ' + city : ''}`.trim();
       return {
         id: o.id || uuidv4(),
         orderId: o.referenceNumber || o.id || uuidv4(),
@@ -41,21 +45,65 @@ const PlanningV2: React.FC = () => {
         shippingCountryCode: 'DE',
         shippingCountryName: 'Deutschland',
         shippingPostcode: postcode,
-        shippingCity: city || o.address,
-        shippingStreet: '',
+        shippingCity: city,
+        shippingStreet: street,
         totalWeightKg: o.weight,
         isPlanned: false,
         bearing: 0,
         distanceFromDepot: 0,
-      };
+        // Preserve a display address for consistency
+        address: addressLine,
+        referenceNumber: o.referenceNumber
+      } as any;
     });
-    addOrders(toAdd);
+    addOrders(toAdd as any);
   };
   const [results, setResults] = useState<RMPlanningResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feedbackModal, setFeedbackModal] = useState<{ open: boolean; tour?: RMTour; rating?: 'UP' | 'DOWN'; comment?: string }>({ open: false, comment: '' });
   const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const stateLoaded = useRef(false);
+
+  // --- Persist V2 Tours global via Supabase ---
+  useEffect(() => {
+    const loadState = async () => {
+      try {
+        if (supabase) {
+          const { data, error } = await supabase
+            .from('navio_state')
+            .select('state')
+            .eq('id', 'planning_v2')
+            .single();
+          if (!error && data?.state?.tours) {
+            setResults({ tours: data.state.tours });
+            stateLoaded.current = true;
+            return;
+          }
+        }
+      } catch (e) {
+          console.warn('V2 state load failed', e);
+        }
+      stateLoaded.current = true;
+    };
+    loadState();
+  }, []);
+
+  useEffect(() => {
+    if (!stateLoaded.current) return;
+    const payload = { tours: results?.tours || [] };
+    // Save Supabase if available
+    const save = async () => {
+      if (!supabase) return;
+      await supabase.from('navio_state').upsert({
+        id: 'planning_v2',
+        org: 'werny',
+        state: payload,
+        updated_at: new Date().toISOString(),
+      });
+    };
+    save().catch((e) => console.warn('V2 state save failed', e));
+  }, [results]);
 
   const handlePlanTours = async () => {
     const lockedTours = results?.tours.filter(t => t.isLocked) || [];

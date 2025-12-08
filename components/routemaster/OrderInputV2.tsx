@@ -270,11 +270,11 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
             </div>
           ) : (
             <ul className="p-4 space-y-2">
-              {localOrders.map((order, index) => (
-                <li 
-                  key={order.id} 
-                  draggable={!isLoading}
-                  onDragStart={(e) => handleDragStart(e, index, order)}
+          {localOrders.map((order, index) => (
+            <li 
+              key={order.id} 
+              draggable={!isLoading}
+              onDragStart={(e) => handleDragStart(e, index, order)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDragEnd={handleDragEnd}
                   className={`flex items-center gap-3 p-3.5 bg-white rounded-xl border transition-all group
@@ -290,12 +290,12 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
                     <div className="min-w-0">
                       <p className="font-bold text-slate-800 text-sm truncate">{order.customerName}</p>
                       <p className="text-xs text-slate-500 truncate mt-0.5" title={order.address}>{order.address}</p>
-                      {order.referenceNumber && (
+                      {order.referenceNumber ? (
                          <div className="flex items-center gap-1 mt-1.5">
                            <FileText className="w-3 h-3 text-slate-400" />
                            <span className="text-[10px] text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">{order.referenceNumber}</span>
                          </div>
-                      )}
+                      ) : null}
                     </div>
                     <div className="text-right">
                        <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 min-w-[60px]">
