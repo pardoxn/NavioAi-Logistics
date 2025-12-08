@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useData } from '../context/DataContext';
-import { TourStatus } from '../types';
+import { TourStatus, Tour, Order } from '../types';
 import { Package, Truck, CheckCircle, Box, ChevronDown, Camera, FileText, Globe, ThumbsUp } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 const Warehouse = () => {
   const { tours, completeTourLoading } = useData();
+  const [v2Tours, setV2Tours] = useState<Tour[]>([]);
   const [expandedTourId, setExpandedTourId] = useState<string | null>(null);
 
   // Form State
@@ -14,8 +16,64 @@ const Warehouse = () => {
   const [note, setNote] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Filter relevant tours
-  const activeTours = tours.filter(t => t.status === TourStatus.LOCKED || t.status === TourStatus.PLANNING);
+  useEffect(() => {
+    const loadV2 = async () => {
+      if (!supabase) return;
+      const { data, error } = await supabase
+        .from('navio_state')
+        .select('state')
+        .eq('id', 'planning_v2')
+        .eq('org', 'werny')
+        .single();
+      if (error || !data?.state?.tours) return;
+      const mapped: Tour[] = (data.state.tours as any[]).map((t: any) => {
+        const stops: Order[] = (t.stops || []).map((s: any) => {
+          const postcodeMatch = (s.address || '').match(/\b\d{4,5}\b/);
+          const postcode = postcodeMatch ? postcodeMatch[0] : '';
+          const city = (s.address || '').replace(postcode, '').trim();
+          return {
+            id: s.id || s.referenceNumber || crypto.randomUUID(),
+            orderId: s.referenceNumber || s.id || '',
+            documentNumber: s.referenceNumber || s.id || '',
+            documentYear: new Date().getFullYear().toString(),
+            documentType: 'Tourenplanung V2',
+            customerReferenceNumber: '',
+            documentDate: new Date().toISOString().split('T')[0],
+            customerNumber: 'RM',
+            customerName1: s.customerName || 'Kunde',
+            shippingCountryCode: 'DE',
+            shippingCountryName: 'Deutschland',
+            shippingPostcode: postcode,
+            shippingCity: city || s.address || '',
+            shippingStreet: '',
+            totalWeightKg: s.weightToUnload || 0,
+            isPlanned: true,
+            bearing: 0,
+            distanceFromDepot: 0,
+          };
+        });
+        const totalWeight = stops.reduce((sum, s) => sum + (s.totalWeightKg || 0), 0);
+        return {
+          id: t.id || crypto.randomUUID(),
+          name: t.truckName || 'Tour V2',
+          date: new Date().toISOString().split('T')[0],
+          status: TourStatus.PLANNING,
+          stops,
+          totalWeight,
+          maxWeight: 1300,
+          utilization: Math.round((totalWeight / 1300) * 100),
+          estimatedDistanceKm: 0,
+          vehiclePlate: t.truckName || '',
+        };
+      });
+      setV2Tours(mapped);
+    };
+    loadV2();
+  }, []);
+
+  // Filter relevant tours (native + V2)
+  const allTours = [...tours, ...v2Tours];
+  const activeTours = allTours.filter(t => t.status === TourStatus.LOCKED || t.status === TourStatus.PLANNING);
 
   const toggleExpand = (id: string) => {
     if (expandedTourId === id) {
