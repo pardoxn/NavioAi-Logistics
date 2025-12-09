@@ -346,69 +346,69 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                         {tour.stops.map((stop, stopIndex) => {
                           const number = stop.stopNumber || stopIndex + 1;
                           return (
-                          <div 
-                            key={`${tourIndex}-${stopIndex}`}
-                            draggable={!tour.isLocked}
-                            onDragStart={(e) => handleDragStart(e, tourIndex, stopIndex)}
-                            onDragOver={(e) => handleDragOverStop(e, tourIndex, stopIndex)}
-                            onDragEnd={handleDragEnd}
-                            className={`flex items-start gap-3 p-3 bg-white rounded-lg border transition-all relative group
-                              ${draggedStop?.tourIndex === tourIndex && draggedStop?.stopIndex === stopIndex ? 'opacity-40 border-dashed border-blue-400' : 'border-slate-200 shadow-sm'}
-                              ${!tour.isLocked ? 'hover:border-blue-300' : ''}
-                            `}
-                          >
-                            {!tour.isLocked && (
+                            <div
+                              key={`${tourIndex}-${stopIndex}`}
+                              draggable={!tour.isLocked}
+                              onDragStart={(e) => handleDragStart(e, tourIndex, stopIndex)}
+                              onDragOver={(e) => handleDragOverStop(e, tourIndex, stopIndex)}
+                              onDragEnd={handleDragEnd}
+                              className={`flex items-start gap-3 p-3 bg-white rounded-lg border transition-all relative group
+                                ${draggedStop?.tourIndex === tourIndex && draggedStop?.stopIndex === stopIndex ? 'opacity-40 border-dashed border-blue-400' : 'border-slate-200 shadow-sm'}
+                                ${!tour.isLocked ? 'hover:border-blue-300' : ''}
+                              `}
+                            >
+                              {!tour.isLocked && (
                                 <div className="mt-1 text-slate-300 cursor-grab active:cursor-grabbing hover:text-slate-500">
-                                <GripVertical className="w-4 h-4" />
+                                  <GripVertical className="w-4 h-4" />
                                 </div>
-                            )}
+                              )}
 
-                            <div className="flex-none flex flex-col items-center gap-1 min-w-[24px] mt-0.5">
-                              <span className="text-xs font-bold text-slate-600">{number}</span>
-                              <div className="w-0.5 h-full bg-slate-100 min-h-[10px] last:hidden" />
-                            </div>
+                              <div className="flex-none flex flex-col items-center gap-1 min-w-[24px] mt-0.5">
+                                <span className="text-xs font-bold text-slate-600">{number}</span>
+                                <div className="w-0.5 h-full bg-slate-100 min-h-[10px] last:hidden" />
+                              </div>
 
-                            <div className="flex-1 min-w-0 pb-1">
-                              <div className="flex justify-between items-start gap-2">
-                                <div>
+                              <div className="flex-1 min-w-0 pb-1">
+                                <div className="flex justify-between items-start gap-2">
+                                  <div>
                                     <p className="font-bold text-sm text-slate-800 leading-tight mb-0.5">
-                                        {stop.customerName || 'Kunde'}
+                                      {stop.customerName || 'Kunde'}
                                     </p>
                                     <p className="text-xs text-slate-500 leading-snug">
-                                        {stop.address}
+                                      {stop.address}
                                     </p>
-                                    
+
                                     {stop.referenceNumber && (
-                                        <div className="flex items-center gap-1 mt-1.5">
-                                            <FileText className="w-3 h-3 text-slate-400" />
-                                            <span className="text-[10px] text-slate-500 font-mono bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
-                                                {stop.referenceNumber}
-                                            </span>
-                                        </div>
+                                      <div className="flex items-center gap-1 mt-1.5">
+                                        <FileText className="w-3 h-3 text-slate-400" />
+                                        <span className="text-[10px] text-slate-500 font-mono bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                                          {stop.referenceNumber}
+                                        </span>
+                                      </div>
                                     )}
-                                </div>
-                                <div className="flex flex-col items-end gap-2">
-                                    <span className={`text-[10px] font-bold px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap`}>
-                                        {stop.weightToUnload} kg
+                                  </div>
+                                  <div className="flex flex-col items-end gap-2">
+                                    <span className="text-[10px] font-bold px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
+                                      {stop.weightToUnload} kg
                                     </span>
-                                    
+
                                     {!tour.isLocked && (
-                                        <button 
-                                            onClick={() => setDeleteModal({tourIndex, stopIndex})}
-                                            className="text-slate-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors opacity-0 group-hover:opacity-100"
-                                            title="Entfernen"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
+                                      <button
+                                        onClick={() => setDeleteModal({ tourIndex, stopIndex })}
+                                        className="text-slate-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors opacity-0 group-hover:opacity-100"
+                                        title="Entfernen"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
                                     )}
+                                  </div>
                                 </div>
-                              </div>
-                              {stop.description && (
-                                <p className="text-[10px] text-blue-600/70 mt-1 italic">
+                                {stop.description && (
+                                  <p className="text-[10px] text-blue-600/70 mt-1 italic">
                                     {stop.description}
-                                </p>
-                              )}
-                            </div>
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           );
                         })}
@@ -416,7 +416,8 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                     )}
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           )}
         </div>
