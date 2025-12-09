@@ -72,11 +72,7 @@ const Login = () => {
         {/* Content Top */}
         <div className="relative z-20">
            <div className="flex items-center gap-4 mb-8 animate-fade-in-down">
-             <Logo size={64} className="drop-shadow-xl" />
-             <div className="flex flex-col">
-               <span className="text-xl font-extrabold tracking-[0.2em] uppercase text-white drop-shadow">Navio AI</span>
-               <span className="text-xs text-blue-100/80 tracking-[0.25em] uppercase">Logistics</span>
-             </div>
+             <Logo size={70} className="drop-shadow-xl" />
            </div>
            
            <div className="space-y-6 animate-fade-in-up">

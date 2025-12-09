@@ -43,13 +43,7 @@ const Sidebar = () => {
 
       {/* Header with Bell - High Z-Index to stay above content */}
       <div className="p-6 pb-2 relative z-[60] flex items-center justify-between">
-        <div className="flex items-center gap-3">
-           <Logo size={40} />
-           <div>
-             <h1 className="text-lg font-bold tracking-tight text-white leading-none">Navio AI</h1>
-             <p className="text-[9px] uppercase tracking-[0.2em] text-cyan-200/60 mt-1 font-medium">Logistics</p>
-           </div>
-        </div>
+        <Logo size={42} className="drop-shadow-lg" />
         {/* BELL HERE */}
         <NotificationBell />
       </div>
