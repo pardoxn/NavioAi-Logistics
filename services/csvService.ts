@@ -20,6 +20,37 @@ export const parseCSV = (file: File): Promise<Order[]> => {
           return fallback;
         };
 
+        const parseDate = (raw: string) => {
+          if (!raw) return '';
+          const trimmed = raw.trim();
+          if (trimmed.includes('.')) {
+            const [d, m, y] = trimmed.split('.');
+            // Handle 2-digit year by assuming 20xx
+            const year = y && y.length === 2 ? `20${y}` : y;
+            return `${year}-${m}-${d}`;
+          }
+          if (trimmed.includes('-')) return trimmed;
+          return '';
+        };
+
+        const deriveCity = (row: any, postcode: string) => {
+          const rawCity = pick(row, ['Ort Lieferanschrift', 'Ort Lieferanschrift_Bezeichnung', 'Ort', 'Stadt'], '');
+          if (rawCity) return rawCity;
+
+          // Fallback: try last part after comma in Auftraggeber/Matchcode
+          const fromName = pick(row, ['Matchcode Auftraggeber', 'Auftraggeber'], '');
+          if (fromName.includes(',')) {
+            const parts = fromName.split(',').map((p: string) => p.trim()).filter(Boolean);
+            const last = parts[parts.length - 1];
+            // If the last part contains the postcode already, drop it
+            if (postcode && last.startsWith(postcode)) {
+              return last.replace(postcode, '').trim();
+            }
+            return last || rawCity;
+          }
+          return rawCity;
+        };
+
         results.data.forEach((row: any) => {
           // 1. Filter Logic: Only 'Lieferschein' (Delivery Note)
           const docType = (row['Belegart'] || '').toString().toLowerCase();
@@ -33,15 +64,10 @@ export const parseCSV = (file: File): Promise<Order[]> => {
             const weight = parseFloat(weightRaw.toString().replace(',', '.'));
 
             const dateRaw = pick(row, ['Belegdatum', 'Datum'], '');
-            // Simple date parsing assuming DD.MM.YYYY which is common in DACH CSVs
-            let isoDate = dateRaw;
+            const isoDate = parseDate(dateRaw);
             let derivedYear = '';
-            if (dateRaw.includes('.')) {
-              const [d, m, y] = dateRaw.split('.');
-              isoDate = `${y}-${m}-${d}`;
-              derivedYear = y;
-            } else if (dateRaw.includes('-')) {
-              derivedYear = dateRaw.split('-')[0];
+            if (isoDate.includes('-')) {
+              derivedYear = isoDate.split('-')[0];
             }
 
             const order: Order = {
@@ -64,7 +90,7 @@ export const parseCSV = (file: File): Promise<Order[]> => {
               shippingCountryCode: pick(row, ['Land Lieferanschrift_Wert'], 'DE'),
               shippingCountryName: pick(row, ['Land Lieferanschrift_Bezeichnung'], 'Deutschland'),
               shippingPostcode: pick(row, ['PLZ Lieferanschrift', 'PLZ', 'Postleitzahl'], ''),
-              shippingCity: pick(row, ['Ort Lieferanschrift', 'Ort Lieferanschrift_Bezeichnung', 'Ort', 'Stadt'], ''),
+              shippingCity: deriveCity(row, pick(row, ['PLZ Lieferanschrift', 'PLZ', 'Postleitzahl'], '')),
               shippingStreet: pick(row, ['Strasse Lieferanschrift', 'Straße', 'Strasse'], ''), // inferred
 
               totalWeightKg: isNaN(weight) ? 0 : weight,
