@@ -23,6 +23,7 @@ import Handbook from './pages/Handbook';
 import { useState } from 'react';
 
 const ProtectedLayout = () => {
+  const disableLegacy = true;
   const { user, isLoading } = useAuth();
   if (isLoading) {
     return (
@@ -58,14 +59,14 @@ const App = () => {
             <Route element={<ProtectedLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/import" element={<Import />} />
-              <Route path="/planning" element={<Planning />} />
+              <Route path="/planning" element={disableLegacy ? <Navigate to="/planning-v2" replace /> : <Planning />} />
               <Route path="/planning-v2" element={<PlanningV2 />} />
               <Route path="/warehouse" element={<Warehouse />} />
               <Route path="/admin" element={<AdminPage />} />
-              <Route path="/archive" element={<Archive />} />
+              <Route path="/archive" element={disableLegacy ? <Navigate to="/archive-v2" replace /> : <Archive />} />
               <Route path="/archive-v2" element={<ArchiveV2 />} />
               <Route path="/activities" element={<Activities />} />
-              <Route path="/team" element={<Team />} />
+              <Route path="/team" element={disableLegacy ? <Navigate to="/dashboard" replace /> : <Team />} />
               <Route path="/handbook" element={<Handbook />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
