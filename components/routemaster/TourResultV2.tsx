@@ -31,6 +31,8 @@ export const TourResultV2: React.FC<TourResultProps> = ({
   const [deleteModal, setDeleteModal] = useState<{tourIndex: number, stopIndex: number} | null>(null);
 
   const START_GEO = { lat: 51.516, lng: 8.698 };
+  const FALLBACK_FIRST_LEG_KM = 80;
+  const FALLBACK_NEXT_LEG_KM = 70;
 
   const getZip = (input?: string) => {
     if (!input) return '';
@@ -68,7 +70,8 @@ export const TourResultV2: React.FC<TourResultProps> = ({
   };
 
   const getWeightPercentage = (weight: number) => {
-    return Math.min((weight / 1300) * 100, 100);
+    const safeWeight = isFinite(weight) ? weight : 0;
+    return Math.min((safeWeight / 1300) * 100, 100);
   };
 
   const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -94,13 +97,24 @@ export const TourResultV2: React.FC<TourResultProps> = ({
         totalDist += dist * 1.3;
         currentPos = stop.geo;
       } else {
-        // Fallback: grob 15km für ersten Sprung, danach 10km je weiterer Stopp
-        totalDist += idx === 0 ? 15 : 10;
+        // Fallback: großzügige Distanzschätzung, wenn keine Koordinaten vorliegen
+        totalDist += idx === 0 ? FALLBACK_FIRST_LEG_KM : FALLBACK_NEXT_LEG_KM;
       }
     });
 
     return Math.round(totalDist);
   };
+
+  const normalizedTours = tours.map((t) => {
+    const totalWeight = isFinite(t.totalWeight) && t.totalWeight !== undefined
+      ? t.totalWeight
+      : t.stops.reduce((sum, s) => sum + (s.weightToUnload || 0), 0);
+    const hasGeo = t.stops.some((s) => s.geo && typeof s.geo.lat === 'number' && typeof s.geo.lng === 'number');
+    const estimatedDistanceKm = hasGeo
+      ? calculateRouteDistance(t.stops)
+      : (t.stops.length > 0 ? FALLBACK_FIRST_LEG_KM + Math.max(0, t.stops.length - 1) * FALLBACK_NEXT_LEG_KM : 0);
+    return { ...t, totalWeight, estimatedDistanceKm };
+  });
 
   const handleDragStart = (e: React.DragEvent, tourIndex: number, stopIndex: number) => {
     if (tours[tourIndex].isLocked) {
@@ -222,9 +236,9 @@ export const TourResultV2: React.FC<TourResultProps> = ({
             </div>
           )}
 
-          {tours.length > 0 && (
+          {normalizedTours.length > 0 && (
             <div className={`space-y-6 ${isLoading ? 'opacity-40 pointer-events-none filter blur-[1px]' : ''} transition-all duration-500`}>
-              {tours.map((tour, tourIndex) => (
+              {normalizedTours.map((tour, tourIndex) => (
                 <div 
                   key={tour.id || tourIndex} 
                   onDragOver={(e) => handleTourDragOver(e, tourIndex)}
@@ -247,17 +261,17 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                           <Truck className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className={`font-bold ${tour.isLocked ? 'text-slate-500' : 'text-slate-800'}`}>
-                            {tour.truckName}
-                          </h3>
-                          <div className="flex items-center gap-2 mt-0.5">
+                         <h3 className={`font-bold ${tour.isLocked ? 'text-slate-500' : 'text-slate-800'}`}>
+                           {tour.truckName}
+                         </h3>
+                         <div className="flex items-center gap-2 mt-0.5">
                             <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200/50 text-slate-600 font-medium">
                               {tour.stops.length} Stopps
                             </span>
                             {tour.stops.length > 0 && (
                                 <span className="text-xs text-slate-400 flex items-center gap-1">
                                     <MapPin className="w-3 h-3" />
-                                    ~{calculateRouteDistance(tour.stops)} km
+                                    ~{tour.estimatedDistanceKm} km
                                 </span>
                             )}
                           </div>
