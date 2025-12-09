@@ -22,6 +22,8 @@ export const ArchiveView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [informedStops, setInformedStops] = useState<Set<string>>(new Set());
   const [localStopPhotos, setLocalStopPhotos] = useState<Record<string, string>>({});
+  const [reactivating, setReactivating] = useState(false);
+  const [printBusy, setPrintBusy] = useState(false);
 
   useEffect(() => {
     const loadArchive = async () => {
@@ -48,6 +50,72 @@ export const ArchiveView: React.FC = () => {
       tour.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tour.stops.some((stop) => stop.customerName.toLowerCase().includes(searchQuery.toLowerCase())),
   );
+
+  const serializeToPlanning = (tour: ArchiveTour) => ({
+    id: tour.id,
+    truckName: tour.id,
+    date: tour.date,
+    status: 'PLANNING',
+    estimatedDistanceKm: typeof tour.totalDistance === 'string' ? Number(tour.totalDistance.replace(/[^\d.-]/g, '')) || 0 : 0,
+    stops: tour.stops.map((s) => ({
+      id: s.id,
+      referenceNumber: s.orderNumber,
+      customerName: s.customerName,
+      address: [s.zip, s.city].filter(Boolean).join(' '),
+      weightToUnload: s.weight,
+      description: s.note,
+    })),
+  });
+
+  const handleReactivate = async () => {
+    if (!selectedTourId || !supabase) return;
+    const tour = tours.find((t) => t.id === selectedTourId);
+    if (!tour) return;
+
+    setReactivating(true);
+    try {
+      const { data: planningData } = await supabase
+        .from('navio_state')
+        .select('state')
+        .eq('id', 'planning_v2')
+        .eq('org', 'werny')
+        .single();
+      const planningTours = (planningData?.state?.tours as any[]) || [];
+      const updatedPlanning = [...planningTours, serializeToPlanning(tour)];
+
+      await supabase.from('navio_state').upsert({
+        id: 'planning_v2',
+        org: 'werny',
+        state: { tours: updatedPlanning },
+      });
+
+      const remainingArchive = tours.filter((t) => t.id !== tour.id);
+      await supabase.from('navio_state').upsert({
+        id: 'planning_v2_archive',
+        org: 'werny',
+        state: { tours: remainingArchive },
+      });
+
+      setTours(remainingArchive);
+      setSelectedTourId(null);
+      setInformedStops(new Set());
+    } catch (err) {
+      console.error('Reaktivieren fehlgeschlagen', err);
+      alert('Reaktivieren fehlgeschlagen.');
+    } finally {
+      setReactivating(false);
+    }
+  };
+
+  const handlePrint = () => {
+    if (!selectedTour) return;
+    setPrintBusy(true);
+    try {
+      window.print();
+    } finally {
+      setTimeout(() => setPrintBusy(false), 300);
+    }
+  };
 
   const toggleInformed = (stopId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -160,13 +228,21 @@ export const ArchiveView: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-[13px] font-medium shadow-sm">
+                  <button
+                    onClick={handlePrint}
+                    disabled={printBusy}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-[13px] font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     <Printer size={16} />
                     <span>Drucken</span>
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-all text-[13px] font-medium">
+                  <button
+                    onClick={handleReactivate}
+                    disabled={reactivating}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-all text-[13px] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     <RotateCcw size={16} />
-                    <span>Reaktivieren</span>
+                    <span>{reactivating ? 'Reaktiviert...' : 'Reaktivieren'}</span>
                   </button>
                 </div>
               </div>
