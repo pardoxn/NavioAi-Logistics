@@ -6,7 +6,6 @@ import Logo from './Logo';
 
 const MobileNav = () => {
   const { isDispo, isLager, isAdmin, logout } = useAuth();
-  const disableLegacy = true;
   const [open, setOpen] = useState(false);
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -62,81 +61,75 @@ const MobileNav = () => {
 
               {isAdmin ? (
                 <>
-              <NavLink to="/dashboard" className={linkClass} onClick={() => setOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <LayoutDashboard size={18} className={isActive ? "text-brand-600" : ""} />
-                    Dashboard
-                  </>
-                )}
-              </NavLink>
-              {!disableLegacy && (
-                <NavLink to="/team" className={linkClass} onClick={() => setOpen(false)}>
-                  {({ isActive }) => (
-                    <>
-                      <MessageSquare size={18} className={isActive ? "text-pink-500" : ""} />
-                      Team & Chat
-                    </>
-                  )}
-                </NavLink>
-              )}
-              <NavLink to="/handbook" className={linkClass} onClick={() => setOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <BookOpen size={18} className={isActive ? "text-amber-500" : ""} />
-                    Handbuch
+                  <NavLink to="/dashboard" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <LayoutDashboard size={18} className={isActive ? "text-brand-600" : ""} />
+                        Dashboard
                       </>
                     )}
                   </NavLink>
-              <NavLink to="/import" className={linkClass} onClick={() => setOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <Truck size={18} className={isActive ? "text-brand-600" : ""} />
-                    Import CSV
-                  </>
-                )}
-              </NavLink>
-              {!disableLegacy && (
-                <NavLink to="/planning" className={linkClass} onClick={() => setOpen(false)}>
-                  {({ isActive }) => (
-                    <>
-                      <Truck size={18} className={isActive ? "text-brand-600" : ""} />
-                      Tourenplanung
-                    </>
-                  )}
-                </NavLink>
-              )}
-              <NavLink to="/planning-v2" className={linkClass} onClick={() => setOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <Route size={18} className={isActive ? "text-emerald-500" : ""} />
-                    Tourenplanung V2
+                  <NavLink to="/team" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <MessageSquare size={18} className={isActive ? "text-pink-500" : ""} />
+                        Team & Chat
                       </>
                     )}
                   </NavLink>
-              <NavLink to="/warehouse" className={linkClass} onClick={() => setOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <Package size={18} className={isActive ? "text-green-500" : ""} />
-                    Geplante Touren
-                  </>
-                )}
-              </NavLink>
-              {!disableLegacy && (
-                <NavLink to="/archive" className={linkClass} onClick={() => setOpen(false)}>
-                  {({ isActive }) => (
-                    <>
-                      <Archive size={18} className={isActive ? "text-amber-500" : ""} />
-                      Archiv
-                    </>
-                  )}
-                </NavLink>
-              )}
-              <NavLink to="/archive-v2" className={linkClass} onClick={() => setOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <Archive size={18} className={isActive ? "text-amber-500" : ""} />
-                    Archiv V2
+                  <NavLink to="/handbook" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <BookOpen size={18} className={isActive ? "text-amber-500" : ""} />
+                        Handbuch
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/import" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Truck size={18} className={isActive ? "text-brand-600" : ""} />
+                        Import CSV
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/planning" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Truck size={18} className={isActive ? "text-brand-600" : ""} />
+                        Tourenplanung
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/planning-v2" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Route size={18} className={isActive ? "text-emerald-500" : ""} />
+                        Tourenplanung V2
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/warehouse" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Package size={18} className={isActive ? "text-green-500" : ""} />
+                        Geplante Touren
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/archive" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Archive size={18} className={isActive ? "text-amber-500" : ""} />
+                        Archiv
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink to="/archive-v2" className={linkClass} onClick={() => setOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <Archive size={18} className={isActive ? "text-amber-500" : ""} />
+                        Archiv V2
                       </>
                     )}
                   </NavLink>

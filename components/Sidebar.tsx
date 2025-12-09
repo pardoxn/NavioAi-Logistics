@@ -14,7 +14,6 @@ const Sidebar = () => {
   const { user, logout, isAdmin, isDispo, isLager } = useAuth();
   const isLagerOnly = user?.role === UserRole.LAGER;
   const navigate = useNavigate();
-  const disableLegacy = true;
 
   const handleLogout = () => {
     logout();
@@ -63,16 +62,14 @@ const Sidebar = () => {
                 </>
               )}
             </NavLink>
-            {!disableLegacy && (
-              <NavLink to="/team" className={linkClass}>
-                {({ isActive }) => (
-                  <>
-                    <MessageSquare size={18} className={isActive ? "text-pink-400 drop-shadow-[0_0_5px_rgba(244,114,182,0.5)]" : ""} />
-                    Team & Chat
-                  </>
-                )}
-              </NavLink>
-            )}
+            <NavLink to="/team" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <MessageSquare size={18} className={isActive ? "text-pink-400 drop-shadow-[0_0_5px_rgba(244,114,182,0.5)]" : ""} />
+                  Team & Chat
+                </>
+              )}
+            </NavLink>
             <NavLink to="/handbook" className={linkClass}>
               {({ isActive }) => (
                 <>
@@ -93,16 +90,14 @@ const Sidebar = () => {
                 </>
               )}
             </NavLink>
-            {!disableLegacy && (
-              <NavLink to="/planning" className={linkClass}>
-                {({ isActive }) => (
-                  <>
-                    <Disc size={18} className={isActive ? "text-cyan-400 animate-spin-slow" : ""} />
-                    Tourenplanung
-                  </>
-                )}
-              </NavLink>
-            )}
+            <NavLink to="/planning" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Disc size={18} className={isActive ? "text-cyan-400 animate-spin-slow" : ""} />
+                  Tourenplanung
+                </>
+              )}
+            </NavLink>
             <NavLink to="/planning-v2" className={linkClass}>
               {({ isActive }) => (
                 <>
@@ -115,16 +110,14 @@ const Sidebar = () => {
               History
               <div className="h-[1px] flex-1 bg-white/5 ml-3"></div>
             </div>
-            {!disableLegacy && (
-              <NavLink to="/archive" className={linkClass}>
-                {({ isActive }) => (
-                  <>
-                    <Archive size={18} className={isActive ? "text-amber-400" : ""} />
-                    Archiv
-                  </>
-                )}
-              </NavLink>
-            )}
+            <NavLink to="/archive" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <Archive size={18} className={isActive ? "text-amber-400" : ""} />
+                  Archiv
+                </>
+              )}
+            </NavLink>
             <NavLink to="/archive-v2" className={linkClass}>
               {({ isActive }) => (
                 <>
