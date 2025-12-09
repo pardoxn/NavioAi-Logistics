@@ -31,8 +31,6 @@ export const TourResultV2: React.FC<TourResultProps> = ({
   const [deleteModal, setDeleteModal] = useState<{tourIndex: number, stopIndex: number} | null>(null);
 
   const START_GEO = { lat: 51.516, lng: 8.698 };
-  const FALLBACK_FIRST_LEG_KM = 80;
-  const FALLBACK_NEXT_LEG_KM = 70;
 
   const getZip = (input?: string) => {
     if (!input) return '';
@@ -91,30 +89,16 @@ export const TourResultV2: React.FC<TourResultProps> = ({
     let totalDist = 0;
     let currentPos = START_GEO;
 
-    stops.forEach((stop, idx) => {
+    stops.forEach((stop) => {
       if (stop.geo && typeof stop.geo.lat === 'number' && typeof stop.geo.lng === 'number') {
         const dist = getDistanceFromLatLonInKm(currentPos.lat, currentPos.lng, stop.geo.lat, stop.geo.lng);
         totalDist += dist * 1.3;
         currentPos = stop.geo;
-      } else {
-        // Fallback: großzügige Distanzschätzung, wenn keine Koordinaten vorliegen
-        totalDist += idx === 0 ? FALLBACK_FIRST_LEG_KM : FALLBACK_NEXT_LEG_KM;
       }
     });
 
     return Math.round(totalDist);
   };
-
-  const normalizedTours = tours.map((t) => {
-    const totalWeight = isFinite(t.totalWeight) && t.totalWeight !== undefined
-      ? t.totalWeight
-      : t.stops.reduce((sum, s) => sum + (s.weightToUnload || 0), 0);
-    const hasGeo = t.stops.some((s) => s.geo && typeof s.geo.lat === 'number' && typeof s.geo.lng === 'number');
-    const estimatedDistanceKm = hasGeo
-      ? calculateRouteDistance(t.stops)
-      : (t.stops.length > 0 ? FALLBACK_FIRST_LEG_KM + Math.max(0, t.stops.length - 1) * FALLBACK_NEXT_LEG_KM : 0);
-    return { ...t, totalWeight, estimatedDistanceKm };
-  });
 
   const handleDragStart = (e: React.DragEvent, tourIndex: number, stopIndex: number) => {
     if (tours[tourIndex].isLocked) {
@@ -236,9 +220,14 @@ export const TourResultV2: React.FC<TourResultProps> = ({
             </div>
           )}
 
-          {normalizedTours.length > 0 && (
+          {tours.length > 0 && (
             <div className={`space-y-6 ${isLoading ? 'opacity-40 pointer-events-none filter blur-[1px]' : ''} transition-all duration-500`}>
-              {normalizedTours.map((tour, tourIndex) => (
+              {tours.map((tour, tourIndex) => {
+                const derivedWeight = isFinite(tour.totalWeight) && tour.totalWeight !== undefined
+                  ? tour.totalWeight
+                  : tour.stops.reduce((sum, s) => sum + (s.weightToUnload || 0), 0);
+                const estimatedDistanceKm = calculateRouteDistance(tour.stops);
+                return (
                 <div 
                   key={tour.id || tourIndex} 
                   onDragOver={(e) => handleTourDragOver(e, tourIndex)}
@@ -271,7 +260,7 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                             {tour.stops.length > 0 && (
                                 <span className="text-xs text-slate-400 flex items-center gap-1">
                                     <MapPin className="w-3 h-3" />
-                                    ~{tour.estimatedDistanceKm} km
+                                    ~{estimatedDistanceKm} km
                                 </span>
                             )}
                           </div>
@@ -341,11 +330,11 @@ export const TourResultV2: React.FC<TourResultProps> = ({
 
                     <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-100">
                         <div 
-                            className={`h-full transition-all duration-500 ${tour.isLocked ? 'bg-slate-300' : getWeightColor(tour.totalWeight)}`}
-                            style={{ width: `${getWeightPercentage(tour.totalWeight)}%` }}
+                            className={`h-full transition-all duration-500 ${tour.isLocked ? 'bg-slate-300' : getWeightColor(derivedWeight)}`}
+                            style={{ width: `${getWeightPercentage(derivedWeight)}%` }}
                         />
+                      </div>
                     </div>
-                  </div>
 
                   <div className="p-3 bg-slate-50/50 min-h-[100px]">
                     {tour.stops.length === 0 ? (
