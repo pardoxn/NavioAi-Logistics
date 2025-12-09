@@ -464,13 +464,15 @@ const Planning = () => {
     e.stopPropagation();
     if (tour.stops.length === 0) return;
 
-    const origin = encodeURIComponent("Ostring 3, 33181 Bad Wünnenberg");
-    const lastStop = tour.stops[tour.stops.length - 1];
-    const destination = encodeURIComponent(`${lastStop.shippingPostcode} ${lastStop.shippingCity}`);
+    const origin = encodeURIComponent("33181"); // Nur PLZ für konsistente Routen
 
-    // Create waypoints string (all stops except the last one)
+    const lastStop = tour.stops[tour.stops.length - 1];
+    const destination = encodeURIComponent(lastStop.shippingPostcode || '');
+
+    // Waypoints: nur PLZ, damit Maps nicht an Straßennamen scheitert
     const waypoints = tour.stops.slice(0, tour.stops.length - 1)
-      .map(s => encodeURIComponent(`${s.shippingPostcode} ${s.shippingCity}`))
+      .map(s => encodeURIComponent(s.shippingPostcode || ''))
+      .filter(Boolean)
       .join('|');
 
     let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;

@@ -32,18 +32,25 @@ export const TourResultV2: React.FC<TourResultProps> = ({
 
   const START_GEO = { lat: 51.516, lng: 8.698 };
 
+  const getZip = (input?: string) => {
+    if (!input) return '';
+    const match = input.match(/\b\d{4,5}\b/);
+    return match ? match[0] : '';
+  };
+
   const generateGoogleMapsLink = (tour: RMTour) => {
     const baseUrl = "https://www.google.com/maps/dir/?api=1";
-    const origin = encodeURIComponent(tour.startLocation);
+    const origin = encodeURIComponent(getZip(tour.startLocation) || tour.startLocation);
     
     if (tour.stops.length === 0) return "#";
 
     const lastStop = tour.stops[tour.stops.length - 1];
-    const destination = encodeURIComponent(lastStop.address);
+    const destination = encodeURIComponent(getZip(lastStop.address) || lastStop.address);
 
     const waypoints = tour.stops
       .slice(0, tour.stops.length - 1)
-      .map(s => encodeURIComponent(s.address))
+      .map(s => encodeURIComponent(getZip(s.address) || s.address))
+      .filter(Boolean)
       .join('|');
 
     let url = `${baseUrl}&origin=${origin}&destination=${destination}`;
