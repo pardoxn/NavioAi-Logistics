@@ -9,7 +9,7 @@ interface LogoProps {
 export const Logo: React.FC<LogoProps> = ({ size = 56, className }) => {
   return (
     <img
-      src="/logo.jpg"
+      src="/logo.png"
       alt="Navio AI Logistics Logo"
       width={size}
       height={size}
