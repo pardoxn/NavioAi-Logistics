@@ -42,10 +42,8 @@ const Sidebar = () => {
       </div>
 
       {/* Header with Bell - High Z-Index to stay above content */}
-      <div className="p-6 pb-2 relative z-[60] flex items-center justify-between">
+      <div className="p-6 pb-2 relative z-[60] flex items-start justify-start">
         <Logo size={120} className="drop-shadow-lg" />
-        {/* BELL HERE */}
-        <NotificationBell />
       </div>
 
       {/* Navigation */}
