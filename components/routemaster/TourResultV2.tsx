@@ -31,6 +31,8 @@ export const TourResultV2: React.FC<TourResultProps> = ({
   const [deleteModal, setDeleteModal] = useState<{tourIndex: number, stopIndex: number} | null>(null);
 
   const START_GEO = { lat: 51.516, lng: 8.698 };
+  const FALLBACK_FIRST_LEG_KM = 80;
+  const FALLBACK_NEXT_LEG_KM = 70;
 
   const getZip = (input?: string) => {
     if (!input) return '';
@@ -226,7 +228,14 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                 const derivedWeight = isFinite(tour.totalWeight) && tour.totalWeight !== undefined
                   ? tour.totalWeight
                   : tour.stops.reduce((sum, s) => sum + (s.weightToUnload || 0), 0);
-                const estimatedDistanceKm = calculateRouteDistance(tour.stops);
+
+                const hasGeo = tour.stops.some((s) => s.geo && typeof s.geo.lat === 'number' && typeof s.geo.lng === 'number');
+                const estimatedDistanceKm = hasGeo
+                  ? calculateRouteDistance(tour.stops)
+                  : (tour.stops.length > 0
+                      ? FALLBACK_FIRST_LEG_KM + Math.max(0, tour.stops.length - 1) * FALLBACK_NEXT_LEG_KM
+                      : 0);
+
                 return (
                 <div 
                   key={tour.id || tourIndex} 
