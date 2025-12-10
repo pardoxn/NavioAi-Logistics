@@ -33,6 +33,7 @@ export const TourResultV2: React.FC<TourResultProps> = ({
   const START_GEO = { lat: 51.516, lng: 8.698 };
   const FALLBACK_FIRST_LEG_KM = 80;
   const FALLBACK_NEXT_LEG_KM = 70;
+  const START_LABEL = 'Ostring 3, 33181 Bad Wünnenberg';
 
   const getZip = (input?: string) => {
     if (!input) return '';
@@ -42,7 +43,7 @@ export const TourResultV2: React.FC<TourResultProps> = ({
 
   const generateGoogleMapsLink = (tour: RMTour) => {
     const baseUrl = "https://www.google.com/maps/dir/?api=1";
-    const origin = encodeURIComponent(getZip(tour.startLocation) || tour.startLocation);
+    const origin = encodeURIComponent(START_LABEL);
     
     if (tour.stops.length === 0) return "#";
 
@@ -331,7 +332,7 @@ export const TourResultV2: React.FC<TourResultProps> = ({
 
                     <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                        <Navigation className="w-3 h-3" />
-                       Start: <span className="font-medium text-slate-700">{tour.startLocation}</span>
+                       Start: <span className="font-medium text-slate-700">{START_LABEL}</span>
                        {tour.directionInfo && (
                          <span className="text-slate-400 mx-1">• {tour.directionInfo}</span>
                        )}
