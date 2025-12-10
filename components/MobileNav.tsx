@@ -38,7 +38,7 @@ const MobileNav = () => {
           <div className="absolute top-0 left-0 h-full w-72 bg-white shadow-2xl border-r border-slate-200 p-4 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Logo size={32} />
+                <Logo size={80} />
               </div>
               <button
                 className="p-2 rounded-full hover:bg-slate-100 text-slate-600"

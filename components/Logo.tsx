@@ -6,13 +6,12 @@ interface LogoProps {
   className?: string;
 }
 
-export const Logo: React.FC<LogoProps> = ({ size = 56, className }) => {
+export const Logo: React.FC<LogoProps> = ({ size = 120, className }) => {
   return (
     <img
       src="/navio_logo.png"
       alt="Navio AI Logistics Logo"
-      width={size}
-      height={size}
+      style={{ width: `${size}px`, height: 'auto' }}
       className={clsx('flex-shrink-0 object-contain', className)}
       loading="lazy"
     />
