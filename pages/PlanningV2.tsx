@@ -337,6 +337,7 @@ const PlanningV2: React.FC = () => {
         return;
       }
       const { error } = await supabase.from('tour_feedback').insert({
+        id: crypto.randomUUID(),
         tour_id: tour.id,
         rating,
         comment,
