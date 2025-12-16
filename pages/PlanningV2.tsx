@@ -4,12 +4,14 @@ import { TourResultV2 } from '../components/routemaster/TourResultV2';
 import { RMOrder, RMPlanningResult, RMTour, RMStop } from '../types/routemaster';
 import { planToursV2 } from '../services/routemasterService';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 import { generateCMRBundle } from '../services/pdfService';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '../lib/supabaseClient';
 import { useRef } from 'react';
 
 const PlanningV2: React.FC = () => {
+  const { user } = useAuth();
   const { cmrConfig, orders: globalOrders, addOrders, removeOrders } = useData();
   const orders: RMOrder[] = useMemo(() => {
     return globalOrders
@@ -340,7 +342,8 @@ const PlanningV2: React.FC = () => {
         id: crypto.randomUUID(),
         tour_id: tour.id,
         rating,
-        comment
+        comment,
+        user_name: user?.username || user?.email || 'unbekannt'
       });
       if (error) throw error;
       setFeedbackToast({ message: 'Feedback gespeichert, danke!', type: 'success' });
