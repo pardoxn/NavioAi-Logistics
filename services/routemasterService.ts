@@ -165,7 +165,22 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
 
   if (!text) throw new Error("Keine Antwort von der KI erhalten.");
 
-  const parsed = JSON.parse(text);
+  let parsed: any;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    // Versuch: JSON-Block aus freiform KI-Antwort ziehen (manche OpenRouter-Modelle ignorieren response_format)
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        parsed = JSON.parse(match[0]);
+      } catch {
+        throw new Error("KI-Antwort konnte nicht gelesen werden (kein gültiges JSON).");
+      }
+    } else {
+      throw new Error("KI-Antwort konnte nicht gelesen werden (kein gültiges JSON).");
+    }
+  }
   const toursWithIds = parsed.tours.map((t: any) => ({
     ...t,
     id: crypto.randomUUID(),
