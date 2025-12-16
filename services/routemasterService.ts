@@ -182,7 +182,9 @@ const callOpenRouter = async (prompt: string): Promise<string> => {
   const metaEnv = getMetaEnv();
   const model = metaEnv.VITE_OPENROUTER_MODEL ||
     (typeof process !== 'undefined' ? (process as any).env?.OPENROUTER_MODEL : undefined) ||
-    "meta-llama/llama-3.3-70b-instruct:free";
+    "openai/gpt-oss-20b";
+
+  const supportsStructured = !model.includes("gpt-oss");
 
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
@@ -196,7 +198,7 @@ const callOpenRouter = async (prompt: string): Promise<string> => {
       model,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.2,
-      response_format: { type: "json_object" }
+      ...(supportsStructured ? { response_format: { type: "json_object" } } : {})
     })
   });
 
@@ -206,7 +208,14 @@ const callOpenRouter = async (prompt: string): Promise<string> => {
   }
 
   const data = await res.json();
-  const text = data?.choices?.[0]?.message?.content;
+  const rawContent = data?.choices?.[0]?.message?.content;
+  const text = typeof rawContent === 'string'
+    ? rawContent
+    : Array.isArray(rawContent)
+      ? rawContent.map((c: any) => c?.text || c?.content || '').join('\n').trim()
+      : '';
+
   if (!text) throw new Error("Keine Antwort von der KI erhalten.");
+
   return text;
 };
