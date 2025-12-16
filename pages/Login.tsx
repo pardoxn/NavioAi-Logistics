@@ -142,6 +142,19 @@ const Login = () => {
               </div>
             </div>
 
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 text-slate-600 select-none">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                />
+                Angemeldet bleiben
+              </label>
+              <Link to="#" className="text-xs font-semibold text-brand-600 hover:text-brand-500">
+                Passwort vergessen?
+              </Link>
+            </div>
+
             {error && (
               <div className="text-red-600 text-sm bg-red-50 p-4 rounded-xl flex items-center gap-3 border border-red-100 animate-shake">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
