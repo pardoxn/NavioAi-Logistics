@@ -124,10 +124,7 @@ const Login = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                 <label className="text-sm font-medium text-slate-700">Passwort</label>
-                 <a href="#" className="text-xs font-semibold text-brand-600 hover:text-brand-500">Vergessen?</a>
-              </div>
+              <label className="text-sm font-medium text-slate-700">Passwort</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-600">
                   <Lock className="h-5 w-5 text-slate-400" />
@@ -150,9 +147,13 @@ const Login = () => {
                 />
                 Angemeldet bleiben
               </label>
-              <Link to="#" className="text-xs font-semibold text-brand-600 hover:text-brand-500">
+              <button
+                type="button"
+                onClick={() => alert('Aktuell befindet sich die Funktion "Passwort vergessen?" noch in der Entwicklung. Bei Problemen bitte Ihren Admin kontaktieren.')}
+                className="text-xs font-semibold text-brand-600 hover:text-brand-500"
+              >
                 Passwort vergessen?
-              </Link>
+              </button>
             </div>
 
             {error && (
