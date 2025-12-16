@@ -115,15 +115,24 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
     Generiere JSON Output exakt nach Schema.
   `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: tourSchema,
-      temperature: 0.2, // Low temperature for deterministic logic
-    },
-  });
+  let response;
+  try {
+    response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: tourSchema,
+        temperature: 0.2, // Low temperature for deterministic logic
+      },
+    });
+  } catch (err: any) {
+    const msg = (err?.message || '').toLowerCase();
+    if (err?.status === 'UNAVAILABLE' || err?.code === 503 || msg.includes('overload') || msg.includes('unavailable')) {
+      throw new Error('Die Routenplanung ist momentan ausgelastet. Bitte in 1–2 Minuten erneut versuchen.');
+    }
+    throw err;
+  }
 
   const text = response.text;
   if (!text) throw new Error("Keine Antwort von der KI erhalten.");

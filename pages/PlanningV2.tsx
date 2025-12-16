@@ -167,7 +167,13 @@ const PlanningV2: React.FC = () => {
       const usedIds = allOrdersToPlan.map(o => o.id).filter(Boolean) as string[];
       if (usedIds.length) removeOrders(usedIds);
     } catch (err: any) {
-      setError(err?.message || "Fehler bei der Planung. Bitte überprüfen Sie Ihre Eingaben oder versuchen Sie es erneut.");
+      const rawMsg = err?.message || (typeof err === 'string' ? err : '');
+      const lowered = (rawMsg || '').toLowerCase();
+      const friendlyOverload = 'Die Routenplanung ist aktuell ausgelastet. Bitte in 1–2 Minuten erneut versuchen.';
+      const friendly = (err?.code === 503 || err?.status === 'UNAVAILABLE' || lowered.includes('overload') || lowered.includes('unavailable'))
+        ? friendlyOverload
+        : (rawMsg || "Fehler bei der Planung. Bitte überprüfen Sie Ihre Eingaben oder versuchen Sie es erneut.");
+      setError(friendly);
     } finally {
       setLoading(false);
     }
