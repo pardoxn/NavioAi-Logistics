@@ -491,14 +491,7 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
                       }`}
                     >
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold text-slate-800 text-sm truncate">{order.customerName}</p>
-                          {isTooHeavy && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">
-                              Zu schwer
-                            </span>
-                          )}
-                        </div>
+                        <p className="font-bold text-slate-800 text-sm truncate">{order.customerName}</p>
                         <p className="text-xs text-slate-500 truncate">{order.address}</p>
                         {order.referenceNumber && (
                           <div className="flex items-center gap-1 mt-1.5">
@@ -509,16 +502,14 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
                           </div>
                         )}
                       </div>
-                      <div className="text-right flex flex-col items-end gap-1 min-w-[90px]">
-                        <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-bold border min-w-[90px] ${
+                      <div className="text-right flex flex-col items-end gap-1 min-w-[120px]">
+                        <span className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-[11px] font-bold border min-w-[110px] gap-2 ${
                           isTooHeavy
                             ? 'bg-red-100 text-red-700 border-red-200 ring-1 ring-red-200'
                             : 'bg-slate-100 text-slate-700 border-slate-200'
                         }`}>
-                          {isTooHeavy ? 'Übergewicht' : `${numericWeight} kg`}
-                        </span>
-                        <span className={`text-xs font-semibold ${isTooHeavy ? 'text-red-700' : 'text-slate-600'}`}>
-                          {numericWeight} kg
+                          <span>{numericWeight} kg</span>
+                          {isTooHeavy && <span className="text-[10px] font-semibold whitespace-nowrap">Zu schwer</span>}
                         </span>
                         {isDup && (
                           <div className="text-[10px] text-amber-700">Duplikat, wird übersprungen</div>
