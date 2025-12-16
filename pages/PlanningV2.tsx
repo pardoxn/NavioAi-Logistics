@@ -340,8 +340,7 @@ const PlanningV2: React.FC = () => {
         id: crypto.randomUUID(),
         tour_id: tour.id,
         rating,
-        comment,
-        source: 'planning_v2'
+        comment
       });
       if (error) throw error;
       setFeedbackToast({ message: 'Feedback gespeichert, danke!', type: 'success' });
