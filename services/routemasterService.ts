@@ -129,9 +129,13 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
   } catch (err: any) {
     const msg = (err?.message || '').toLowerCase();
     if (err?.status === 'UNAVAILABLE' || err?.code === 503 || msg.includes('overload') || msg.includes('unavailable')) {
-      throw new Error('Die Routenplanung ist momentan ausgelastet. Bitte in 1–2 Minuten erneut versuchen.');
+      // Fallback: heuristische Planung ohne KI, damit Nutzer arbeiten kann
+      const heuristicTours = buildHeuristicTours(orders);
+      return { tours: heuristicTours };
     }
-    throw err;
+    // Bei anderen Fehlern ebenfalls heuristische Notfallplanung anbieten
+    const heuristicTours = buildHeuristicTours(orders);
+    return { tours: heuristicTours };
   }
 
   const text = response.text;
@@ -145,4 +149,51 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
   }));
 
   return { tours: toursWithIds };
+};
+
+// Einfache Heuristik: sortiere nach PLZ/Ort, packe bis 1300 kg pro Tour, Startpunkt ist das Depot
+const buildHeuristicTours = (orders: RMOrder[]): RMPlanningResult["tours"] => {
+  const sorted = [...orders].sort((a, b) => {
+    const aKey = `${a.address || ''}`.toLowerCase();
+    const bKey = `${b.address || ''}`.toLowerCase();
+    return aKey.localeCompare(bKey);
+  });
+
+  const tours: RMPlanningResult["tours"] = [];
+  let currentStops: any[] = [];
+  let currentWeight = 0;
+  let tourIndex = 1;
+
+  const flushTour = () => {
+    if (!currentStops.length) return;
+    tours.push({
+      id: crypto.randomUUID(),
+      truckName: `Tour ${tourIndex}`,
+      totalWeight: currentWeight,
+      startLocation: START_LOCATION,
+      directionInfo: 'Heuristische Planung (ohne KI)',
+      stops: currentStops.map((s, idx) => ({
+        stopNumber: idx + 1,
+        customerName: s.customerName,
+        address: s.address,
+        weightToUnload: s.weight,
+        referenceNumber: s.referenceNumber,
+      }))
+    });
+    tourIndex += 1;
+    currentStops = [];
+    currentWeight = 0;
+  };
+
+  sorted.forEach(o => {
+    const weight = o.weight || 0;
+    if (currentWeight + weight > MAX_WEIGHT && currentStops.length > 0) {
+      flushTour();
+    }
+    currentStops.push(o);
+    currentWeight += weight;
+  });
+
+  flushTour();
+  return tours;
 };
