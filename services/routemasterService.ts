@@ -4,30 +4,13 @@ import { RMOrder, RMPlanningResult } from "../types/routemaster";
 const START_LOCATION = "Ostring 3, 33181 Bad Wünnenberg";
 const MAX_WEIGHT = 1300;
 
-const getMetaEnv = () => {
-  try {
-    return (import.meta as any)?.env || {};
-  } catch {
-    return {};
-  }
-};
-
 const getApiKey = () => {
-  const metaEnv = getMetaEnv();
+  const metaEnv = (import.meta as any)?.env || {};
   return (
     metaEnv.VITE_GEMINI_API_KEY ||
     metaEnv.VITE_API_KEY ||
     (typeof process !== 'undefined' ? (process as any).env?.VITE_GEMINI_API_KEY : undefined) ||
     (typeof process !== 'undefined' ? (process as any).env?.API_KEY : undefined)
-  );
-};
-
-const getOpenRouterApiKey = () => {
-  const metaEnv = getMetaEnv();
-  return (
-    metaEnv.VITE_OPENROUTER_API_KEY ||
-    (typeof process !== 'undefined' ? (process as any).env?.OPENROUTER_API_KEY : undefined) ||
-    (typeof process !== 'undefined' ? (process as any).env?.VITE_OPENROUTER_API_KEY : undefined)
   );
 };
 
@@ -79,18 +62,12 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
     return { tours: [] };
   }
 
-  const metaEnv = getMetaEnv();
-  const hasOpenRouterKey = !!getOpenRouterApiKey();
-  const useOpenRouter = metaEnv.VITE_USE_OPENROUTER === 'true' ||
-    (typeof process !== 'undefined' ? (process as any).env?.USE_OPENROUTER === 'true' : false) ||
-    (!getApiKey() && hasOpenRouterKey);
-
   const apiKey = getApiKey();
-  if (!useOpenRouter && !apiKey) {
+  if (!apiKey) {
     throw new Error("Kein Gemini API Key konfiguriert. Bitte VITE_GEMINI_API_KEY (oder VITE_API_KEY/API_KEY) setzen und Dev-Server neu starten.");
   }
 
-  const ai = !useOpenRouter ? new GoogleGenAI({ apiKey }) : null;
+  const ai = new GoogleGenAI({ apiKey });
 
   const prompt = `
     Du bist ein Senior Logistik-Planer für eine Spedition in Bad Wünnenberg.
@@ -138,49 +115,29 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
     Generiere JSON Output exakt nach Schema.
   `;
 
-  let text: string | undefined;
-
-  if (useOpenRouter) {
-    text = await callOpenRouter(prompt);
-  } else {
-    try {
-      const response = await ai!.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: tourSchema,
-          temperature: 0.2, // Low temperature for deterministic logic
-        },
-      });
-      text = response.text;
-    } catch (err: any) {
-      const msg = (err?.message || '').toLowerCase();
-      if (err?.status === 'UNAVAILABLE' || err?.code === 503 || msg.includes('overload') || msg.includes('unavailable')) {
-        throw new Error('Die Routenplanung ist momentan ausgelastet. Bitte in 1–2 Minuten erneut versuchen.');
-      }
-      throw err;
+  let response;
+  try {
+    response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: tourSchema,
+        temperature: 0.2, // Low temperature for deterministic logic
+      },
+    });
+  } catch (err: any) {
+    const msg = (err?.message || '').toLowerCase();
+    if (err?.status === 'UNAVAILABLE' || err?.code === 503 || msg.includes('overload') || msg.includes('unavailable')) {
+      throw new Error('Die Routenplanung ist momentan ausgelastet. Bitte in 1–2 Minuten erneut versuchen.');
     }
+    throw err;
   }
 
+  const text = response.text;
   if (!text) throw new Error("Keine Antwort von der KI erhalten.");
 
-  let parsed: any;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    // Versuch: JSON-Block aus freiform KI-Antwort ziehen (manche OpenRouter-Modelle ignorieren response_format)
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) {
-      try {
-        parsed = JSON.parse(match[0]);
-      } catch {
-        throw new Error("KI-Antwort konnte nicht gelesen werden (kein gültiges JSON).");
-      }
-    } else {
-      throw new Error("KI-Antwort konnte nicht gelesen werden (kein gültiges JSON).");
-    }
-  }
+  const parsed = JSON.parse(text);
   const toursWithIds = parsed.tours.map((t: any) => ({
     ...t,
     id: crypto.randomUUID(),
@@ -188,49 +145,4 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
   }));
 
   return { tours: toursWithIds };
-};
-
-const callOpenRouter = async (prompt: string): Promise<string> => {
-  const key = getOpenRouterApiKey();
-  if (!key) throw new Error("Kein OpenRouter API Key konfiguriert.");
-
-  const metaEnv = getMetaEnv();
-  const model = metaEnv.VITE_OPENROUTER_MODEL ||
-    (typeof process !== 'undefined' ? (process as any).env?.OPENROUTER_MODEL : undefined) ||
-    "openai/gpt-oss-20b";
-
-  const supportsStructured = !model.includes("gpt-oss");
-
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${key}`,
-      "HTTP-Referer": "https://navio-ai-logistics",
-      "X-Title": "Navio AI Logistics"
-    },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.2,
-      ...(supportsStructured ? { response_format: { type: "json_object" } } : {})
-    })
-  });
-
-  if (!res.ok) {
-    const msg = await res.text().catch(() => '');
-    throw new Error(`OpenRouter Fehler: ${res.status} ${res.statusText} ${msg}`);
-  }
-
-  const data = await res.json();
-  const rawContent = data?.choices?.[0]?.message?.content;
-  const text = typeof rawContent === 'string'
-    ? rawContent
-    : Array.isArray(rawContent)
-      ? rawContent.map((c: any) => c?.text || c?.content || '').join('\n').trim()
-      : '';
-
-  if (!text) throw new Error("Keine Antwort von der KI erhalten.");
-
-  return text;
 };
