@@ -24,6 +24,7 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
   onRemoveOrder,
   onClearOrders,
   onPlan, 
+  onOptimizeExisting,
   onReset,
   isLoading,
   hasResults,
