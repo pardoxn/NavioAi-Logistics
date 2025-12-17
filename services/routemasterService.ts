@@ -68,6 +68,12 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
   }
 
   const ai = new GoogleGenAI({ apiKey });
+  const modelFallbacks = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-pro"
+  ];
 
   const prompt = `
     Du bist ein Senior Logistik-Planer für eine Spedition in Bad Wünnenberg.
@@ -115,15 +121,47 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
     Generiere JSON Output exakt nach Schema.
   `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: tourSchema,
-      temperature: 0.2, // Low temperature for deterministic logic
-    },
-  });
+  let response;
+  let lastError: any;
+  // exponentielles Backoff über mehrere Modelle
+  for (let m = 0; m < modelFallbacks.length; m++) {
+    const model = modelFallbacks[m];
+    const delays = [0, 1500, 4000, 10000]; // in ms
+    for (let i = 0; i < delays.length; i++) {
+      try {
+        if (delays[i] > 0) await new Promise(res => setTimeout(res, delays[i]));
+        response = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: tourSchema,
+            temperature: 0.2, // Low temperature for deterministic logic
+          },
+        });
+        m = modelFallbacks.length; // break outer loop
+        break;
+      } catch (err: any) {
+        lastError = err;
+        const msg = (err?.message || '').toLowerCase();
+        const isTransient = err?.status === 'UNAVAILABLE' || err?.code === 503 || msg.includes('overload') || msg.includes('unavailable');
+        const isRate = err?.status === 'RESOURCE_EXHAUSTED' || err?.code === 429 || msg.includes('quota') || msg.includes('limit');
+        if (isTransient || isRate) {
+          // retry next attempt/model
+          continue;
+        }
+        // non transient: abort retries
+        m = modelFallbacks.length;
+        break;
+      }
+    }
+    if (response) break;
+  }
+
+  if (!response) {
+    const msg = lastError?.message || 'Die Routenplanung ist momentan nicht verfügbar. Bitte später erneut versuchen.';
+    throw new Error(msg);
+  }
 
   const text = response.text;
   if (!text) throw new Error("Keine Antwort von der KI erhalten.");
