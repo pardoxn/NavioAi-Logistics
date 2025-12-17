@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
@@ -10,19 +10,8 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [rememberEmail, setRememberEmail] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
-  const REMEMBER_KEY = 'navio_remember_email';
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const saved = localStorage.getItem(REMEMBER_KEY);
-    if (saved) {
-      setEmail(saved);
-      setRememberEmail(true);
-    }
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,14 +37,6 @@ const Login = () => {
       navigate('/planning-v2');
     } else {
       navigate('/dashboard');
-    }
-
-    if (typeof window !== 'undefined') {
-      if (rememberEmail) {
-        localStorage.setItem(REMEMBER_KEY, email);
-      } else {
-        localStorage.removeItem(REMEMBER_KEY);
-      }
     }
   };
 
@@ -143,7 +124,10 @@ const Login = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Passwort</label>
+              <div className="flex justify-between items-center">
+                 <label className="text-sm font-medium text-slate-700">Passwort</label>
+                 <a href="#" className="text-xs font-semibold text-brand-600 hover:text-brand-500">Vergessen?</a>
+              </div>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-600">
                   <Lock className="h-5 w-5 text-slate-400" />
@@ -156,25 +140,6 @@ const Login = () => {
                   placeholder="••••••••"
                 />
               </div>
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-slate-600 select-none">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-                  checked={rememberEmail}
-                  onChange={(e) => setRememberEmail(e.target.checked)}
-                />
-                Angemeldet bleiben
-              </label>
-              <button
-                type="button"
-                onClick={() => alert('Aktuell befindet sich die Funktion "Passwort vergessen?" noch in der Entwicklung. Bei Problemen bitte Ihren Admin kontaktieren.')}
-                className="text-xs font-semibold text-brand-600 hover:text-brand-500"
-              >
-                Passwort vergessen?
-              </button>
             </div>
 
             {error && (

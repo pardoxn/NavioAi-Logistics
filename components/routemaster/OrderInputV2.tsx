@@ -11,7 +11,6 @@ interface OrderInputProps {
   onRemoveOrder: (orderId: string) => void;
   onClearOrders: () => void;
   onPlan: () => void;
-  onOptimizeExisting?: () => void;
   onReset: () => void;
   isLoading: boolean;
   hasResults: boolean;
@@ -24,7 +23,6 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
   onRemoveOrder,
   onClearOrders,
   onPlan, 
-  onOptimizeExisting,
   onReset,
   isLoading,
   hasResults,
@@ -354,27 +352,14 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
             </button>
             
             {hasResults && (
-              <>
-                {onOptimizeExisting && (
-                  <button
-                    onClick={onOptimizeExisting}
-                    disabled={isLoading}
-                    className="px-4 py-3 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-800 rounded-xl font-semibold transition-colors shadow-sm"
-                    title="Geplante Touren mit KI optimieren"
-                  >
-                    <Zap className="w-4 h-4 inline mr-2" />
-                    KI optimieren
-                  </button>
-                )}
-                <button
-                  onClick={onReset}
-                  disabled={isLoading}
-                  className="px-4 py-3 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-medium transition-colors shadow-sm"
-                  title="Zurücksetzen"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </button>
-              </>
+              <button
+                onClick={onReset}
+                disabled={isLoading}
+                className="px-4 py-3 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-medium transition-colors shadow-sm"
+                title="Zurücksetzen"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
             )}
           </div>
         </div>
@@ -488,22 +473,10 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
                 <p className="text-sm text-slate-500">Keine Einträge geladen.</p>
               ) : (
                 <ul className="space-y-3">
-                  {importPreview.map((order) => {
-                    const numericWeight = typeof order.weight === 'string'
-                      ? parseFloat(order.weight.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.')) || 0
-                      : Number(order.weight) || 0;
-                    const isTooHeavy = numericWeight > 1300;
-                    const isDup = duplicateIds.has(order.id);
-                    return (
+                  {importPreview.map((order) => (
                     <li 
                       key={order.id} 
-                      className={`flex items-center gap-3 p-3.5 rounded-xl border ${
-                        isTooHeavy
-                          ? 'bg-red-50 border-red-200 border-2'
-                          : isDup
-                            ? 'bg-amber-50 border-amber-200'
-                            : 'bg-slate-50 border-slate-200'
-                      }`}
+                      className={`flex items-center gap-3 p-3.5 rounded-xl border ${duplicateIds.has(order.id) ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'}`}
                     >
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-slate-800 text-sm truncate">{order.customerName}</p>
@@ -517,17 +490,12 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
                           </div>
                         )}
                       </div>
-                      <div className="text-right flex flex-col items-end gap-1 min-w-[120px]">
-                        <span className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-[11px] font-bold border min-w-[110px] gap-2 ${
-                          isTooHeavy
-                            ? 'bg-red-100 text-red-700 border-red-200 ring-1 ring-red-200'
-                            : 'bg-slate-100 text-slate-700 border-slate-200'
-                        }`}>
-                          <span>{numericWeight} kg</span>
-                          {isTooHeavy && <span className="text-[10px] font-semibold whitespace-nowrap">Zu schwer</span>}
+                      <div className="text-right">
+                        <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 min-w-[60px]">
+                          {order.weight} kg
                         </span>
-                        {isDup && (
-                          <div className="text-[10px] text-amber-700">Duplikat, wird übersprungen</div>
+                        {duplicateIds.has(order.id) && (
+                          <div className="text-[10px] text-amber-700 mt-1">Duplikat, wird übersprungen</div>
                         )}
                       </div>
                       <button 
@@ -538,8 +506,7 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </li>
-                  );
-                  })}
+                  ))}
                 </ul>
               )}
             </div>

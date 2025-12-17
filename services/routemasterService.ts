@@ -115,28 +115,15 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
     Generiere JSON Output exakt nach Schema.
   `;
 
-  let response;
-  try {
-    response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: tourSchema,
-        temperature: 0.2, // Low temperature for deterministic logic
-      },
-    });
-  } catch (err: any) {
-    const msg = (err?.message || '').toLowerCase();
-    if (err?.status === 'UNAVAILABLE' || err?.code === 503 || msg.includes('overload') || msg.includes('unavailable')) {
-      // Fallback: heuristische Planung ohne KI, damit Nutzer arbeiten kann
-      const heuristicTours = buildHeuristicTours(orders);
-      return { tours: heuristicTours };
-    }
-    // Bei anderen Fehlern ebenfalls heuristische Notfallplanung anbieten
-    const heuristicTours = buildHeuristicTours(orders);
-    return { tours: heuristicTours };
-  }
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: tourSchema,
+      temperature: 0.2, // Low temperature for deterministic logic
+    },
+  });
 
   const text = response.text;
   if (!text) throw new Error("Keine Antwort von der KI erhalten.");
@@ -149,59 +136,4 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
   }));
 
   return { tours: toursWithIds };
-};
-
-// Einfache Heuristik: sortiere nach PLZ/Ort, packe bis 1300 kg pro Tour, Startpunkt ist das Depot
-const buildHeuristicTours = (orders: RMOrder[]): RMPlanningResult["tours"] => {
-  const extractPlz = (addr: string) => {
-    const m = (addr || '').match(/\b(\d{4,5})\b/);
-    return m ? parseInt(m[1], 10) : Number.POSITIVE_INFINITY;
-  };
-
-  const sorted = [...orders].sort((a, b) => {
-    const aPlz = extractPlz(a.address || '');
-    const bPlz = extractPlz(b.address || '');
-    if (aPlz !== bPlz) return aPlz - bPlz;
-    const aKey = `${a.address || ''}`.toLowerCase();
-    const bKey = `${b.address || ''}`.toLowerCase();
-    return aKey.localeCompare(bKey);
-  });
-
-  const tours: RMPlanningResult["tours"] = [];
-  let currentStops: any[] = [];
-  let currentWeight = 0;
-  let tourIndex = 1;
-
-  const flushTour = () => {
-    if (!currentStops.length) return;
-    tours.push({
-      id: crypto.randomUUID(),
-      truckName: `Tour ${tourIndex}`,
-      totalWeight: currentWeight,
-      startLocation: START_LOCATION,
-      directionInfo: 'Heuristische Planung (ohne KI)',
-      stops: currentStops.map((s, idx) => ({
-        stopNumber: idx + 1,
-        customerName: s.customerName,
-        address: s.address,
-        weightToUnload: s.weight,
-        referenceNumber: s.referenceNumber,
-      }))
-    });
-    tourIndex += 1;
-    currentStops = [];
-    currentWeight = 0;
-  };
-
-  sorted.forEach(o => {
-    const weight = o.weight || 0;
-    if (currentWeight + weight > MAX_WEIGHT && currentStops.length > 0) {
-      flushTour();
-    }
-    currentStops.push(o);
-    currentWeight += weight;
-  });
-
-  flushTour();
-  return tours;
 };

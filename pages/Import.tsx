@@ -267,19 +267,9 @@ const Import = () => {
                     <tbody className="bg-white divide-y divide-slate-100">
                       {preview.map((row, index) => {
                         const isDup = isDuplicate(row);
-                        const isTooHeavy = (row.totalWeightKg || 0) > 1300;
                         
                         return (
-                          <tr 
-                            key={index} 
-                            className={`transition-colors group ${
-                              isTooHeavy 
-                                ? 'bg-red-50/60 hover:bg-red-100/60' 
-                                : isDup 
-                                  ? 'bg-amber-50/60 hover:bg-amber-100/50' 
-                                  : 'hover:bg-slate-50/80'
-                            }`}
-                          >
+                          <tr key={index} className={`transition-colors group ${isDup ? 'bg-amber-50/60 hover:bg-amber-100/50' : 'hover:bg-slate-50/80'}`}>
                             <td className="px-6 py-4 whitespace-nowrap">
                                <div className="flex flex-col">
                                  <span className={`text-sm font-bold font-mono ${isDup ? 'text-amber-700' : 'text-slate-700'}`}>{row.documentNumber}</span>
@@ -296,16 +286,7 @@ const Import = () => {
                                <span className="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-xs font-mono font-bold">{row.shippingPostcode}</span>
                                {row.shippingCity}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-700">
-                              <div className="flex items-center gap-2">
-                                <span className={isTooHeavy ? 'text-red-700' : ''}>{row.totalWeightKg} kg</span>
-                                {isTooHeavy && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-red-100 text-red-700 border border-red-200">
-                                    Zu schwer
-                                  </span>
-                                )}
-                              </div>
-                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-700">{row.totalWeightKg} kg</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                                <button 
                                  onClick={() => removeFromPreview(index)}

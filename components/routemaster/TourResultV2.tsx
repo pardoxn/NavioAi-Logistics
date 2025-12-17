@@ -330,17 +330,12 @@ export const TourResultV2: React.FC<TourResultProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
-                       <div className="flex items-center gap-2">
-                         <Navigation className="w-3 h-3" />
-                         Start: <span className="font-medium text-slate-700">{START_LABEL}</span>
-                         {tour.directionInfo && (
-                           <span className="text-slate-400 mx-1">• {tour.directionInfo}</span>
-                         )}
-                       </div>
-                       <div className="text-[11px] font-semibold text-slate-600">
-                         {derivedWeight} kg / 1300 kg · {Math.round(getWeightPercentage(derivedWeight))}%
-                       </div>
+                    <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                       <Navigation className="w-3 h-3" />
+                       Start: <span className="font-medium text-slate-700">{START_LABEL}</span>
+                       {tour.directionInfo && (
+                         <span className="text-slate-400 mx-1">• {tour.directionInfo}</span>
+                       )}
                     </div>
 
                     <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-100">

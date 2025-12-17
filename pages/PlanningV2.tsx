@@ -167,44 +167,7 @@ const PlanningV2: React.FC = () => {
       const usedIds = allOrdersToPlan.map(o => o.id).filter(Boolean) as string[];
       if (usedIds.length) removeOrders(usedIds);
     } catch (err: any) {
-      const rawMsg = err?.message || (typeof err === 'string' ? err : '');
-      const lowered = (rawMsg || '').toLowerCase();
-      const friendlyOverload = 'Die Routenplanung ist aktuell ausgelastet. Bitte in 1–2 Minuten erneut versuchen.';
-      const friendly = (err?.code === 503 || err?.status === 'UNAVAILABLE' || lowered.includes('overload') || lowered.includes('unavailable'))
-        ? friendlyOverload
-        : (rawMsg || "Fehler bei der Planung. Bitte überprüfen Sie Ihre Eingaben oder versuchen Sie es erneut.");
-      setError(friendly);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleOptimizeExistingTours = async () => {
-    if (!results) return;
-    const unlockedTours = results.tours.filter(t => !t.isLocked);
-    const ordersFromTours: RMOrder[] = [];
-    unlockedTours.forEach(tour => {
-      tour.stops.forEach(stop => {
-        ordersFromTours.push({
-          id: uuidv4(),
-          customerName: stop.customerName || 'Unbekannt',
-          address: stop.address,
-          weight: stop.weightToUnload,
-          referenceNumber: stop.referenceNumber
-        });
-      });
-    });
-    if (!ordersFromTours.length) return;
-
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await planToursV2(ordersFromTours, feedbackNotes);
-      const newTours = data.tours.map(t => ({ ...t, status: 'PLANNING' }));
-      const lockedTours = results.tours.filter(t => t.isLocked);
-      setResults({ tours: [...lockedTours, ...newTours] });
-    } catch (err: any) {
-      setError(err?.message || "Fehler bei der Optimierung. Bitte später erneut versuchen.");
+      setError(err?.message || "Fehler bei der Planung. Bitte überprüfen Sie Ihre Eingaben oder versuchen Sie es erneut.");
     } finally {
       setLoading(false);
     }
@@ -412,7 +375,6 @@ const PlanningV2: React.FC = () => {
               onRemoveOrder={handleRemoveOrderFromList}
               onClearOrders={handleClearOrders}
               onPlan={handlePlanTours}
-              onOptimizeExisting={results ? handleOptimizeExistingTours : undefined}
               onReset={handleReset}
               isLoading={loading}
               hasResults={!!results}

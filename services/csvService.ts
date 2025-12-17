@@ -61,11 +61,7 @@ export const parseCSV = (file: File): Promise<Order[]> => {
           // 2. Map Fields
           try {
             const weightRaw = pick(row, ['Gesamtgewicht in kg', 'Gewicht', 'Gewicht in kg'], '0');
-            const weightString = weightRaw.toString().trim();
-            const normalizedWeight = weightString.includes(',')
-              ? weightString.replace(/\./g, '').replace(',', '.')
-              : weightString.replace(/\./g, '');
-            const weight = parseFloat(normalizedWeight);
+            const weight = parseFloat(weightRaw.toString().replace(',', '.'));
 
             const dateRaw = pick(row, ['Belegdatum', 'Datum'], '');
             const isoDate = parseDate(dateRaw);
