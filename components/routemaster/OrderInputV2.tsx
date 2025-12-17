@@ -11,6 +11,7 @@ interface OrderInputProps {
   onRemoveOrder: (orderId: string) => void;
   onClearOrders: () => void;
   onPlan: () => void;
+  onOptimizeExisting?: () => void;
   onReset: () => void;
   isLoading: boolean;
   hasResults: boolean;
@@ -352,14 +353,27 @@ export const OrderInputV2: React.FC<OrderInputProps> = ({
             </button>
             
             {hasResults && (
-              <button
-                onClick={onReset}
-                disabled={isLoading}
-                className="px-4 py-3 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-medium transition-colors shadow-sm"
-                title="Zurücksetzen"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </button>
+              <>
+                {onOptimizeExisting && (
+                  <button
+                    onClick={onOptimizeExisting}
+                    disabled={isLoading}
+                    className="px-4 py-3 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-800 rounded-xl font-semibold transition-colors shadow-sm"
+                    title="Geplante Touren mit KI optimieren"
+                  >
+                    <Zap className="w-4 h-4 inline mr-2" />
+                    KI optimieren
+                  </button>
+                )}
+                <button
+                  onClick={onReset}
+                  disabled={isLoading}
+                  className="px-4 py-3 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-medium transition-colors shadow-sm"
+                  title="Zurücksetzen"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+              </>
             )}
           </div>
         </div>

@@ -179,6 +179,37 @@ const PlanningV2: React.FC = () => {
     }
   };
 
+  const handleOptimizeExistingTours = async () => {
+    if (!results) return;
+    const unlockedTours = results.tours.filter(t => !t.isLocked);
+    const ordersFromTours: RMOrder[] = [];
+    unlockedTours.forEach(tour => {
+      tour.stops.forEach(stop => {
+        ordersFromTours.push({
+          id: uuidv4(),
+          customerName: stop.customerName || 'Unbekannt',
+          address: stop.address,
+          weight: stop.weightToUnload,
+          referenceNumber: stop.referenceNumber
+        });
+      });
+    });
+    if (!ordersFromTours.length) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await planToursV2(ordersFromTours, feedbackNotes);
+      const newTours = data.tours.map(t => ({ ...t, status: 'PLANNING' }));
+      const lockedTours = results.tours.filter(t => t.isLocked);
+      setResults({ tours: [...lockedTours, ...newTours] });
+    } catch (err: any) {
+      setError(err?.message || "Fehler bei der Optimierung. Bitte später erneut versuchen.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleReset = () => {
     if (results) {
       const restoredOrders: RMOrder[] = [];
@@ -381,6 +412,7 @@ const PlanningV2: React.FC = () => {
               onRemoveOrder={handleRemoveOrderFromList}
               onClearOrders={handleClearOrders}
               onPlan={handlePlanTours}
+              onOptimizeExisting={results ? handleOptimizeExistingTours : undefined}
               onReset={handleReset}
               isLoading={loading}
               hasResults={!!results}
