@@ -153,7 +153,15 @@ export const planToursV2 = async (orders: RMOrder[], feedbackNotes?: string): Pr
 
 // Einfache Heuristik: sortiere nach PLZ/Ort, packe bis 1300 kg pro Tour, Startpunkt ist das Depot
 const buildHeuristicTours = (orders: RMOrder[]): RMPlanningResult["tours"] => {
+  const extractPlz = (addr: string) => {
+    const m = (addr || '').match(/\b(\d{4,5})\b/);
+    return m ? parseInt(m[1], 10) : Number.POSITIVE_INFINITY;
+  };
+
   const sorted = [...orders].sort((a, b) => {
+    const aPlz = extractPlz(a.address || '');
+    const bPlz = extractPlz(b.address || '');
+    if (aPlz !== bPlz) return aPlz - bPlz;
     const aKey = `${a.address || ''}`.toLowerCase();
     const bKey = `${b.address || ''}`.toLowerCase();
     return aKey.localeCompare(bKey);
